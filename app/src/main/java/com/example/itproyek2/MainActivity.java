@@ -36,9 +36,9 @@ public class MainActivity extends AppCompatActivity {
     private boolean isAutoMode = false;
     private boolean isOverload = false;
     
-    // Constants for features
-    private static final double TARIF_PER_KWH = 1444.70; // Tarif PLN R1
-    private static final double MAX_WATT_LIMIT = 100.0; // Limit for Overload Alert
+    // Constants based on SmartPress Project
+    private static final double TARIF_PER_KWH = 1444.70; // Tarif PLN subsidi/sosial
+    private static final double MAX_WATT_LIMIT = 100.0; // Batas aman lampu Mushola
     
     private final Handler realtimeHandler = new Handler(Looper.getMainLooper());
     private final Random random = new Random();
@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
         toggleGroupLamp.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
             if (isChecked) {
                 if (isOverload) {
-                    showToast("Sistem terkunci karena Overload. Reset perangkat.");
+                    showToast("Sistem terkunci (Overload). Tekan Reset.");
                     group.post(() -> group.check(R.id.btnOff));
                 } else if (isAutoMode) {
                     showToast(getString(R.string.msg_disable_auto));
@@ -115,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 updateRealtimeData();
-                realtimeHandler.postDelayed(this, 2000); // Update every 2 seconds
+                realtimeHandler.postDelayed(this, 2000); // Update data setiap 2 detik
             }
         }, 1000);
     }
@@ -123,38 +123,36 @@ public class MainActivity extends AppCompatActivity {
     private void updateRealtimeData() {
         double daya;
         if (isLampOn && !isOverload) {
-            // Normal Simulation with possibility of random spike for overload testing
-            daya = 50 + random.nextDouble() * 10;
+            // Simulasi pembacaan daya lampu mushola (misal: 40-50 Watt)
+            daya = 40 + random.nextDouble() * 10;
             
-            // Randomly trigger overload for demo purposes (1% chance)
-            if (random.nextInt(100) == 1) {
-                daya = 120.5; // Trigger Overload
-            }
+            // Simulasi lonjakan daya acak untuk testing proteksi (Overload)
+            if (random.nextInt(100) == 1) daya = 125.8; 
             
             double arus = daya / 220;
-            double tegangan = 218 + random.nextDouble() * 4;
+            double tegangan = 219 + random.nextDouble() * 2;
             
             tvDaya.setText(String.format(Locale.getDefault(), ": %s Watt", df.format(daya)));
             tvArus.setText(String.format(Locale.getDefault(), ": %s A", df.format(arus)));
             tvTegangan.setText(String.format(Locale.getDefault(), ": %s V", df.format(tegangan)));
             
-            // Feature: Energy & Cost Analytics (Simulated hourly cost)
+            // Fitur: Kalkulasi Estimasi Biaya
             double estimasiBiaya = (daya / 1000) * TARIF_PER_KWH;
             tvEstimasiBiaya.setText(String.format(Locale.getDefault(), ": Rp %s/jam", currencyDf.format(estimasiBiaya)));
 
-            // Feature: Overload Alert
+            // Fitur: Proteksi Overload
             if (daya > MAX_WATT_LIMIT) {
                 triggerOverload(daya);
             }
 
         } else {
-            tvDaya.setText(": 0 Watt");
-            tvArus.setText(": 0 A");
+            tvDaya.setText(R.string.daya_default);
+            tvArus.setText(R.string.arus_default);
             tvTegangan.setText(": 220 V");
-            tvEstimasiBiaya.setText(": Rp 0");
+            tvEstimasiBiaya.setText(R.string.biaya_default);
         }
         
-        // Random Light Condition
+        // Simulasi Sensor LDR (Cahaya)
         int lightVal = random.nextInt(100);
         String conditionStr = lightVal > 50 ? "Terang" : "Gelap";
         tvKondisiCahaya.setText(String.format(Locale.getDefault(), ": %s (%d%%)", conditionStr, lightVal));
@@ -166,15 +164,14 @@ public class MainActivity extends AppCompatActivity {
 
     private void triggerOverload(double currentDaya) {
         isOverload = true;
-        updateLampStatus(false, "System (Overload)");
+        updateLampStatus(false, "Sistem (Overload)");
         
-        // Show Alert Dialog
         new AlertDialog.Builder(this)
                 .setTitle(R.string.alert_overload_title)
                 .setMessage(getString(R.string.alert_overload_msg, df.format(currentDaya)))
-                .setPositiveButton("Reset", (dialog, which) -> {
+                .setPositiveButton(R.string.reset, (dialog, which) -> {
                     isOverload = false;
-                    addNotification("System Reset after Overload");
+                    addNotification("Sistem berhasil di-reset");
                 })
                 .setCancelable(false)
                 .show();
@@ -189,12 +186,12 @@ public class MainActivity extends AppCompatActivity {
             ivLampIcon.setImageResource(R.drawable.ic_lamp_on);
             toggleGroupLamp.check(R.id.btnOn);
         } else {
-            tvStatusLampu.setText("Lampu Mati");
+            tvStatusLampu.setText(R.string.lampu_mati);
             ivLampIcon.setImageResource(R.drawable.ic_lamp_off);
             toggleGroupLamp.check(R.id.btnOff);
         }
         
-        if (!source.equals("System") && !source.contains("Overload")) {
+        if (!source.equals("Sistem") && !source.contains("Overload")) {
             String status = on ? "nyalakan" : "matikan";
             addNotification(getString(R.string.notif_lamp_status, status, source));
         }
@@ -204,7 +201,7 @@ public class MainActivity extends AppCompatActivity {
         String kondisi = tvKondisiCahaya.getText().toString();
         boolean shouldBeOn = kondisi.contains("Gelap");
         if (isLampOn != shouldBeOn) {
-            updateLampStatus(shouldBeOn, "Auto Mode");
+            updateLampStatus(shouldBeOn, "Mode Otomatis");
         }
     }
 
