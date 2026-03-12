@@ -11,7 +11,6 @@ import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -28,7 +27,6 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView tvStatusLampu, tvKondisiCahaya, tvNotification;
     private TextView tvDaya, tvArus, tvTegangan;
-    private TextView tvEspStatus, tvWifiStatus, tvCloudStatus;
     private ImageView ivLampIcon;
     private MaterialButtonToggleGroup toggleGroupLamp, toggleGroupMode;
     private Button btnDetail;
@@ -65,9 +63,6 @@ public class MainActivity extends AppCompatActivity {
         toggleGroupMode = findViewById(R.id.toggleGroupMode);
         btnDetail = findViewById(R.id.btnDetail);
         
-        // IoT Status Views (Using generic way to find since they don't have IDs in previous XML edit, I should update XML first or find them by position, better update XML)
-        // Wait, I will update activity_main.xml to add IDs for the IoT status and Light Condition
-        
         // Initial Selection
         toggleGroupLamp.check(R.id.btnOn);
         toggleGroupMode.check(R.id.btnManual);
@@ -76,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
         toggleGroupLamp.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
             if (isChecked) {
                 if (isAutoMode) {
-                    showToast("Matikan Mode Auto untuk kontrol manual");
+                    showToast(getString(R.string.msg_disable_auto));
                     group.post(() -> group.check(isLampOn ? R.id.btnOn : R.id.btnOff));
                 } else {
                     updateLampStatus(checkedId == R.id.btnOn, "Manual");
@@ -88,7 +83,8 @@ public class MainActivity extends AppCompatActivity {
         toggleGroupMode.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
             if (isChecked) {
                 isAutoMode = (checkedId == R.id.btnAuto);
-                addNotification("Mode diubah ke " + (isAutoMode ? "Otomatis" : "Manual"));
+                String modeStr = isAutoMode ? getString(R.string.auto) : getString(R.string.manual);
+                addNotification(getString(R.string.notif_mode_changed, modeStr));
                 if (isAutoMode) simulateAutoLogic();
             }
         });
@@ -119,9 +115,9 @@ public class MainActivity extends AppCompatActivity {
             double arus = daya / 220;
             double tegangan = 218 + random.nextDouble() * 4;
             
-            tvDaya.setText(": " + df.format(daya) + " Watt");
-            tvArus.setText(": " + df.format(arus) + " A");
-            tvTegangan.setText(": " + df.format(tegangan) + " V");
+            tvDaya.setText(String.format(Locale.getDefault(), ": %s Watt", df.format(daya)));
+            tvArus.setText(String.format(Locale.getDefault(), ": %s A", df.format(arus)));
+            tvTegangan.setText(String.format(Locale.getDefault(), ": %s V", df.format(tegangan)));
         } else {
             tvDaya.setText(": 0 Watt");
             tvArus.setText(": 0 A");
@@ -130,11 +126,8 @@ public class MainActivity extends AppCompatActivity {
         
         // Random Light Condition
         int lightVal = random.nextInt(100);
-        if (lightVal > 50) {
-            tvKondisiCahaya.setText(": Terang (" + lightVal + "%)");
-        } else {
-            tvKondisiCahaya.setText(": Gelap (" + lightVal + "%)");
-        }
+        String conditionStr = lightVal > 50 ? "Terang" : "Gelap";
+        tvKondisiCahaya.setText(String.format(Locale.getDefault(), ": %s (%d%%)", conditionStr, lightVal));
         
         if (isAutoMode) {
             simulateAutoLogic();
@@ -144,7 +137,7 @@ public class MainActivity extends AppCompatActivity {
     private void updateLampStatus(boolean on, String source) {
         isLampOn = on;
         if (on) {
-            tvStatusLampu.setText("Lampu Nyala");
+            tvStatusLampu.setText(R.string.lampu_nyala);
             ivLampIcon.setImageResource(R.drawable.ic_lamp_on);
             toggleGroupLamp.check(R.id.btnOn);
         } else {
@@ -154,7 +147,8 @@ public class MainActivity extends AppCompatActivity {
         }
         
         if (!source.equals("System")) {
-            addNotification("Lampu di" + (on ? "nyalakan" : "matikan") + " via " + source);
+            String status = on ? "nyalakan" : "matikan";
+            addNotification(getString(R.string.notif_lamp_status, status, source));
         }
     }
 
@@ -168,7 +162,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void addNotification(String message) {
         String currentTime = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(new Date());
-        tvNotification.setText("[" + currentTime + "] " + message);
+        tvNotification.setText(String.format("[%s] %s", currentTime, message));
     }
 
     private void showToast(String message) {

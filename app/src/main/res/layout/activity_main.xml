@@ -23,7 +23,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="SMARTPRESS APP"
+                android:text="@string/smart_press_app"
                 android:textColor="@color/white"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -31,7 +31,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Smart Lamp Controller"
+                android:text="@string/smart_lamp_controller"
                 android:textColor="@color/text_secondary"
                 android:textSize="14sp" />
         </LinearLayout>
@@ -69,7 +69,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
-                        android:text="Status Device"
+                        android:text="@string/status_device"
                         android:textColor="@color/white"
                         android:textSize="14sp"
                         android:textStyle="bold" />
@@ -82,13 +82,13 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="ESP32"
+                            android:text="@string/esp32"
                             android:textColor="@color/text_secondary"
                             android:textSize="12sp" />
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Online"
+                            android:text="@string/online"
                             android:textColor="#4CAF50"
                             android:textSize="12sp"
                             android:textStyle="bold" />
@@ -103,13 +103,13 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="WiFi"
+                            android:text="@string/wifi"
                             android:textColor="@color/text_secondary"
                             android:textSize="12sp" />
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Connected"
+                            android:text="@string/connected"
                             android:textColor="#4CAF50"
                             android:textSize="12sp"
                             android:textStyle="bold" />
@@ -124,13 +124,13 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Cloud"
+                            android:text="@string/cloud"
                             android:textColor="@color/text_secondary"
                             android:textSize="12sp" />
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Active"
+                            android:text="@string/active"
                             android:textColor="#4CAF50"
                             android:textSize="12sp"
                             android:textStyle="bold" />
@@ -160,6 +160,7 @@
                         android:id="@+id/ivLampIcon"
                         android:layout_width="56dp"
                         android:layout_height="56dp"
+                        android:contentDescription="@string/lamp_icon_desc"
                         android:src="@drawable/ic_lamp_on" />
 
                     <LinearLayout
@@ -171,7 +172,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Status Lampu"
+                            android:text="@string/status_lampu"
                             android:textColor="@color/text_secondary"
                             android:textSize="12sp" />
 
@@ -179,7 +180,7 @@
                             android:id="@+id/tvStatusLampu"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Lampu Nyala"
+                            android:text="@string/lampu_nyala"
                             android:textColor="@color/white"
                             android:textSize="18sp"
                             android:textStyle="bold" />
@@ -208,7 +209,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="12dp"
-                        android:text="Kontrol Lampu"
+                        android:text="@string/kontrol_lampu"
                         android:textColor="@color/white"
                         android:textSize="14sp"
                         android:textStyle="bold" />
@@ -226,7 +227,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="ON"
+                            android:text="@string/on"
                             android:textColor="@color/toggle_text_selector"
                             app:backgroundTint="@color/toggle_background_selector"
                             app:strokeColor="@color/border_dark" />
@@ -237,7 +238,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="OFF"
+                            android:text="@string/off"
                             android:textColor="@color/toggle_text_selector"
                             app:backgroundTint="@color/toggle_background_selector"
                             app:strokeColor="@color/border_dark" />
@@ -266,7 +267,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="12dp"
-                        android:text="Mode Sistem"
+                        android:text="@string/mode_sistem"
                         android:textColor="@color/white"
                         android:textSize="14sp"
                         android:textStyle="bold" />
@@ -284,7 +285,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Manual"
+                            android:text="@string/manual"
                             android:textColor="@color/toggle_text_selector"
                             app:backgroundTint="@color/toggle_background_selector"
                             app:strokeColor="@color/border_dark" />
@@ -295,7 +296,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Auto"
+                            android:text="@string/auto"
                             android:textColor="@color/toggle_text_selector"
                             app:backgroundTint="@color/toggle_background_selector"
                             app:strokeColor="@color/border_dark" />
@@ -324,7 +325,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
-                        android:text="Notifikasi Terbaru"
+                        android:text="@string/notifikasi_terbaru"
                         android:textColor="@color/white"
                         android:textSize="14sp"
                         android:textStyle="bold" />
@@ -333,7 +334,7 @@
                         android:id="@+id/tvNotification"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Belum ada notifikasi masuk"
+                        android:text="@string/belum_ada_notifikasi"
                         android:textColor="@color/text_secondary"
                         android:textSize="13sp" />
                 </LinearLayout>
@@ -365,7 +366,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Konsumsi Listrik"
+                            android:text="@string/konsumsi_listrik"
                             android:textColor="@color/white"
                             android:textSize="14sp"
                             android:textStyle="bold" />
@@ -374,7 +375,7 @@
                             style="@style/Widget.Material3.Button.TextButton"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Detail >"
+                            android:text="@string/detail"
                             android:textColor="@color/purple_light"
                             android:textSize="12sp" />
                     </LinearLayout>
@@ -387,13 +388,13 @@
                         <TextView
                             android:layout_width="100dp"
                             android:layout_height="wrap_content"
-                            android:text="Daya"
+                            android:text="@string/daya"
                             android:textColor="@color/text_secondary" />
                         <TextView
                             android:id="@+id/tvDaya"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text=": 55 Watt"
+                            android:text="@string/daya_default"
                             android:textColor="@color/white"
                             android:textStyle="bold" />
                     </LinearLayout>
@@ -406,13 +407,13 @@
                         <TextView
                             android:layout_width="100dp"
                             android:layout_height="wrap_content"
-                            android:text="Arus"
+                            android:text="@string/arus"
                             android:textColor="@color/text_secondary" />
                         <TextView
                             android:id="@+id/tvArus"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text=": 0.25 A"
+                            android:text="@string/arus_default"
                             android:textColor="@color/white"
                             android:textStyle="bold" />
                     </LinearLayout>
@@ -425,13 +426,13 @@
                         <TextView
                             android:layout_width="100dp"
                             android:layout_height="wrap_content"
-                            android:text="Tegangan"
+                            android:text="@string/tegangan"
                             android:textColor="@color/text_secondary" />
                         <TextView
                             android:id="@+id/tvTegangan"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text=": 220 V"
+                            android:text="@string/tegangan_default"
                             android:textColor="@color/white"
                             android:textStyle="bold" />
                     </LinearLayout>
@@ -450,13 +451,13 @@
                         <TextView
                             android:layout_width="100dp"
                             android:layout_height="wrap_content"
-                            android:text="Kondisi Cahaya"
+                            android:text="@string/kondisi_cahaya"
                             android:textColor="@color/text_secondary" />
                         <TextView
                             android:id="@+id/tvKondisiCahaya"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text=": Terang"
+                            android:text="@string/kondisi_cahaya_default"
                             android:textColor="@color/white"
                             android:textStyle="bold" />
                     </LinearLayout>

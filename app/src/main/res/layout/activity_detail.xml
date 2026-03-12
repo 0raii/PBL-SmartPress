@@ -18,7 +18,7 @@
             android:layout_height="?attr/actionBarSize"
             app:navigationIcon="@android:drawable/ic_menu_revert"
             app:navigationIconTint="@color/white"
-            app:title="Detail Konsumsi"
+            app:title="@string/detail_konsumsi"
             app:titleTextColor="@color/white" />
 
     </com.google.android.material.appbar.AppBarLayout>
@@ -54,7 +54,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="16dp"
-                        android:text="Statistik Pemakaian"
+                        android:text="@string/statistik_pemakaian"
                         android:textColor="@color/white"
                         android:textSize="16sp"
                         android:textStyle="bold" />
@@ -68,12 +68,12 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Hari ini"
+                            android:text="@string/hari_ini"
                             android:textColor="@color/text_secondary" />
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0.32 kWh"
+                            android:text="@string/kwh_today"
                             android:textColor="@color/purple_light"
                             android:textStyle="bold" />
                     </LinearLayout>
@@ -87,12 +87,12 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Minggu ini"
+                            android:text="@string/minggu_ini"
                             android:textColor="@color/text_secondary" />
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="2.1 kWh"
+                            android:text="@string/kwh_week"
                             android:textColor="@color/purple_light"
                             android:textStyle="bold" />
                     </LinearLayout>
@@ -106,12 +106,12 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Bulan ini"
+                            android:text="@string/bulan_ini"
                             android:textColor="@color/text_secondary" />
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="8.5 kWh"
+                            android:text="@string/kwh_month"
                             android:textColor="@color/purple_light"
                             android:textStyle="bold" />
                     </LinearLayout>
@@ -137,7 +137,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Diagram Konsumsi (Watt)"
+                        android:text="@string/diagram_konsumsi"
                         android:textColor="@color/white"
                         android:layout_marginBottom="8dp"/>
 
