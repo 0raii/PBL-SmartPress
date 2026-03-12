@@ -1,7 +1,9 @@
 <resources>
     <string name="app_name">SmartPress</string>
-    <string name="smart_press_app">SMARTPRESS</string>
+    <string name="smart_press_app">SmartPress Dashboard</string>
     <string name="smart_lamp_controller">Monitoring Lampu Mushola</string>
+    <string name="welcome_john">Welcome John</string>
+
     <string name="status_device">Status Perangkat IoT</string>
     <string name="esp32">Kontroler ESP32</string>
     <string name="online">Online</string>
@@ -9,28 +11,41 @@
     <string name="connected">Tersambung</string>
     <string name="cloud">Cloud Server</string>
     <string name="active">Aktif</string>
-    <string name="status_lampu">Kondisi Lampu</string>
+
+    <string name="status_lampu">Status Lampu</string>
     <string name="lampu_nyala">Lampu Menyala</string>
     <string name="lampu_mati">Lampu Padam</string>
-    <string name="kontrol_lampu">Kontrol Manual</string>
+    <string name="kontrol_lampu">Kontrol Lampu</string>
     <string name="on">ON</string>
     <string name="off">OFF</string>
-    <string name="mode_sistem">Mode Operasi</string>
-    <string name="manual">Manual</string>
-    <string name="auto">Otomatis</string>
+
+    <string name="mode_sistem">Kondisi Cahaya</string>
+    <string name="manual">Gelap</string>
+    <string name="auto">Terang</string>
+
     <string name="notifikasi_terbaru">Log Aktivitas</string>
     <string name="belum_ada_notifikasi">Belum ada aktivitas terdeteksi</string>
-    <string name="konsumsi_listrik">Data Konsumsi Energi</string>
+
+    <string name="konsumsi_listrik">Konsumsi Listrik</string>
     <string name="detail">Statistik ></string>
     <string name="daya">Daya</string>
-    <string name="daya_default">: 0 Watt</string>
+    <string name="daya_val">55 Watt</string>
     <string name="arus">Arus</string>
-    <string name="arus_default">: 0 A</string>
+    <string name="arus_val">0.25 A</string>
     <string name="tegangan">Tegangan</string>
+    <string name="tegangan_val">220 V</string>
+
+    <string name="daya_default">: 0 Watt</string>
+    <string name="arus_default">: 0 A</string>
     <string name="tegangan_default">: 220 V</string>
-    <string name="kondisi_cahaya">Sensor Cahaya</string>
-    <string name="kondisi_cahaya_default">: --</string>
-    <string name="lamp_icon_desc">Icon Status Lampu</string>
+
+    <string name="label_status">Status Lampu</string>
+    <string name="lamp_illustration">Lamp Illustration</string>
+    <string name="back">Back</string>
+
+    <string name="home">Home</string>
+    <string name="settings">Settings</string>
+
     <string name="detail_konsumsi">Statistik Penggunaan</string>
     <string name="statistik_pemakaian">Akumulasi Energi (kWh)</string>
     <string name="hari_ini">Hari ini</string>
@@ -45,11 +60,22 @@
     <string name="notif_mode_changed">Sistem diubah ke mode %1$s</string>
     <string name="notif_lamp_status">Lampu di%1$s (via %2$s)</string>
     <string name="msg_disable_auto">Mode Otomatis aktif. Matikan untuk kontrol manual.</string>
-
     <string name="estimasi_biaya">Estimasi Biaya</string>
     <string name="biaya_default">: Rp 0</string>
     <string name="alert_overload_title">PERINGATAN: BEBAN BERLEBIH!</string>
     <string name="alert_overload_msg">Terdeteksi lonjakan daya sebesar %1$s Watt. Sistem mematikan lampu otomatis untuk mencegah kebakaran.</string>
     <string name="notif_overload">OVERLOAD! Sistem proteksi aktif di Mushola.</string>
     <string name="reset">Reset Sistem</string>
+    <string name="lamp_icon_desc">Icon Status Lampu</string>
+    <string name="kondisi_cahaya">Kondisi Cahaya</string>
+    <string name="kondisi_cahaya_default">: --</string>
+    <string name="icon_desc">Icon Description</string>
+
+    <!-- Additional Strings for Monitoring Detail -->
+    <string name="detail_monitoring">Detail Monitoring</string>
+    <string name="durasi_nyala">Durasi Nyala</string>
+    <string name="suhu_esp">Suhu ESP32</string>
+    <string name="sinyal_wifi">Sinyal Wi-Fi</string>
+    <string name="grafik_daya_realtime">Grafik Daya Real-time</string>
+    <string name="akumulasi_kwh">Akumulasi kWh</string>
 </resources>

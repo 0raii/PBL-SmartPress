@@ -10,15 +10,16 @@
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/card_dark">
+        android:background="@color/card_bg">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbarDetail"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:navigationIcon="@android:drawable/ic_menu_revert"
+            app:navigationIcon="@drawable/ic_arrow_back"
             app:navigationIconTint="@color/white"
-            app:title="@string/detail_konsumsi"
+            app:title="Analisis Energi Mendalam"
+            app:titleCentered="true"
             app:titleTextColor="@color/white" />
 
     </com.google.android.material.appbar.AppBarLayout>
@@ -34,119 +35,184 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Stats Card -->
+            <!-- Card: Prediksi & Efisiensi -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                app:cardBackgroundColor="@color/card_dark"
-                app:cardCornerRadius="16dp"
-                app:strokeColor="@color/border_dark"
-                app:strokeWidth="1dp">
+                app:cardBackgroundColor="@color/primary_blue"
+                app:cardCornerRadius="24dp"
+                app:strokeWidth="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="24dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="16dp"
-                        android:text="@string/statistik_pemakaian"
+                        android:text="Prediksi Tagihan Bulan Ini"
+                        android:textColor="#E0E0E0"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/tvPrediction"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Rp 45.500"
                         android:textColor="@color/white"
-                        android:textSize="16sp"
+                        android:textSize="28sp"
                         android:textStyle="bold" />
 
-                    <LinearLayout
+                    <View
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:paddingVertical="8dp">
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="@string/hari_ini"
-                            android:textColor="@color/text_secondary" />
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/kwh_today"
-                            android:textColor="@color/purple_light"
-                            android:textStyle="bold" />
-                    </LinearLayout>
+                        android:layout_height="1dp"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="16dp"
+                        android:background="#40FFFFFF" />
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
+                    <TextView
+                        android:id="@+id/tvEfficiency"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:paddingVertical="8dp">
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="@string/minggu_ini"
-                            android:textColor="@color/text_secondary" />
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/kwh_week"
-                            android:textColor="@color/purple_light"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:paddingVertical="8dp">
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="@string/bulan_ini"
-                            android:textColor="@color/text_secondary" />
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/kwh_month"
-                            android:textColor="@color/purple_light"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-
+                        android:text="Status: Sangat Efisien (Lampu LED 10W)"
+                        android:textColor="@color/white"
+                        android:textSize="14sp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Real MPAndroidChart LineChart -->
+            <!-- Real-time Stats Grid -->
+            <GridLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:columnCount="2"
+                android:rowCount="2"
+                android:alignmentMode="alignMargins"
+                android:layout_marginBottom="16dp">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_margin="4dp"
+                    app:cardBackgroundColor="@color/card_bg"
+                    app:cardCornerRadius="16dp">
+                    <LinearLayout android:padding="16dp" android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
+                        <TextView android:text="Tegangan" android:textSize="12sp" android:textColor="@color/text_secondary" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                        <TextView android:id="@+id/tvVoltDetail" android:text="220.5 V" android:textSize="18sp" android:textStyle="bold" android:textColor="@color/white" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_margin="4dp"
+                    app:cardBackgroundColor="@color/card_bg"
+                    app:cardCornerRadius="16dp">
+                    <LinearLayout android:padding="16dp" android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
+                        <TextView android:text="Arus Listrik" android:textSize="12sp" android:textColor="@color/text_secondary" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                        <TextView android:id="@+id/tvAmpereDetail" android:text="0.12 A" android:textSize="18sp" android:textStyle="bold" android:textColor="@color/white" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_margin="4dp"
+                    app:cardBackgroundColor="@color/card_bg"
+                    app:cardCornerRadius="16dp">
+                    <LinearLayout android:padding="16dp" android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
+                        <TextView android:text="Suhu Perangkat" android:textSize="12sp" android:textColor="@color/text_secondary" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                        <TextView android:id="@+id/tvSuhuESP" android:text="34.2°C" android:textSize="18sp" android:textStyle="bold" android:textColor="#4CAF50" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_margin="4dp"
+                    app:cardBackgroundColor="@color/card_bg"
+                    app:cardCornerRadius="16dp">
+                    <LinearLayout android:padding="16dp" android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
+                        <TextView android:text="Durasi Hari Ini" android:textSize="12sp" android:textColor="@color/text_secondary" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                        <TextView android:id="@+id/tvDurasiNyala" android:text="04:20:12" android:textSize="18sp" android:textStyle="bold" android:textColor="@color/white" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+            </GridLayout>
+
+            <!-- Chart Card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
-                android:layout_height="300dp"
-                app:cardBackgroundColor="@color/card_dark"
-                app:cardCornerRadius="16dp"
-                app:strokeColor="@color/border_dark"
-                app:strokeWidth="1dp">
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardBackgroundColor="@color/card_bg"
+                app:cardCornerRadius="24dp"
+                app:strokeWidth="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="12dp">
+                    android:padding="20dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/diagram_konsumsi"
+                        android:text="Grafik Fluktuasi Daya (Watt)"
                         android:textColor="@color/white"
-                        android:layout_marginBottom="8dp"/>
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="16dp"/>
 
                     <com.github.mikephil.charting.charts.LineChart
                         android:id="@+id/lineChart"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent" />
+                        android:layout_height="220dp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-                    //tes commit12
+            <!-- Card: Rincian Biaya -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="@color/card_bg"
+                app:cardCornerRadius="24dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="24dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Rincian Biaya Listrik"
+                        android:textColor="@color/white"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="16dp" />
+
+                    <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="8dp">
+                        <TextView android:text="Penggunaan (kWh)" android:textColor="@color/text_secondary" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                        <TextView android:id="@+id/tvKwhToday" android:text="0.12 kWh" android:textColor="@color/white" android:layout_alignParentEnd="true" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                    </RelativeLayout>
+                    <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="8dp">
+                        <TextView android:text="Tarif per kWh" android:textColor="@color/text_secondary" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                        <TextView android:text="Rp 1.444,70" android:textColor="@color/white" android:layout_alignParentEnd="true" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                    </RelativeLayout>
+                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/border_dark" android:layout_marginVertical="8dp"/>
+                    <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="8dp">
+                        <TextView android:text="Total Tagihan" android:textStyle="bold" android:textColor="@color/white" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                        <TextView android:id="@+id/tvEstimasiBiaya" android:text="Rp 174" android:textColor="@color/accent_yellow" android:textStyle="bold" android:layout_alignParentEnd="true" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                    </RelativeLayout>
+
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 

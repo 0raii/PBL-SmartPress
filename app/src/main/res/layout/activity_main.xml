@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
@@ -8,40 +8,29 @@
     android:background="@color/bg_dark"
     tools:context=".MainActivity">
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:layout_width="match_parent"
+    <!-- Centered Title -->
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@color/card_dark">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:paddingVertical="12dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/smart_press_app"
-                android:textColor="@color/white"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/smart_lamp_controller"
-                android:textColor="@color/text_secondary"
-                android:textSize="14sp" />
-        </LinearLayout>
-
-    </com.google.android.material.appbar.AppBarLayout>
+        android:layout_marginTop="24dp"
+        android:gravity="center"
+        android:text="@string/smart_lamp_controller"
+        android:textColor="@color/white"
+        android:textSize="26sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        android:clipToPadding="false"
+        android:paddingBottom="100dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvTitle">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -49,341 +38,87 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Card: IoT Device Status -->
+            <!-- Card 1: Status Lampu & Info Perangkat -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                app:cardBackgroundColor="@color/card_dark"
-                app:cardCornerRadius="16dp"
-                app:strokeColor="@color/border_dark"
-                app:strokeWidth="1dp">
+                android:layout_marginBottom="16dp"
+                app:cardBackgroundColor="@color/card_bg"
+                app:cardCornerRadius="24dp"
+                app:strokeWidth="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="20dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
-                        android:text="@string/status_device"
-                        android:textColor="@color/white"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="@string/esp32"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="12sp" />
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/online"
-                            android:textColor="#4CAF50"
-                            android:textSize="12sp"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginTop="4dp">
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="@string/wifi"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="12sp" />
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/connected"
-                            android:textColor="#4CAF50"
-                            android:textSize="12sp"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginTop="4dp">
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="@string/cloud"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="12sp" />
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/active"
-                            android:textColor="#4CAF50"
-                            android:textSize="12sp"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Card 1: Lamp Status -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                app:cardBackgroundColor="@color/card_dark"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="0dp"
-                app:strokeColor="@color/border_dark"
-                app:strokeWidth="1dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:orientation="horizontal"
-                    android:padding="16dp">
-
-                    <ImageView
-                        android:id="@+id/ivLampIcon"
-                        android:layout_width="56dp"
-                        android:layout_height="56dp"
-                        android:contentDescription="@string/lamp_icon_desc"
-                        android:src="@drawable/ic_lamp_on" />
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/status_lampu"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="12sp" />
-
-                        <TextView
-                            android:id="@+id/tvStatusLampu"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/lampu_nyala"
-                            android:textColor="@color/white"
-                            android:textSize="18sp"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Card 2: Control & Mode -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:baselineAligned="false"
-                android:layout_marginBottom="12dp">
-
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="6dp"
-                    app:cardBackgroundColor="@color/card_dark"
-                    app:cardCornerRadius="16dp"
-                    app:strokeColor="@color/border_dark"
-                    app:strokeWidth="1dp">
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="12dp">
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/kontrol_lampu"
-                            android:textColor="@color/white"
-                            android:textSize="12sp"
-                            android:textStyle="bold"
-                            android:layout_marginBottom="8dp"/>
-                        <com.google.android.material.button.MaterialButtonToggleGroup
-                            android:id="@+id/toggleGroupLamp"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            app:selectionRequired="true"
-                            app:singleSelection="true">
-                            <Button
-                                android:id="@+id/btnOn"
-                                style="@style/Widget.Material3.Button.OutlinedButton"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="@string/on"
-                                android:padding="0dp"
-                                android:textSize="11sp"
-                                android:textColor="@color/toggle_text_selector"
-                                app:backgroundTint="@color/toggle_background_selector" />
-                            <Button
-                                android:id="@+id/btnOff"
-                                style="@style/Widget.Material3.Button.OutlinedButton"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="@string/off"
-                                android:padding="0dp"
-                                android:textSize="11sp"
-                                android:textColor="@color/toggle_text_selector"
-                                app:backgroundTint="@color/toggle_background_selector" />
-                        </com.google.android.material.button.MaterialButtonToggleGroup>
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="6dp"
-                    app:cardBackgroundColor="@color/card_dark"
-                    app:cardCornerRadius="16dp"
-                    app:strokeColor="@color/border_dark"
-                    app:strokeWidth="1dp">
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="12dp">
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/mode_sistem"
-                            android:textColor="@color/white"
-                            android:textSize="12sp"
-                            android:textStyle="bold"
-                            android:layout_marginBottom="8dp"/>
-                        <com.google.android.material.button.MaterialButtonToggleGroup
-                            android:id="@+id/toggleGroupMode"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            app:selectionRequired="true"
-                            app:singleSelection="true">
-                            <Button
-                                android:id="@+id/btnManual"
-                                style="@style/Widget.Material3.Button.OutlinedButton"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="@string/manual"
-                                android:padding="0dp"
-                                android:textSize="11sp"
-                                android:textColor="@color/toggle_text_selector"
-                                app:backgroundTint="@color/toggle_background_selector" />
-                            <Button
-                                android:id="@+id/btnAuto"
-                                style="@style/Widget.Material3.Button.OutlinedButton"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="@string/auto"
-                                android:padding="0dp"
-                                android:textSize="11sp"
-                                android:textColor="@color/toggle_text_selector"
-                                app:backgroundTint="@color/toggle_background_selector" />
-                        </com.google.android.material.button.MaterialButtonToggleGroup>
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-            </LinearLayout>
-
-            <!-- Card 4: Notifications -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                app:cardBackgroundColor="@color/card_dark"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="0dp"
-                app:strokeColor="@color/border_dark"
-                app:strokeWidth="1dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
-                        android:text="@string/notifikasi_terbaru"
-                        android:textColor="@color/white"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/tvNotification"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/belum_ada_notifikasi"
+                        android:text="@string/status_lampu"
                         android:textColor="@color/text_secondary"
-                        android:textSize="13sp" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+                        android:textSize="18sp" />
 
-            <!-- Card 5: Power Consumption & Cost -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardBackgroundColor="@color/card_dark"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="0dp"
-                app:strokeColor="@color/border_dark"
-                app:strokeWidth="1dp">
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="20dp"
+                        android:layout_marginBottom="20dp">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
+                        <View
+                            android:id="@+id/bulbGlow"
+                            android:layout_width="100dp"
+                            android:layout_height="100dp"
+                            android:background="@drawable/bulb_glow"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <ImageView
+                            android:id="@+id/ivLampIllustration"
+                            android:layout_width="80dp"
+                            android:layout_height="80dp"
+                            android:contentDescription="@string/lamp_illustration"
+                            android:src="@drawable/ic_power"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:tint="@color/accent_yellow" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    <TextView
+                        android:id="@+id/tvStatusLampu"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:text="@string/on"
+                        android:textColor="@color/white"
+                        android:textSize="28sp"
+                        android:textStyle="bold" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginTop="24dp"
+                        android:layout_marginBottom="24dp"
+                        android:background="@color/border_dark" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/status_device"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:layout_marginBottom="12dp">
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="@string/konsumsi_listrik"
-                            android:textColor="@color/white"
-                            android:textSize="14sp"
-                            android:textStyle="bold" />
-                        <Button
-                            android:id="@+id/btnDetail"
-                            style="@style/Widget.Material3.Button.TextButton"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/detail"
-                            android:textColor="@color/purple_light"
-                            android:textSize="12sp" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
                         android:orientation="horizontal">
 
                         <LinearLayout
@@ -391,35 +126,18 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:orientation="vertical">
-
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="@string/daya"
-                                android:textColor="@color/text_secondary"
-                                android:textSize="11sp" />
-                            <TextView
-                                android:id="@+id/tvDaya"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/daya_default"
+                                android:text="@string/esp32"
                                 android:textColor="@color/white"
-                                android:textStyle="bold" />
-
+                                android:textSize="16sp" />
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="8dp"
-                                android:text="@string/arus"
-                                android:textColor="@color/text_secondary"
-                                android:textSize="11sp" />
-                            <TextView
-                                android:id="@+id/tvArus"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/arus_default"
-                                android:textColor="@color/white"
-                                android:textStyle="bold" />
+                                android:text="@string/online"
+                                android:textColor="#4CAF50"
+                                android:textSize="14sp" />
                         </LinearLayout>
 
                         <LinearLayout
@@ -427,34 +145,278 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:orientation="vertical">
-
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="@string/tegangan"
-                                android:textColor="@color/text_secondary"
-                                android:textSize="11sp" />
-                            <TextView
-                                android:id="@+id/tvTegangan"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/tegangan_default"
+                                android:text="@string/wifi"
                                 android:textColor="@color/white"
-                                android:textStyle="bold" />
+                                android:textSize="16sp" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/connected"
+                                android:textColor="#4CAF50"
+                                android:textSize="14sp" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
+            <!-- Card 2: Kontrol Lampu -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardBackgroundColor="@color/card_bg"
+                app:cardCornerRadius="24dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"
+                        android:text="@string/kontrol_lampu"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="18sp" />
+
+                    <com.google.android.material.button.MaterialButtonToggleGroup
+                        android:id="@+id/toggleGroupLamp"
+                        android:layout_width="match_parent"
+                        android:layout_height="60dp"
+                        app:selectionRequired="true"
+                        app:singleSelection="true">
+                        <Button
+                            android:id="@+id/btnOn"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:text="@string/on"
+                            android:textSize="18sp"
+                            android:textColor="@color/toggle_text_selector"
+                            app:backgroundTint="@color/toggle_background_selector"
+                            app:cornerRadius="12dp"
+                            app:strokeColor="@color/primary_blue"
+                            app:strokeWidth="1dp" />
+                        <Button
+                            android:id="@+id/btnOff"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:text="@string/off"
+                            android:textSize="18sp"
+                            android:textColor="@color/toggle_text_selector"
+                            app:backgroundTint="@color/toggle_background_selector"
+                            app:cornerRadius="12dp"
+                            app:strokeColor="@color/primary_blue"
+                            app:strokeWidth="1dp" />
+                    </com.google.android.material.button.MaterialButtonToggleGroup>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Card 3: Mode Operasi -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardBackgroundColor="@color/card_bg"
+                app:cardCornerRadius="24dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"
+                        android:text="Mode Operasi"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="18sp" />
+
+                    <com.google.android.material.button.MaterialButtonToggleGroup
+                        android:id="@+id/toggleGroupMode"
+                        android:layout_width="match_parent"
+                        android:layout_height="60dp"
+                        app:selectionRequired="true"
+                        app:singleSelection="true">
+                        <Button
+                            android:id="@+id/btnManual"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:text="MANUAL"
+                            android:textSize="18sp"
+                            android:textColor="@color/toggle_text_selector"
+                            app:backgroundTint="@color/toggle_background_selector"
+                            app:cornerRadius="12dp"
+                            app:strokeColor="@color/primary_blue"
+                            app:strokeWidth="1dp" />
+                        <Button
+                            android:id="@+id/btnAuto"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:text="OTOMATIS"
+                            android:textSize="18sp"
+                            android:textColor="@color/toggle_text_selector"
+                            app:backgroundTint="@color/toggle_background_selector"
+                            app:cornerRadius="12dp"
+                            app:strokeColor="@color/primary_blue"
+                            app:strokeWidth="1dp" />
+                    </com.google.android.material.button.MaterialButtonToggleGroup>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Card 4: Kondisi Cahaya (Centered Status) -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardBackgroundColor="@color/card_bg"
+                app:cardCornerRadius="24dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"
+                        android:text="Kondisi Cahaya"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="18sp" />
+
+                    <LinearLayout
+                        android:id="@+id/layoutStatusCahaya"
+                        android:layout_width="match_parent"
+                        android:layout_height="64dp"
+                        android:background="@drawable/status_bg_dark"
+                        android:gravity="center"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="24dp">
+
+                        <ImageView
+                            android:id="@+id/ivKondisiIcon"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:contentDescription="Light Icon"
+                            android:src="@drawable/ic_star_on"
+                            app:tint="@color/accent_yellow" />
+
+                        <TextView
+                            android:id="@+id/tvKondisiCahaya"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:text="Terang"
+                            android:textColor="@color/white"
+                            android:textSize="22sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Card 5: Konsumsi Listrik (Home Version) -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardBackgroundColor="@color/card_bg"
+                app:cardCornerRadius="24dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="20dp">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerVertical="true"
+                            android:text="@string/konsumsi_listrik"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="18sp" />
+                        <Button
+                            android:id="@+id/btnDetail"
+                            style="@style/Widget.Material3.Button.TextButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:text="Analisis Lengkap >"
+                            android:textSize="14sp"
+                            android:textColor="@color/primary_blue" />
+                    </RelativeLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:weightSum="2">
+
+                        <!-- Daya Realtime -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="8dp"
-                                android:text="@string/estimasi_biaya"
+                                android:text="Daya Saat Ini"
                                 android:textColor="@color/text_secondary"
-                                android:textSize="11sp" />
+                                android:textSize="12sp" />
                             <TextView
-                                android:id="@+id/tvEstimasiBiaya"
+                                android:id="@+id/tvDaya"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="@string/biaya_default"
-                                android:textColor="#FFEB3B"
+                                android:text="0 Watt"
+                                android:textColor="@color/white"
+                                android:textSize="18sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                        <!-- Estimasi Biaya -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Estimasi Biaya"
+                                android:textColor="@color/text_secondary"
+                                android:textSize="12sp" />
+                            <TextView
+                                android:id="@+id/tvCostSummary"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Rp 0"
+                                android:textColor="@color/accent_yellow"
+                                android:textSize="18sp"
                                 android:textStyle="bold" />
                         </LinearLayout>
                     </LinearLayout>
@@ -462,32 +424,67 @@
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:layout_marginVertical="12dp"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="16dp"
                         android:background="@color/border_dark" />
 
-                    <LinearLayout
+                    <TextView
+                        android:id="@+id/tvKwhSummary"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Total Pemakaian Hari Ini: 0.00 kWh"
+                        android:textColor="@color/primary_blue"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Card 6: Log Aktivitas -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardBackgroundColor="@color/card_bg"
+                app:cardCornerRadius="24dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"
+                        android:text="@string/notifikasi_terbaru"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="18sp" />
+
+                    <TextView
+                        android:id="@+id/tvLogAktivitas"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:paddingVertical="4dp">
-                        <TextView
-                            android:layout_width="100dp"
-                            android:layout_height="wrap_content"
-                            android:text="@string/kondisi_cahaya"
-                            android:textColor="@color/text_secondary" />
-                        <TextView
-                            android:id="@+id/tvKondisiCahaya"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/kondisi_cahaya_default"
-                            android:textColor="@color/white"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-
+                        android:text="@string/belum_ada_notifikasi"
+                        android:textColor="@color/white"
+                        android:textSize="16sp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+    <!-- Bottom Navigation -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNav"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:background="@color/card_bg"
+        app:itemIconTint="@color/primary_blue"
+        app:itemTextColor="@color/text_secondary"
+        app:labelVisibilityMode="labeled"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:menu="@menu/bottom_menu" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

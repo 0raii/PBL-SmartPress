@@ -6,12 +6,13 @@ import android.os.Handler;
 import android.os.Looper;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -19,6 +20,7 @@ import androidx.core.view.WindowInsetsCompat;
 import com.google.android.material.button.MaterialButtonToggleGroup;
 
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -26,24 +28,22 @@ import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
 
-    private TextView tvStatusLampu, tvKondisiCahaya, tvNotification;
-    private TextView tvDaya, tvArus, tvTegangan, tvEstimasiBiaya;
-    private ImageView ivLampIcon;
+    private TextView tvStatusLampu, tvKondisiCahaya, tvLogAktivitas;
+    private TextView tvDaya, tvCostSummary, tvKwhSummary;
+    private ImageView ivLampIllustration, ivKondisiIcon;
+    private LinearLayout layoutStatusCahaya;
     private MaterialButtonToggleGroup toggleGroupLamp, toggleGroupMode;
     private Button btnDetail;
 
     private boolean isLampOn = true;
     private boolean isAutoMode = false;
-    private boolean isOverload = false;
-    
-    // Constants based on SmartPress Project
-    private static final double TARIF_PER_KWH = 1444.70; // Tarif PLN subsidi/sosial
-    private static final double MAX_WATT_LIMIT = 100.0; // Batas aman lampu Mushola
+    private double totalKwh = 0.45; // Simulated starting value
     
     private final Handler realtimeHandler = new Handler(Looper.getMainLooper());
     private final Random random = new Random();
     private final DecimalFormat df = new DecimalFormat("#.##");
-    private final DecimalFormat currencyDf = new DecimalFormat("#,###");
+    private final NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("id", "ID"));
+    private final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,22 +51,26 @@ public class MainActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
-        // Apply Window Insets
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
+        // Initialize NumberFormat for no decimals in currency
+        currencyFormat.setMaximumFractionDigits(0);
+
         // Initialize Views
         tvStatusLampu = findViewById(R.id.tvStatusLampu);
         tvKondisiCahaya = findViewById(R.id.tvKondisiCahaya);
-        tvNotification = findViewById(R.id.tvNotification);
+        tvLogAktivitas = findViewById(R.id.tvLogAktivitas);
         tvDaya = findViewById(R.id.tvDaya);
-        tvArus = findViewById(R.id.tvArus);
-        tvTegangan = findViewById(R.id.tvTegangan);
-        tvEstimasiBiaya = findViewById(R.id.tvEstimasiBiaya);
-        ivLampIcon = findViewById(R.id.ivLampIcon);
+        tvCostSummary = findViewById(R.id.tvCostSummary);
+        tvKwhSummary = findViewById(R.id.tvKwhSummary);
+        
+        ivLampIllustration = findViewById(R.id.ivLampIllustration);
+        ivKondisiIcon = findViewById(R.id.ivKondisiIcon);
+        layoutStatusCahaya = findViewById(R.id.layoutStatusCahaya);
         toggleGroupLamp = findViewById(R.id.toggleGroupLamp);
         toggleGroupMode = findViewById(R.id.toggleGroupMode);
         btnDetail = findViewById(R.id.btnDetail);
@@ -78,136 +82,93 @@ public class MainActivity extends AppCompatActivity {
         // Control Lamp Logic
         toggleGroupLamp.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
             if (isChecked) {
-                if (isOverload) {
-                    showToast("Sistem terkunci (Overload). Tekan Reset.");
-                    group.post(() -> group.check(R.id.btnOff));
-                } else if (isAutoMode) {
-                    showToast(getString(R.string.msg_disable_auto));
+                if (isAutoMode) {
+                    showToast("Matikan Mode OTOMATIS untuk kontrol manual");
                     group.post(() -> group.check(isLampOn ? R.id.btnOn : R.id.btnOff));
                 } else {
-                    updateLampStatus(checkedId == R.id.btnOn, "Manual");
+                    updateLampState(checkedId == R.id.btnOn, "Manual");
                 }
             }
         });
 
-        // Mode System Logic
         toggleGroupMode.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
             if (isChecked) {
                 isAutoMode = (checkedId == R.id.btnAuto);
-                String modeStr = isAutoMode ? getString(R.string.auto) : getString(R.string.manual);
-                addNotification(getString(R.string.notif_mode_changed, modeStr));
-                if (isAutoMode) simulateAutoLogic();
+                addLog("Mode diubah ke " + (isAutoMode ? "OTOMATIS" : "MANUAL"));
             }
         });
 
-        // Detail Button Logic
         btnDetail.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, DetailActivity.class);
             startActivity(intent);
         });
 
-        // Start Realtime Simulation
         startRealtimeSimulation();
+    }
+
+    private void updateLampState(boolean on, String triggerSource) {
+        if (isLampOn != on) {
+            isLampOn = on;
+            tvStatusLampu.setText(on ? "ON" : "OFF");
+            ivLampIllustration.setColorFilter(ContextCompat.getColor(this, on ? R.color.accent_yellow : R.color.text_secondary));
+            if (on && toggleGroupLamp.getCheckedButtonId() != R.id.btnOn) toggleGroupLamp.check(R.id.btnOn);
+            else if (!on && toggleGroupLamp.getCheckedButtonId() != R.id.btnOff) toggleGroupLamp.check(R.id.btnOff);
+            addLog("Lampu " + (on ? "HIDUP" : "MATI") + " (" + triggerSource + ")");
+        }
+    }
+
+    private void addLog(String message) {
+        String currentTime = timeFormat.format(new Date());
+        tvLogAktivitas.setText("[" + currentTime + "] " + message);
     }
 
     private void startRealtimeSimulation() {
         realtimeHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                updateRealtimeData();
-                realtimeHandler.postDelayed(this, 2000); // Update data setiap 2 detik
+                simulateIoTData();
+                realtimeHandler.postDelayed(this, 2000); 
             }
         }, 1000);
     }
 
-    private void updateRealtimeData() {
-        double daya;
-        if (isLampOn && !isOverload) {
-            // Simulasi pembacaan daya lampu mushola (misal: 40-50 Watt)
-            daya = 40 + random.nextDouble() * 10;
-            
-            // Simulasi lonjakan daya acak untuk testing proteksi (Overload)
-            if (random.nextInt(100) == 1) daya = 125.8; 
-            
-            double arus = daya / 220;
-            double tegangan = 219 + random.nextDouble() * 2;
-            
-            tvDaya.setText(String.format(Locale.getDefault(), ": %s Watt", df.format(daya)));
-            tvArus.setText(String.format(Locale.getDefault(), ": %s A", df.format(arus)));
-            tvTegangan.setText(String.format(Locale.getDefault(), ": %s V", df.format(tegangan)));
-            
-            // Fitur: Kalkulasi Estimasi Biaya
-            double estimasiBiaya = (daya / 1000) * TARIF_PER_KWH;
-            tvEstimasiBiaya.setText(String.format(Locale.getDefault(), ": Rp %s/jam", currencyDf.format(estimasiBiaya)));
-
-            // Fitur: Proteksi Overload
-            if (daya > MAX_WATT_LIMIT) {
-                triggerOverload(daya);
-            }
-
+    private void simulateIoTData() {
+        // 1. Light Condition Simulation
+        int lux = random.nextInt(1000);
+        boolean isDark = lux < 300;
+        
+        if (isDark) {
+            tvKondisiCahaya.setText("Gelap");
+            tvKondisiCahaya.setTextColor(ContextCompat.getColor(this, R.color.white));
+            ivKondisiIcon.setImageResource(R.drawable.ic_star_on); 
+            ivKondisiIcon.setColorFilter(ContextCompat.getColor(this, R.color.white));
+            layoutStatusCahaya.setBackgroundResource(R.drawable.status_bg_dark);
         } else {
-            tvDaya.setText(R.string.daya_default);
-            tvArus.setText(R.string.arus_default);
-            tvTegangan.setText(": 220 V");
-            tvEstimasiBiaya.setText(R.string.biaya_default);
+            tvKondisiCahaya.setText("Terang");
+            tvKondisiCahaya.setTextColor(ContextCompat.getColor(this, R.color.bg_dark));
+            ivKondisiIcon.setImageResource(R.drawable.ic_star_on);
+            ivKondisiIcon.setColorFilter(ContextCompat.getColor(this, R.color.bg_dark));
+            layoutStatusCahaya.setBackgroundResource(R.drawable.status_bright_bg);
         }
-        
-        // Simulasi Sensor LDR (Cahaya)
-        int lightVal = random.nextInt(100);
-        String conditionStr = lightVal > 50 ? "Terang" : "Gelap";
-        tvKondisiCahaya.setText(String.format(Locale.getDefault(), ": %s (%d%%)", conditionStr, lightVal));
-        
-        if (isAutoMode && !isOverload) {
-            simulateAutoLogic();
+
+        if (isAutoMode) {
+            if (isDark && !isLampOn) updateLampState(true, "Auto Sensor");
+            else if (!isDark && isLampOn) updateLampState(false, "Auto Sensor");
         }
-    }
 
-    private void triggerOverload(double currentDaya) {
-        isOverload = true;
-        updateLampStatus(false, "Sistem (Overload)");
-        
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.alert_overload_title)
-                .setMessage(getString(R.string.alert_overload_msg, df.format(currentDaya)))
-                .setPositiveButton(R.string.reset, (dialog, which) -> {
-                    isOverload = false;
-                    addNotification("Sistem berhasil di-reset");
-                })
-                .setCancelable(false)
-                .show();
-                
-        addNotification(getString(R.string.notif_overload));
-    }
-
-    private void updateLampStatus(boolean on, String source) {
-        isLampOn = on;
-        if (on) {
-            tvStatusLampu.setText(R.string.lampu_nyala);
-            ivLampIcon.setImageResource(R.drawable.ic_lamp_on);
-            toggleGroupLamp.check(R.id.btnOn);
+        // 2. Consumption Summary Calculation
+        if (isLampOn) {
+            double currentWatt = 45 + random.nextDouble() * 10;
+            totalKwh += (currentWatt / 1000.0) * (2.0 / 3600.0);
+            
+            tvDaya.setText(df.format(currentWatt) + " Watt");
+            tvCostSummary.setText(currencyFormat.format(totalKwh * 1444.70));
+            tvKwhSummary.setText("Total Pemakaian Hari Ini: " + df.format(totalKwh) + " kWh");
         } else {
-            tvStatusLampu.setText(R.string.lampu_mati);
-            ivLampIcon.setImageResource(R.drawable.ic_lamp_off);
-            toggleGroupLamp.check(R.id.btnOff);
+            tvDaya.setText("0 Watt");
+            tvCostSummary.setText(currencyFormat.format(totalKwh * 1444.70));
+            tvKwhSummary.setText("Total Pemakaian Hari Ini: " + df.format(totalKwh) + " kWh");
         }
-        
-        if (!source.equals("Sistem") && !source.contains("Overload")) {
-            String status = on ? "nyalakan" : "matikan";
-            addNotification(getString(R.string.notif_lamp_status, status, source));
-        }
-    }
-
-    private void simulateAutoLogic() {
-        String kondisi = tvKondisiCahaya.getText().toString();
-        boolean shouldBeOn = kondisi.contains("Gelap");
-        if (isLampOn != shouldBeOn) {
-            updateLampStatus(shouldBeOn, "Mode Otomatis");
-        }
-    }
-
-    private void addNotification(String message) {
-        String currentTime = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(new Date());
-        tvNotification.setText(String.format("[%s] %s", currentTime, message));
     }
 
     private void showToast(String message) {
