@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!-- Modern Dark Theme Colors -->
+    <color name="bg_dark">#121212</color>
+    <color name="card_dark">#1E1E1E</color>
+    <color name="border_dark">#333333</color>
+
+    <!-- Accent Colors -->
+    <color name="purple_light">#D0BCFF</color>
+    <color name="green_light">#B4F8C8</color>
+    <color name="text_secondary">#B0B0B0</color>
+
+    <!-- State List Colors for Toggle Group -->
+    <color name="toggle_bg_selected">#D0BCFF</color>
+    <color name="toggle_bg_unselected">#00000000</color>
+    <color name="toggle_text_selected">#121212</color>
+    <color name="toggle_text_unselected">#FFFFFF</color>
+</resources>
