@@ -39,9 +39,16 @@
     <string name="kwh_week">2.1 kWh</string>
     <string name="kwh_month">8.5 kWh</string>
     <string name="diagram_konsumsi">Diagram Konsumsi (Watt)</string>
-    <string name="waiting_data">Menunggu data...</string>
+    <string name="waiting_data">Menunggu data…</string>
     <string name="label_pemakaian">Pemakaian (Watt)</string>
     <string name="notif_mode_changed">Mode diubah ke %1$s</string>
     <string name="notif_lamp_status">Lampu di%1$s via %2$s</string>
     <string name="msg_disable_auto">Matikan Mode Auto untuk kontrol manual</string>
+
+    <!-- New Strings for Energy & Cost and Overload Alert -->
+    <string name="estimasi_biaya">Estimasi Biaya</string>
+    <string name="biaya_default">: Rp 0</string>
+    <string name="alert_overload_title">BAHAYA: OVERLOAD!</string>
+    <string name="alert_overload_msg">Pemakaian daya melebihi batas aman (%1$s Watt). Lampu dimatikan untuk keamanan.</string>
+    <string name="notif_overload">PERINGATAN: Overload terdeteksi! Sistem mengamankan perangkat.</string>
 </resources>

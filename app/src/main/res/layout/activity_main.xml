@@ -49,7 +49,7 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Card: IoT Device Status (NEW) -->
+            <!-- Card: IoT Device Status -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -138,7 +138,7 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Card 1: Lamp Status (Updated with Custom Icon) -->
+            <!-- Card 1: Lamp Status -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -188,121 +188,122 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Card 2: Control -->
-            <com.google.android.material.card.MaterialCardView
+            <!-- Card 2: Control & Mode -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                app:cardBackgroundColor="@color/card_dark"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="0dp"
-                app:strokeColor="@color/border_dark"
-                app:strokeWidth="1dp">
+                android:orientation="horizontal"
+                android:baselineAligned="false"
+                android:layout_marginBottom="12dp">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="12dp"
-                        android:text="@string/kontrol_lampu"
-                        android:textColor="@color/white"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-
-                    <com.google.android.material.button.MaterialButtonToggleGroup
-                        android:id="@+id/toggleGroupLamp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="6dp"
+                    app:cardBackgroundColor="@color/card_dark"
+                    app:cardCornerRadius="16dp"
+                    app:strokeColor="@color/border_dark"
+                    app:strokeWidth="1dp">
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:selectionRequired="true"
-                        app:singleSelection="true">
-
-                        <Button
-                            android:id="@+id/btnOn"
-                            style="@style/Widget.Material3.Button.OutlinedButton"
-                            android:layout_width="0dp"
+                        android:orientation="vertical"
+                        android:padding="12dp">
+                        <TextView
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="@string/on"
-                            android:textColor="@color/toggle_text_selector"
-                            app:backgroundTint="@color/toggle_background_selector"
-                            app:strokeColor="@color/border_dark" />
-
-                        <Button
-                            android:id="@+id/btnOff"
-                            style="@style/Widget.Material3.Button.OutlinedButton"
-                            android:layout_width="0dp"
+                            android:text="@string/kontrol_lampu"
+                            android:textColor="@color/white"
+                            android:textSize="12sp"
+                            android:textStyle="bold"
+                            android:layout_marginBottom="8dp"/>
+                        <com.google.android.material.button.MaterialButtonToggleGroup
+                            android:id="@+id/toggleGroupLamp"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="@string/off"
-                            android:textColor="@color/toggle_text_selector"
-                            app:backgroundTint="@color/toggle_background_selector"
-                            app:strokeColor="@color/border_dark" />
-                    </com.google.android.material.button.MaterialButtonToggleGroup>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+                            app:selectionRequired="true"
+                            app:singleSelection="true">
+                            <Button
+                                android:id="@+id/btnOn"
+                                style="@style/Widget.Material3.Button.OutlinedButton"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/on"
+                                android:padding="0dp"
+                                android:textSize="11sp"
+                                android:textColor="@color/toggle_text_selector"
+                                app:backgroundTint="@color/toggle_background_selector" />
+                            <Button
+                                android:id="@+id/btnOff"
+                                style="@style/Widget.Material3.Button.OutlinedButton"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/off"
+                                android:padding="0dp"
+                                android:textSize="11sp"
+                                android:textColor="@color/toggle_text_selector"
+                                app:backgroundTint="@color/toggle_background_selector" />
+                        </com.google.android.material.button.MaterialButtonToggleGroup>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
 
-            <!-- Card 3: Mode -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                app:cardBackgroundColor="@color/card_dark"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="0dp"
-                app:strokeColor="@color/border_dark"
-                app:strokeWidth="1dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="12dp"
-                        android:text="@string/mode_sistem"
-                        android:textColor="@color/white"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-
-                    <com.google.android.material.button.MaterialButtonToggleGroup
-                        android:id="@+id/toggleGroupMode"
+                    android:layout_weight="1"
+                    android:layout_marginStart="6dp"
+                    app:cardBackgroundColor="@color/card_dark"
+                    app:cardCornerRadius="16dp"
+                    app:strokeColor="@color/border_dark"
+                    app:strokeWidth="1dp">
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:selectionRequired="true"
-                        app:singleSelection="true">
-
-                        <Button
-                            android:id="@+id/btnManual"
-                            style="@style/Widget.Material3.Button.OutlinedButton"
-                            android:layout_width="0dp"
+                        android:orientation="vertical"
+                        android:padding="12dp">
+                        <TextView
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="@string/manual"
-                            android:textColor="@color/toggle_text_selector"
-                            app:backgroundTint="@color/toggle_background_selector"
-                            app:strokeColor="@color/border_dark" />
-
-                        <Button
-                            android:id="@+id/btnAuto"
-                            style="@style/Widget.Material3.Button.OutlinedButton"
-                            android:layout_width="0dp"
+                            android:text="@string/mode_sistem"
+                            android:textColor="@color/white"
+                            android:textSize="12sp"
+                            android:textStyle="bold"
+                            android:layout_marginBottom="8dp"/>
+                        <com.google.android.material.button.MaterialButtonToggleGroup
+                            android:id="@+id/toggleGroupMode"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="@string/auto"
-                            android:textColor="@color/toggle_text_selector"
-                            app:backgroundTint="@color/toggle_background_selector"
-                            app:strokeColor="@color/border_dark" />
-                    </com.google.android.material.button.MaterialButtonToggleGroup>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+                            app:selectionRequired="true"
+                            app:singleSelection="true">
+                            <Button
+                                android:id="@+id/btnManual"
+                                style="@style/Widget.Material3.Button.OutlinedButton"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/manual"
+                                android:padding="0dp"
+                                android:textSize="11sp"
+                                android:textColor="@color/toggle_text_selector"
+                                app:backgroundTint="@color/toggle_background_selector" />
+                            <Button
+                                android:id="@+id/btnAuto"
+                                style="@style/Widget.Material3.Button.OutlinedButton"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/auto"
+                                android:padding="0dp"
+                                android:textSize="11sp"
+                                android:textColor="@color/toggle_text_selector"
+                                app:backgroundTint="@color/toggle_background_selector" />
+                        </com.google.android.material.button.MaterialButtonToggleGroup>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
 
             <!-- Card 4: Notifications -->
             <com.google.android.material.card.MaterialCardView
@@ -340,7 +341,7 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Card 5: Power Consumption -->
+            <!-- Card 5: Power Consumption & Cost -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -383,58 +384,79 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:paddingVertical="4dp">
-                        <TextView
-                            android:layout_width="100dp"
-                            android:layout_height="wrap_content"
-                            android:text="@string/daya"
-                            android:textColor="@color/text_secondary" />
-                        <TextView
-                            android:id="@+id/tvDaya"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/daya_default"
-                            android:textColor="@color/white"
-                            android:textStyle="bold" />
-                    </LinearLayout>
+                        android:orientation="horizontal">
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:paddingVertical="4dp">
-                        <TextView
-                            android:layout_width="100dp"
+                        <LinearLayout
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:text="@string/arus"
-                            android:textColor="@color/text_secondary" />
-                        <TextView
-                            android:id="@+id/tvArus"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/arus_default"
-                            android:textColor="@color/white"
-                            android:textStyle="bold" />
-                    </LinearLayout>
+                            android:layout_weight="1"
+                            android:orientation="vertical">
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:paddingVertical="4dp">
-                        <TextView
-                            android:layout_width="100dp"
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/daya"
+                                android:textColor="@color/text_secondary"
+                                android:textSize="11sp" />
+                            <TextView
+                                android:id="@+id/tvDaya"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/daya_default"
+                                android:textColor="@color/white"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:text="@string/arus"
+                                android:textColor="@color/text_secondary"
+                                android:textSize="11sp" />
+                            <TextView
+                                android:id="@+id/tvArus"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/arus_default"
+                                android:textColor="@color/white"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:text="@string/tegangan"
-                            android:textColor="@color/text_secondary" />
-                        <TextView
-                            android:id="@+id/tvTegangan"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/tegangan_default"
-                            android:textColor="@color/white"
-                            android:textStyle="bold" />
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/tegangan"
+                                android:textColor="@color/text_secondary"
+                                android:textSize="11sp" />
+                            <TextView
+                                android:id="@+id/tvTegangan"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/tegangan_default"
+                                android:textColor="@color/white"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:text="@string/estimasi_biaya"
+                                android:textColor="@color/text_secondary"
+                                android:textSize="11sp" />
+                            <TextView
+                                android:id="@+id/tvEstimasiBiaya"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/biaya_default"
+                                android:textColor="#FFEB3B"
+                                android:textStyle="bold" />
+                        </LinearLayout>
                     </LinearLayout>
 
                     <View
