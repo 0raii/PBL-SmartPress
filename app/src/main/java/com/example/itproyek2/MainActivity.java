@@ -37,9 +37,9 @@ public class MainActivity extends AppCompatActivity {
     private MaterialButtonToggleGroup toggleGroupLamp, toggleGroupMode;
     private Button btnDetail;
 
-    private boolean isLampOn = true;
-    private boolean isAutoMode = false;
-    private double totalKwh = 0.45; // Simulated starting value
+    private boolean isLampOn;
+    private boolean isAutoMode;
+    private double totalKwh;
     
     private final Handler realtimeHandler = new Handler(Looper.getMainLooper());
     private final Random random = new Random();
@@ -75,10 +75,12 @@ public class MainActivity extends AppCompatActivity {
         toggleGroupLamp = findViewById(R.id.toggleGroupLamp);
         toggleGroupMode = findViewById(R.id.toggleGroupMode);
         btnDetail = findViewById(R.id.btnDetail);
+
+        // Load Saved State
+        loadAppState();
         
-        // Initial Selection
-        toggleGroupLamp.check(R.id.btnOn);
-        toggleGroupMode.check(R.id.btnManual);
+        // Apply Loaded UI State
+        applyUiState();
 
         // Control Lamp Logic
         toggleGroupLamp.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
@@ -95,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
         toggleGroupMode.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
             if (isChecked) {
                 isAutoMode = (checkedId == R.id.btnAuto);
+                saveAppState(); // Save mode change
                 addLog("Mode diubah ke " + (isAutoMode ? "OTOMATIS" : "MANUAL"));
             }
         });
@@ -117,7 +120,9 @@ public class MainActivity extends AppCompatActivity {
                 finish();
                 return true;
             } else if (id == R.id.nav_settings) {
-                // Settings activity placeholder
+                startActivity(new Intent(this, SettingsActivity.class));
+                overridePendingTransition(0, 0);
+                finish();
                 return true;
             }
             return false;
@@ -126,26 +131,39 @@ public class MainActivity extends AppCompatActivity {
         startRealtimeSimulation();
     }
 
-    private void saveLogToHistory(String message) {
+    private void loadAppState() {
         SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
-        String history = prefs.getString("history_data", "");
-        String currentTime = new SimpleDateFormat("HH:mm", Locale.getDefault()).format(new Date());
-        
-        // IconType: 1 for Lamp, 2 for Mode
-        int iconType = message.contains("Lampu") ? 1 : 2;
-        String newEntry = message + "|" + "Hari Ini " + currentTime + "|" + iconType + ";";
-        
-        prefs.edit().putString("history_data", history + newEntry).apply();
-        prefs.edit().putString("total_kwh", df.format(totalKwh)).apply();
+        isLampOn = prefs.getBoolean("is_lamp_on", true);
+        isAutoMode = prefs.getBoolean("is_auto_mode", false);
+        String kwhStr = prefs.getString("total_kwh", "0.45");
+        try {
+            totalKwh = Double.parseDouble(kwhStr.replace(",", "."));
+        } catch (Exception e) {
+            totalKwh = 0.45;
+        }
+    }
+
+    private void saveAppState() {
+        SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putBoolean("is_lamp_on", isLampOn);
+        editor.putBoolean("is_auto_mode", isAutoMode);
+        editor.putString("total_kwh", df.format(totalKwh));
+        editor.apply();
+    }
+
+    private void applyUiState() {
+        tvStatusLampu.setText(isLampOn ? "HIDUP" : "MATI");
+        ivLampIllustration.setColorFilter(ContextCompat.getColor(this, isLampOn ? R.color.accent_yellow : R.color.text_secondary));
+        toggleGroupLamp.check(isLampOn ? R.id.btnOn : R.id.btnOff);
+        toggleGroupMode.check(isAutoMode ? R.id.btnAuto : R.id.btnManual);
     }
 
     private void updateLampState(boolean on, String triggerSource) {
         if (isLampOn != on) {
             isLampOn = on;
-            tvStatusLampu.setText(on ? "HIDUP" : "MATI");
-            ivLampIllustration.setColorFilter(ContextCompat.getColor(this, on ? R.color.accent_yellow : R.color.text_secondary));
-            if (on && toggleGroupLamp.getCheckedButtonId() != R.id.btnOn) toggleGroupLamp.check(R.id.btnOn);
-            else if (!on && toggleGroupLamp.getCheckedButtonId() != R.id.btnOff) toggleGroupLamp.check(R.id.btnOff);
+            saveAppState(); // Save lamp change
+            applyUiState();
             addLog("Lampu " + (on ? "HIDUP" : "MATI") + " (" + triggerSource + ")");
         }
     }
@@ -154,6 +172,15 @@ public class MainActivity extends AppCompatActivity {
         String currentTime = timeFormat.format(new Date());
         tvLogAktivitas.setText("[" + currentTime + "] " + message);
         saveLogToHistory(message);
+    }
+
+    private void saveLogToHistory(String message) {
+        SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
+        String history = prefs.getString("history_data", "");
+        String currentTime = new SimpleDateFormat("HH:mm", Locale.getDefault()).format(new Date());
+        int iconType = message.contains("Lampu") ? 1 : 2;
+        String newEntry = message + "|" + "Hari Ini " + currentTime + "|" + iconType + ";";
+        prefs.edit().putString("history_data", history + newEntry).apply();
     }
 
     private void startRealtimeSimulation() {
@@ -167,7 +194,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void simulateIoTData() {
-        // 1. Light Condition Simulation
         int lux = random.nextInt(1000);
         boolean isDark = lux < 300;
         
@@ -190,19 +216,17 @@ public class MainActivity extends AppCompatActivity {
             else if (!isDark && isLampOn) updateLampState(false, "Sensor Otomatis");
         }
 
-        // 2. Consumption Summary Calculation
         if (isLampOn) {
             double currentWatt = 45 + random.nextDouble() * 10;
             totalKwh += (currentWatt / 1000.0) * (2.0 / 3600.0);
-            
             tvDaya.setText(df.format(currentWatt) + " Watt");
-            tvCostSummary.setText(currencyFormat.format(totalKwh * 1444.70));
-            tvKwhSummary.setText("Total Pemakaian Hari Ini: " + df.format(totalKwh) + " kWh");
         } else {
             tvDaya.setText("0 Watt");
-            tvCostSummary.setText(currencyFormat.format(totalKwh * 1444.70));
-            tvKwhSummary.setText("Total Pemakaian Hari Ini: " + df.format(totalKwh) + " kWh");
         }
+        
+        tvCostSummary.setText(currencyFormat.format(totalKwh * 1444.70));
+        tvKwhSummary.setText("Total Pemakaian Hari Ini: " + df.format(totalKwh) + " kWh");
+        saveAppState(); // Sync kWh periodically
     }
 
     private void showToast(String message) {
