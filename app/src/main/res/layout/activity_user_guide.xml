@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#121212"
+    android:orientation="vertical">
+
+    <!-- Header -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:paddingHorizontal="16dp">
+        <ImageView
+            android:id="@+id/btnBackGuide"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_centerVertical="true"
+            android:src="@drawable/ic_arrow_back"
+            app:tint="@color/white" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="32dp"
+            android:layout_toEndOf="@id/btnBackGuide"
+            android:text="Panduan Pengguna"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+    </RelativeLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Cara Menggunakan Aplikasi"
+                android:textColor="@color/accent_yellow"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="16dp"/>
+
+            <!-- Beranda -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="1. Beranda (Kontrol Lampu)"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="● Gunakan tombol ON/OFF untuk mengontrol lampu secara manual.\n● Aktifkan mode OTOMATIS agar lampu menyala sendiri saat kondisi gelap.\n● Jika perangkat OFFLINE, tombol kontrol tidak dapat ditekan."
+                android:textColor="#B0B0B0"
+                android:layout_marginBottom="16dp"
+                android:lineSpacingExtra="4dp"/>
+
+            <!-- Deep Monitoring -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2. Monitoring Mendalam"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="● Klik tombol 'Detail' di Beranda untuk melihat grafik penggunaan daya secara real-time.\n● Pantau Voltase, Ampere, dan Suhu Perangkat untuk memastikan keamanan."
+                android:textColor="#B0B0B0"
+                android:layout_marginBottom="16dp"
+                android:lineSpacingExtra="4dp"/>
+
+            <!-- Aktifitas -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="3. Riwayat Aktifitas"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="● Buka menu Aktifitas untuk melihat log penggunaan lampu.\n● Lihat grafik durasi menyala harian dalam satuan menit dan jam."
+                android:textColor="#B0B0B0"
+                android:layout_marginBottom="16dp"
+                android:lineSpacingExtra="4dp"/>
+
+            <!-- Notifikasi -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="4. Pengaturan Notifikasi"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="● Anda dapat mengaktifkan peringatan durasi menyala (maks 5 jam) agar lebih hemat energi.\n● Aktifkan peringatan suhu agar sistem memberi tahu jika perangkat terlalu panas."
+                android:textColor="#B0B0B0"
+                android:layout_marginBottom="16dp"
+                android:lineSpacingExtra="4dp"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#33FFFFFF"
+                android:layout_marginVertical="16dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Catatan: Pastikan koneksi internet Anda stabil agar sinkronisasi data dengan perangkat berjalan lancar."
+                android:textColor="@color/accent_yellow"
+                android:textSize="14sp"
+                android:textStyle="italic" />
+
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

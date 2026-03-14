@@ -1,10 +1,17 @@
 package com.example.itproyek2;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -13,6 +20,7 @@ import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -32,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView tvStatusLampu, tvKondisiCahaya, tvLogAktivitas;
     private TextView tvDaya, tvCostSummary, tvKwhSummary;
+    private TextView tvEspStatus, tvWifiStatus;
     private ImageView ivLampIllustration, ivKondisiIcon;
     private LinearLayout layoutStatusCahaya;
     private MaterialButtonToggleGroup toggleGroupLamp, toggleGroupMode;
@@ -39,19 +48,27 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean isLampOn;
     private boolean isAutoMode;
+    private boolean isConnected = true;
     private double totalKwh;
+    private long lampOnStartTime = 0;
     
+    private boolean notifLamp, notifOvertime, notifOverheat, notifEnergy;
+
     private final Handler realtimeHandler = new Handler(Looper.getMainLooper());
     private final Random random = new Random();
     private final DecimalFormat df = new DecimalFormat("#.##");
     private final NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("id", "ID"));
     private final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
 
+    private static final String CHANNEL_ID = "SMART_LAMP_NOTIF";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+
+        createNotificationChannel();
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -61,13 +78,14 @@ public class MainActivity extends AppCompatActivity {
 
         currencyFormat.setMaximumFractionDigits(0);
 
-        // Initialize Views
         tvStatusLampu = findViewById(R.id.tvStatusLampu);
         tvKondisiCahaya = findViewById(R.id.tvKondisiCahaya);
         tvLogAktivitas = findViewById(R.id.tvLogAktivitas);
         tvDaya = findViewById(R.id.tvDaya);
         tvCostSummary = findViewById(R.id.tvCostSummary);
         tvKwhSummary = findViewById(R.id.tvKwhSummary);
+        tvEspStatus = findViewById(R.id.tvEspStatus);
+        tvWifiStatus = findViewById(R.id.tvWifiStatus);
         
         ivLampIllustration = findViewById(R.id.ivLampIllustration);
         ivKondisiIcon = findViewById(R.id.ivKondisiIcon);
@@ -76,50 +94,65 @@ public class MainActivity extends AppCompatActivity {
         toggleGroupMode = findViewById(R.id.toggleGroupMode);
         btnDetail = findViewById(R.id.btnDetail);
 
-        // Load Saved State
         loadAppState();
-        
-        // Apply Loaded UI State
         applyUiState();
 
-        // Control Lamp Logic
         toggleGroupLamp.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
             if (isChecked) {
-                if (isAutoMode) {
+                if (!isConnected) {
+                    showToast("Gagal: Perangkat sedang Offline!");
+                    syncLampToggle();
+                } else if (isAutoMode) {
                     showToast("Matikan Mode OTOMATIS untuk kontrol manual");
-                    group.post(() -> group.check(isLampOn ? R.id.btnOn : R.id.btnOff));
+                    syncLampToggle();
                 } else {
                     updateLampState(checkedId == R.id.btnOn, "Manual");
                 }
             }
         });
 
+        tvEspStatus.setOnClickListener(v -> {
+            if (!isConnected) {
+                showToast("Mencoba menghubungkan kembali...");
+                new Handler().postDelayed(() -> {
+                    isConnected = true;
+                    saveAppState();
+                    applyUiState();
+                    addLog("Info: Perangkat dihubungkan kembali secara manual");
+                    showToast("Berhasil: Perangkat Online");
+                }, 1500);
+            }
+        });
+
         toggleGroupMode.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
             if (isChecked) {
-                isAutoMode = (checkedId == R.id.btnAuto);
-                saveAppState(); // Save mode change
-                addLog("Mode diubah ke " + (isAutoMode ? "OTOMATIS" : "MANUAL"));
+                if (!isConnected) {
+                    showToast("Gagal: Perangkat sedang Offline!");
+                    toggleGroupMode.post(() -> toggleGroupMode.check(isAutoMode ? R.id.btnAuto : R.id.btnManual));
+                } else {
+                    isAutoMode = (checkedId == R.id.btnAuto);
+                    saveAppState();
+                    addLog("Mode diubah ke " + (isAutoMode ? "OTOMATIS" : "MANUAL"));
+                }
             }
         });
 
         btnDetail.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, DetailActivity.class);
-            startActivity(intent);
+            startActivity(new Intent(MainActivity.this, DetailActivity.class));
         });
 
-        // Bottom Navigation Logic
         BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
         bottomNav.setSelectedItemId(R.id.nav_home);
         bottomNav.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
-            if (id == R.id.nav_home) {
-                return true;
-            } else if (id == R.id.nav_history) {
+            if (id == R.id.nav_home) return true;
+            if (id == R.id.nav_history) {
                 startActivity(new Intent(this, HistoryActivity.class));
                 overridePendingTransition(0, 0);
                 finish();
                 return true;
-            } else if (id == R.id.nav_settings) {
+            }
+            if (id == R.id.nav_settings) {
                 startActivity(new Intent(this, SettingsActivity.class));
                 overridePendingTransition(0, 0);
                 finish();
@@ -131,16 +164,61 @@ public class MainActivity extends AppCompatActivity {
         startRealtimeSimulation();
     }
 
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = "Smart Lamp Channel";
+            String description = "Pemberitahuan Penting Sistem Lampu";
+            int importance = NotificationManager.IMPORTANCE_HIGH;
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+            channel.enableLights(true);
+            channel.setLightColor(Color.YELLOW);
+            channel.enableVibration(true);
+
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
+    }
+
+    private void sendSystemNotification(String title, String message) {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_lamp_on)
+                .setContentTitle(title)
+                .setContentText(message)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true);
+
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.notify((int) System.currentTimeMillis(), builder.build());
+    }
+
+    private void syncLampToggle() {
+        toggleGroupLamp.post(() -> toggleGroupLamp.check(isLampOn ? R.id.btnOn : R.id.btnOff));
+    }
+
     private void loadAppState() {
         SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
         isLampOn = prefs.getBoolean("is_lamp_on", true);
         isAutoMode = prefs.getBoolean("is_auto_mode", false);
+        isConnected = prefs.getBoolean("is_connected", true);
         String kwhStr = prefs.getString("total_kwh", "0.45");
         try {
             totalKwh = Double.parseDouble(kwhStr.replace(",", "."));
         } catch (Exception e) {
             totalKwh = 0.45;
         }
+        
+        notifLamp = prefs.getBoolean("notif_lamp", true);
+        notifOvertime = prefs.getBoolean("notif_overtime", true);
+        notifOverheat = prefs.getBoolean("notif_overheat", true);
+        notifEnergy = prefs.getBoolean("notif_energy", true);
+
+        if (isLampOn) lampOnStartTime = System.currentTimeMillis();
     }
 
     private void saveAppState() {
@@ -148,6 +226,7 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences.Editor editor = prefs.edit();
         editor.putBoolean("is_lamp_on", isLampOn);
         editor.putBoolean("is_auto_mode", isAutoMode);
+        editor.putBoolean("is_connected", isConnected);
         editor.putString("total_kwh", df.format(totalKwh));
         editor.apply();
     }
@@ -155,16 +234,34 @@ public class MainActivity extends AppCompatActivity {
     private void applyUiState() {
         tvStatusLampu.setText(isLampOn ? "HIDUP" : "MATI");
         ivLampIllustration.setColorFilter(ContextCompat.getColor(this, isLampOn ? R.color.accent_yellow : R.color.text_secondary));
-        toggleGroupLamp.check(isLampOn ? R.id.btnOn : R.id.btnOff);
+        syncLampToggle();
         toggleGroupMode.check(isAutoMode ? R.id.btnAuto : R.id.btnManual);
+        
+        if (isConnected) {
+            tvEspStatus.setText("Online");
+            tvEspStatus.setTextColor(ContextCompat.getColor(this, R.color.primary_blue));
+            tvWifiStatus.setText("Terhubung");
+            tvWifiStatus.setTextColor(ContextCompat.getColor(this, R.color.primary_blue));
+            ivLampIllustration.setAlpha(1.0f);
+        } else {
+            tvEspStatus.setText("Offline");
+            tvEspStatus.setTextColor(ContextCompat.getColor(this, R.color.text_secondary));
+            tvWifiStatus.setText("Terputus");
+            tvWifiStatus.setTextColor(ContextCompat.getColor(this, R.color.text_secondary));
+            ivLampIllustration.setAlpha(0.3f);
+            tvStatusLampu.setText("OFFLINE");
+            tvDaya.setText("- Watt");
+        }
     }
 
     private void updateLampState(boolean on, String triggerSource) {
         if (isLampOn != on) {
             isLampOn = on;
-            saveAppState(); // Save lamp change
+            lampOnStartTime = isLampOn ? System.currentTimeMillis() : 0;
+            saveAppState();
             applyUiState();
             addLog("Lampu " + (on ? "HIDUP" : "MATI") + " (" + triggerSource + ")");
+            if (notifLamp) showToast("Notifikasi: Lampu " + (on ? "Menyala" : "Mati"));
         }
     }
 
@@ -178,7 +275,15 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
         String history = prefs.getString("history_data", "");
         String currentTime = new SimpleDateFormat("HH:mm", Locale.getDefault()).format(new Date());
-        int iconType = message.contains("Lampu") ? 1 : 2;
+        
+        int iconType = 0;
+        String msg = message.toUpperCase();
+        if (msg.contains("HIDUP")) iconType = 1;
+        else if (msg.contains("MATI")) iconType = 2;
+        else if (msg.contains("OTOMATIS")) iconType = 3;
+        else if (msg.contains("MANUAL")) iconType = 4;
+        else if (msg.contains("OFFLINE")) iconType = 5;
+
         String newEntry = message + "|" + "Hari Ini " + currentTime + "|" + iconType + ";";
         prefs.edit().putString("history_data", history + newEntry).apply();
     }
@@ -187,7 +292,22 @@ public class MainActivity extends AppCompatActivity {
         realtimeHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                simulateIoTData();
+                if (random.nextInt(100) < 2) { 
+                    isConnected = !isConnected;
+                    saveAppState();
+                    runOnUiThread(() -> applyUiState());
+                    if (!isConnected) {
+                        addLog("Peringatan: Perangkat Terputus (Offline)");
+                        sendSystemNotification("Koneksi Terputus", "Perangkat ESP32 Anda tidak dapat dijangkau.");
+                    } else {
+                        addLog("Info: Perangkat Terhubung Kembali");
+                    }
+                }
+
+                if (isConnected) {
+                    simulateIoTData();
+                    checkAlerts();
+                }
                 realtimeHandler.postDelayed(this, 2000); 
             }
         }, 1000);
@@ -197,19 +317,10 @@ public class MainActivity extends AppCompatActivity {
         int lux = random.nextInt(1000);
         boolean isDark = lux < 300;
         
-        if (isDark) {
-            tvKondisiCahaya.setText("Gelap");
-            tvKondisiCahaya.setTextColor(ContextCompat.getColor(this, R.color.white));
-            ivKondisiIcon.setImageResource(R.drawable.ic_star_on); 
-            ivKondisiIcon.setColorFilter(ContextCompat.getColor(this, R.color.white));
-            layoutStatusCahaya.setBackgroundResource(R.drawable.status_bg_dark);
-        } else {
-            tvKondisiCahaya.setText("Terang");
-            tvKondisiCahaya.setTextColor(ContextCompat.getColor(this, R.color.bg_dark));
-            ivKondisiIcon.setImageResource(R.drawable.ic_star_on);
-            ivKondisiIcon.setColorFilter(ContextCompat.getColor(this, R.color.bg_dark));
-            layoutStatusCahaya.setBackgroundResource(R.drawable.status_bright_bg);
-        }
+        tvKondisiCahaya.setText(isDark ? "Gelap" : "Terang");
+        tvKondisiCahaya.setTextColor(ContextCompat.getColor(this, isDark ? R.color.white : R.color.bg_dark));
+        ivKondisiIcon.setColorFilter(ContextCompat.getColor(this, isDark ? R.color.white : R.color.bg_dark));
+        layoutStatusCahaya.setBackgroundResource(isDark ? R.drawable.status_bg_dark : R.drawable.status_bright_bg);
 
         if (isAutoMode) {
             if (isDark && !isLampOn) updateLampState(true, "Sensor Otomatis");
@@ -226,7 +337,24 @@ public class MainActivity extends AppCompatActivity {
         
         tvCostSummary.setText(currencyFormat.format(totalKwh * 1444.70));
         tvKwhSummary.setText("Total Pemakaian Hari Ini: " + df.format(totalKwh) + " kWh");
-        saveAppState(); // Sync kWh periodically
+        saveAppState();
+    }
+
+    private void checkAlerts() {
+        if (isLampOn && lampOnStartTime > 0 && notifOvertime) {
+            long durationSec = (System.currentTimeMillis() - lampOnStartTime) / 1000;
+            if (durationSec > 60) {
+                sendSystemNotification("Peringatan Durasi", "Lampu sudah menyala lebih dari 1 menit. Matikan jika tidak digunakan!");
+                addLog("Peringatan: Overtime Detected");
+                lampOnStartTime = System.currentTimeMillis(); 
+            }
+        }
+
+        float temp = 30 + random.nextFloat() * 20;
+        if (temp > 45 && notifOverheat) {
+            sendSystemNotification("Peringatan Suhu", "Suhu ESP32 mencapai " + df.format(temp) + "°C. Perangkat terlalu panas!");
+            addLog("Peringatan: Overheat " + df.format(temp) + "°C");
+        }
     }
 
     private void showToast(String message) {
