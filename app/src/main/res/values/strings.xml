@@ -1,33 +1,33 @@
 <resources>
     <string name="app_name">SmartPress</string>
-    <string name="smart_press_app">SmartPress Dashboard</string>
-    <string name="smart_lamp_controller">Monitoring Lampu Mushola</string>
-    <string name="welcome_john">Welcome John</string>
+    <string name="smart_press_app">Dashboard SmartPress</string>
+    <string name="smart_lamp_controller">Kontrol Lampu Pintar</string>
+    <string name="welcome_user">Selamat Datang, Pengguna</string>
 
     <string name="status_device">Status Perangkat IoT</string>
     <string name="esp32">Kontroler ESP32</string>
     <string name="online">Online</string>
     <string name="wifi">Koneksi WiFi</string>
     <string name="connected">Tersambung</string>
-    <string name="cloud">Cloud Server</string>
+    <string name="cloud">Server Cloud</string>
     <string name="active">Aktif</string>
 
     <string name="status_lampu">Status Lampu</string>
     <string name="lampu_nyala">Lampu Menyala</string>
     <string name="lampu_mati">Lampu Padam</string>
     <string name="kontrol_lampu">Kontrol Lampu</string>
-    <string name="on">ON</string>
-    <string name="off">OFF</string>
+    <string name="on">HIDUP</string>
+    <string name="off">MATI</string>
 
-    <string name="mode_sistem">Kondisi Cahaya</string>
-    <string name="manual">Gelap</string>
-    <string name="auto">Terang</string>
+    <string name="mode_sistem">Mode Sistem</string>
+    <string name="manual">MANUAL</string>
+    <string name="auto">OTOMATIS</string>
 
-    <string name="notifikasi_terbaru">Log Aktivitas</string>
+    <string name="notifikasi_terbaru">Aktivitas Terbaru</string>
     <string name="belum_ada_notifikasi">Belum ada aktivitas terdeteksi</string>
 
     <string name="konsumsi_listrik">Konsumsi Listrik</string>
-    <string name="detail">Statistik ></string>
+    <string name="detail">Analisis Lengkap ></string>
     <string name="daya">Daya</string>
     <string name="daya_val">55 Watt</string>
     <string name="arus">Arus</string>
@@ -40,17 +40,18 @@
     <string name="tegangan_default">: 220 V</string>
 
     <string name="label_status">Status Lampu</string>
-    <string name="lamp_illustration">Lamp Illustration</string>
-    <string name="back">Back</string>
+    <string name="lamp_illustration">Ilustrasi Lampu</string>
+    <string name="back">Kembali</string>
 
-    <string name="home">Home</string>
-    <string name="settings">Settings</string>
+    <string name="home">Beranda</string>
+    <string name="history">Aktivitas</string>
+    <string name="settings">Pengaturan</string>
 
     <string name="detail_konsumsi">Statistik Penggunaan</string>
     <string name="statistik_pemakaian">Akumulasi Energi (kWh)</string>
-    <string name="hari_ini">Hari ini</string>
-    <string name="minggu_ini">Minggu ini</string>
-    <string name="bulan_ini">Bulan ini</string>
+    <string name="hari_ini">Hari Ini</string>
+    <string name="minggu_ini">Minggu Ini</string>
+    <string name="bulan_ini">Bulan Ini</string>
     <string name="kwh_today">0.32 kWh</string>
     <string name="kwh_week">2.1 kWh</string>
     <string name="kwh_month">8.5 kWh</string>
@@ -63,15 +64,24 @@
     <string name="estimasi_biaya">Estimasi Biaya</string>
     <string name="biaya_default">: Rp 0</string>
     <string name="alert_overload_title">PERINGATAN: BEBAN BERLEBIH!</string>
-    <string name="alert_overload_msg">Terdeteksi lonjakan daya sebesar %1$s Watt. Sistem mematikan lampu otomatis untuk mencegah kebakaran.</string>
-    <string name="notif_overload">OVERLOAD! Sistem proteksi aktif di Mushola.</string>
+    <string name="alert_overload_msg">Terdeteksi lonjakan daya sebesar %1$s Watt. Sistem mematikan lampu otomatis.</string>
+    <string name="notif_overload">OVERLOAD! Sistem proteksi aktif.</string>
     <string name="reset">Reset Sistem</string>
-    <string name="lamp_icon_desc">Icon Status Lampu</string>
+    <string name="lamp_icon_desc">Ikon Status Lampu</string>
     <string name="kondisi_cahaya">Kondisi Cahaya</string>
     <string name="kondisi_cahaya_default">: --</string>
-    <string name="icon_desc">Icon Description</string>
+    <string name="icon_desc">Deskripsi Ikon</string>
 
-    <!-- Additional Strings for Monitoring Detail -->
+    <!-- Additional Strings for Activity/History -->
+    <string name="activity_title">Aktivitas</string>
+    <string name="lamp_usage_monitoring">Monitoring Penggunaan Lampu</string>
+    <string name="total_usage_today">Total Penggunaan Lampu Hari Ini</string>
+    <string name="hours_format">%d Jam</string>
+    <string name="recent_activity">Aktivitas Terbaru</string>
+    <string name="energy_consumption">Konsumsi Energi</string>
+    <string name="today_label">Hari Ini : %s</string>
+    <string name="week_label">Minggu : %s</string>
+
     <string name="detail_monitoring">Detail Monitoring</string>
     <string name="durasi_nyala">Durasi Nyala</string>
     <string name="suhu_esp">Suhu ESP32</string>

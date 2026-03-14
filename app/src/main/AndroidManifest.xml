@@ -24,6 +24,10 @@
             android:name=".DetailActivity"
             android:exported="false"
             android:theme="@style/Theme.ItProyek2" />
+        <activity
+            android:name=".HistoryActivity"
+            android:exported="false"
+            android:theme="@style/Theme.ItProyek2" />
     </application>
 
 </manifest>

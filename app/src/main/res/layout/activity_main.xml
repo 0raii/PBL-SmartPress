@@ -29,7 +29,7 @@
         android:layout_marginTop="16dp"
         android:clipToPadding="false"
         android:paddingBottom="100dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bottomNav"
         app:layout_constraintTop_toBottomOf="@id/tvTitle">
 
         <LinearLayout
@@ -85,8 +85,7 @@
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"
-                            app:tint="@color/accent_yellow" />
+                            app:layout_constraintTop_toTopOf="parent" />
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -240,7 +239,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="16dp"
-                        android:text="Mode Operasi"
+                        android:text="@string/mode_sistem"
                         android:textColor="@color/text_secondary"
                         android:textSize="18sp" />
 
@@ -256,7 +255,7 @@
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
-                            android:text="MANUAL"
+                            android:text="@string/manual"
                             android:textSize="18sp"
                             android:textColor="@color/toggle_text_selector"
                             app:backgroundTint="@color/toggle_background_selector"
@@ -269,7 +268,7 @@
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
-                            android:text="OTOMATIS"
+                            android:text="@string/auto"
                             android:textSize="18sp"
                             android:textColor="@color/toggle_text_selector"
                             app:backgroundTint="@color/toggle_background_selector"
@@ -299,7 +298,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="16dp"
-                        android:text="Kondisi Cahaya"
+                        android:text="@string/kondisi_cahaya"
                         android:textColor="@color/text_secondary"
                         android:textSize="18sp" />
 
@@ -316,9 +315,8 @@
                             android:id="@+id/ivKondisiIcon"
                             android:layout_width="32dp"
                             android:layout_height="32dp"
-                            android:contentDescription="Light Icon"
-                            android:src="@drawable/ic_star_on"
-                            app:tint="@color/accent_yellow" />
+                            android:contentDescription="@string/icon_desc"
+                            android:src="@drawable/ic_star_on" />
 
                         <TextView
                             android:id="@+id/tvKondisiCahaya"
@@ -365,7 +363,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_alignParentEnd="true"
-                            android:text="Analisis Lengkap >"
+                            android:text="@string/detail"
                             android:textSize="14sp"
                             android:textColor="@color/primary_blue" />
                     </RelativeLayout>
@@ -385,7 +383,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Daya Saat Ini"
+                                android:text="@string/daya"
                                 android:textColor="@color/text_secondary"
                                 android:textSize="12sp" />
                             <TextView
@@ -407,7 +405,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Estimasi Biaya"
+                                android:text="@string/estimasi_biaya"
                                 android:textColor="@color/text_secondary"
                                 android:textSize="12sp" />
                             <TextView

@@ -1,6 +1,7 @@
 package com.example.itproyek2;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -17,6 +18,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.button.MaterialButtonToggleGroup;
 
 import java.text.DecimalFormat;
@@ -57,7 +59,6 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
-        // Initialize NumberFormat for no decimals in currency
         currencyFormat.setMaximumFractionDigits(0);
 
         // Initialize Views
@@ -103,13 +104,45 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
+        // Bottom Navigation Logic
+        BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
+        bottomNav.setSelectedItemId(R.id.nav_home);
+        bottomNav.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+            if (id == R.id.nav_home) {
+                return true;
+            } else if (id == R.id.nav_history) {
+                startActivity(new Intent(this, HistoryActivity.class));
+                overridePendingTransition(0, 0);
+                finish();
+                return true;
+            } else if (id == R.id.nav_settings) {
+                // Settings activity placeholder
+                return true;
+            }
+            return false;
+        });
+
         startRealtimeSimulation();
+    }
+
+    private void saveLogToHistory(String message) {
+        SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
+        String history = prefs.getString("history_data", "");
+        String currentTime = new SimpleDateFormat("HH:mm", Locale.getDefault()).format(new Date());
+        
+        // IconType: 1 for Lamp, 2 for Mode
+        int iconType = message.contains("Lampu") ? 1 : 2;
+        String newEntry = message + "|" + "Hari Ini " + currentTime + "|" + iconType + ";";
+        
+        prefs.edit().putString("history_data", history + newEntry).apply();
+        prefs.edit().putString("total_kwh", df.format(totalKwh)).apply();
     }
 
     private void updateLampState(boolean on, String triggerSource) {
         if (isLampOn != on) {
             isLampOn = on;
-            tvStatusLampu.setText(on ? "ON" : "OFF");
+            tvStatusLampu.setText(on ? "HIDUP" : "MATI");
             ivLampIllustration.setColorFilter(ContextCompat.getColor(this, on ? R.color.accent_yellow : R.color.text_secondary));
             if (on && toggleGroupLamp.getCheckedButtonId() != R.id.btnOn) toggleGroupLamp.check(R.id.btnOn);
             else if (!on && toggleGroupLamp.getCheckedButtonId() != R.id.btnOff) toggleGroupLamp.check(R.id.btnOff);
@@ -120,6 +153,7 @@ public class MainActivity extends AppCompatActivity {
     private void addLog(String message) {
         String currentTime = timeFormat.format(new Date());
         tvLogAktivitas.setText("[" + currentTime + "] " + message);
+        saveLogToHistory(message);
     }
 
     private void startRealtimeSimulation() {
@@ -152,8 +186,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (isAutoMode) {
-            if (isDark && !isLampOn) updateLampState(true, "Auto Sensor");
-            else if (!isDark && isLampOn) updateLampState(false, "Auto Sensor");
+            if (isDark && !isLampOn) updateLampState(true, "Sensor Otomatis");
+            else if (!isDark && isLampOn) updateLampState(false, "Sensor Otomatis");
         }
 
         // 2. Consumption Summary Calculation
