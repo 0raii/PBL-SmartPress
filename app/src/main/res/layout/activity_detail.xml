@@ -4,23 +4,23 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg_dark"
+    android:background="@color/main_bg"
     tools:context=".DetailActivity">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/card_bg">
+        android:background="@color/card_bg_custom">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbarDetail"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:navigationIcon="@drawable/ic_arrow_back"
-            app:navigationIconTint="@color/white"
+            app:navigationIconTint="@color/text_head"
             app:title="Analisis Energi Mendalam"
             app:titleCentered="true"
-            app:titleTextColor="@color/white" />
+            app:titleTextColor="@color/text_head" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -42,6 +42,7 @@
                 android:layout_marginBottom="16dp"
                 app:cardBackgroundColor="@color/primary_blue"
                 app:cardCornerRadius="24dp"
+                app:cardElevation="4dp"
                 app:strokeWidth="0dp">
 
                 <LinearLayout
@@ -97,11 +98,12 @@
                     android:layout_height="wrap_content"
                     android:layout_columnWeight="1"
                     android:layout_margin="4dp"
-                    app:cardBackgroundColor="@color/card_bg"
-                    app:cardCornerRadius="16dp">
+                    app:cardBackgroundColor="@color/card_bg_custom"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="2dp">
                     <LinearLayout android:padding="16dp" android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
-                        <TextView android:text="Tegangan" android:textSize="12sp" android:textColor="@color/text_secondary" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-                        <TextView android:id="@+id/tvVoltDetail" android:text="220.5 V" android:textSize="18sp" android:textStyle="bold" android:textColor="@color/white" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                        <TextView android:text="Tegangan" android:textSize="12sp" android:textColor="@color/text_sub" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                        <TextView android:id="@+id/tvVoltDetail" android:text="220.5 V" android:textSize="18sp" android:textStyle="bold" android:textColor="@color/text_head" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
@@ -110,11 +112,12 @@
                     android:layout_height="wrap_content"
                     android:layout_columnWeight="1"
                     android:layout_margin="4dp"
-                    app:cardBackgroundColor="@color/card_bg"
-                    app:cardCornerRadius="16dp">
+                    app:cardBackgroundColor="@color/card_bg_custom"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="2dp">
                     <LinearLayout android:padding="16dp" android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
-                        <TextView android:text="Arus Listrik" android:textSize="12sp" android:textColor="@color/text_secondary" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-                        <TextView android:id="@+id/tvAmpereDetail" android:text="0.12 A" android:textSize="18sp" android:textStyle="bold" android:textColor="@color/white" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                        <TextView android:text="Arus Listrik" android:textSize="12sp" android:textColor="@color/text_sub" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                        <TextView android:id="@+id/tvAmpereDetail" android:text="0.12 A" android:textSize="18sp" android:textStyle="bold" android:textColor="@color/text_head" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
@@ -123,10 +126,11 @@
                     android:layout_height="wrap_content"
                     android:layout_columnWeight="1"
                     android:layout_margin="4dp"
-                    app:cardBackgroundColor="@color/card_bg"
-                    app:cardCornerRadius="16dp">
+                    app:cardBackgroundColor="@color/card_bg_custom"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="2dp">
                     <LinearLayout android:padding="16dp" android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
-                        <TextView android:text="Suhu Perangkat" android:textSize="12sp" android:textColor="@color/text_secondary" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                        <TextView android:text="Suhu Perangkat" android:textSize="12sp" android:textColor="@color/text_sub" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
                         <TextView android:id="@+id/tvSuhuESP" android:text="34.2°C" android:textSize="18sp" android:textStyle="bold" android:textColor="#4CAF50" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
@@ -136,11 +140,12 @@
                     android:layout_height="wrap_content"
                     android:layout_columnWeight="1"
                     android:layout_margin="4dp"
-                    app:cardBackgroundColor="@color/card_bg"
-                    app:cardCornerRadius="16dp">
+                    app:cardBackgroundColor="@color/card_bg_custom"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="2dp">
                     <LinearLayout android:padding="16dp" android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
-                        <TextView android:text="Durasi Hari Ini" android:textSize="12sp" android:textColor="@color/text_secondary" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-                        <TextView android:id="@+id/tvDurasiNyala" android:text="04:20:12" android:textSize="18sp" android:textStyle="bold" android:textColor="@color/white" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                        <TextView android:text="Durasi Hari Ini" android:textSize="12sp" android:textColor="@color/text_sub" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                        <TextView android:id="@+id/tvDurasiNyala" android:text="04:20:12" android:textSize="18sp" android:textStyle="bold" android:textColor="@color/text_head" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
@@ -151,8 +156,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                app:cardBackgroundColor="@color/card_bg"
+                app:cardBackgroundColor="@color/card_bg_custom"
                 app:cardCornerRadius="24dp"
+                app:cardElevation="2dp"
                 app:strokeWidth="0dp">
 
                 <LinearLayout
@@ -165,7 +171,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Grafik Fluktuasi Daya (Watt)"
-                        android:textColor="@color/white"
+                        android:textColor="@color/text_head"
                         android:textSize="16sp"
                         android:textStyle="bold"
                         android:layout_marginBottom="16dp"/>
@@ -181,8 +187,9 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardBackgroundColor="@color/card_bg"
-                app:cardCornerRadius="24dp">
+                app:cardBackgroundColor="@color/card_bg_custom"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="2dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -194,22 +201,22 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Rincian Biaya Listrik"
-                        android:textColor="@color/white"
+                        android:textColor="@color/text_head"
                         android:textSize="16sp"
                         android:textStyle="bold"
                         android:layout_marginBottom="16dp" />
 
                     <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="8dp">
-                        <TextView android:text="Penggunaan (kWh)" android:textColor="@color/text_secondary" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-                        <TextView android:id="@+id/tvKwhToday" android:text="0.12 kWh" android:textColor="@color/white" android:layout_alignParentEnd="true" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                        <TextView android:text="Penggunaan (kWh)" android:textColor="@color/text_sub" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                        <TextView android:id="@+id/tvKwhToday" android:text="0.12 kWh" android:textColor="@color/text_head" android:layout_alignParentEnd="true" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
                     </RelativeLayout>
                     <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="8dp">
-                        <TextView android:text="Tarif per kWh" android:textColor="@color/text_secondary" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-                        <TextView android:text="Rp 1.444,70" android:textColor="@color/white" android:layout_alignParentEnd="true" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                        <TextView android:text="Tarif per kWh" android:textColor="@color/text_sub" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                        <TextView android:text="Rp 1.444,70" android:textColor="@color/text_head" android:layout_alignParentEnd="true" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
                     </RelativeLayout>
-                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/border_dark" android:layout_marginVertical="8dp"/>
+                    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/divider_color" android:layout_marginVertical="8dp"/>
                     <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="8dp">
-                        <TextView android:text="Total Tagihan" android:textStyle="bold" android:textColor="@color/white" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                        <TextView android:text="Total Tagihan" android:textStyle="bold" android:textColor="@color/text_head" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
                         <TextView android:id="@+id/tvEstimasiBiaya" android:text="Rp 174" android:textColor="@color/accent_yellow" android:textStyle="bold" android:layout_alignParentEnd="true" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
                     </RelativeLayout>
 

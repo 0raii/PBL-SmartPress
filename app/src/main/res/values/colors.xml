@@ -3,20 +3,25 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
-    <!-- SmartPress Colors from Image 2 -->
     <color name="primary_blue">#1E88E5</color>
     <color name="accent_yellow">#FFC107</color>
-    <color name="bg_dark">#121212</color>
 
-    <!-- UI Element Colors -->
+    <!-- Light Mode (Default) -->
+    <color name="main_bg">#F5F7FB</color>
+    <color name="card_bg_custom">#FFFFFF</color>
+    <color name="text_head">#333333</color>
+    <color name="text_sub">#666666</color>
+    <color name="divider_color">#E0E0E0</color>
+    <color name="nav_bg">#FFFFFF</color>
+
     <color name="card_bg">#1E1E26</color>
     <color name="card_dark">#1E1E26</color>
     <color name="border_dark">#2C2C34</color>
     <color name="text_primary">#FFFFFF</color>
     <color name="text_secondary">#9E9E9E</color>
     <color name="purple_light">#BB86FC</color>
+    <color name="bg_dark">#121212</color>
 
-    <!-- Selection Colors -->
     <color name="selected_blue">#1E88E5</color>
     <color name="selected_yellow">#FFC107</color>
     <color name="unselected_dark">#25252D</color>
@@ -25,7 +30,6 @@
     <color name="toggle_text_selected">#FFFFFF</color>
     <color name="toggle_text_unselected">#B0B0B0</color>
 
-    <!-- Gradient Colors for Bulb Glow -->
     <color name="bulb_glow_start">#4DFFC107</color>
     <color name="bulb_glow_end">#00FFC107</color>
 </resources>

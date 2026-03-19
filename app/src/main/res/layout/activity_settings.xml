@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#121212"
+    android:background="@color/main_bg"
     android:orientation="vertical">
 
     <!-- Header -->
@@ -12,22 +12,12 @@
         android:layout_height="56dp"
         android:paddingHorizontal="16dp">
 
-        <ImageView
-            android:id="@+id/btnBack"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_centerVertical="true"
-            android:src="@drawable/ic_arrow_back"
-            app:tint="@color/white" />
-
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginStart="32dp"
-            android:layout_toEndOf="@id/btnBack"
+            android:layout_centerInParent="true"
             android:text="Pengaturan"
-            android:textColor="@color/white"
+            android:textColor="@color/text_head"
             android:textSize="18sp"
             android:textStyle="bold" />
     </RelativeLayout>
@@ -48,8 +38,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
-                app:cardBackgroundColor="#1E1E2C"
-                app:cardCornerRadius="16dp">
+                app:cardBackgroundColor="@color/card_bg_custom"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -61,14 +52,14 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Perangkat"
-                        android:textColor="@color/white"
+                        android:textColor="@color/text_head"
                         android:textSize="16sp" />
 
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:layout_marginVertical="8dp"
-                        android:background="#33FFFFFF" />
+                        android:background="@color/divider_color" />
 
                     <RelativeLayout
                         android:layout_width="match_parent"
@@ -91,7 +82,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Lampu Teras Mushola"
-                                android:textColor="@color/white"
+                                android:textColor="@color/text_head"
                                 android:textSize="14sp" />
                             <TextView
                                 android:id="@+id/tvStatusDevice1"
@@ -124,7 +115,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Lampu Dalam Mushola"
-                                android:textColor="@color/white"
+                                android:textColor="@color/text_head"
                                 android:textSize="14sp" />
                             <TextView
                                 android:id="@+id/tvStatusDevice2"
@@ -143,8 +134,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
-                app:cardBackgroundColor="#1E1E2C"
-                app:cardCornerRadius="16dp">
+                app:cardBackgroundColor="@color/card_bg_custom"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -156,14 +148,14 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Notifikasi"
-                        android:textColor="@color/white"
+                        android:textColor="@color/text_head"
                         android:textSize="16sp" />
 
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:layout_marginVertical="8dp"
-                        android:background="#33FFFFFF" />
+                        android:background="@color/divider_color" />
 
                     <RelativeLayout
                         android:layout_width="match_parent"
@@ -173,7 +165,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Notifikasi Status Lampu"
-                            android:textColor="@color/white" />
+                            android:textColor="@color/text_head" />
                         <androidx.appcompat.widget.SwitchCompat
                             android:id="@+id/switchNotifLamp"
                             android:layout_width="wrap_content"
@@ -181,7 +173,7 @@
                             android:layout_alignParentEnd="true" />
                     </RelativeLayout>
 
-                    <View android:layout_width="match_parent" android:layout_height="0.5dp" android:background="#1AFFFFFF" />
+                    <View android:layout_width="match_parent" android:layout_height="0.5dp" android:background="@color/divider_color" />
 
                     <RelativeLayout
                         android:layout_width="match_parent"
@@ -191,7 +183,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Peringatan Durasi (Maks 5 jam)"
-                            android:textColor="@color/white" />
+                            android:textColor="@color/text_head" />
                         <androidx.appcompat.widget.SwitchCompat
                             android:id="@+id/switchNotifOvertime"
                             android:layout_width="wrap_content"
@@ -199,7 +191,7 @@
                             android:layout_alignParentEnd="true" />
                     </RelativeLayout>
 
-                    <View android:layout_width="match_parent" android:layout_height="0.5dp" android:background="#1AFFFFFF" />
+                    <View android:layout_width="match_parent" android:layout_height="0.5dp" android:background="@color/divider_color" />
 
                     <RelativeLayout
                         android:layout_width="match_parent"
@@ -209,7 +201,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Peringatan Suhu Perangkat"
-                            android:textColor="@color/white" />
+                            android:textColor="@color/text_head" />
                         <androidx.appcompat.widget.SwitchCompat
                             android:id="@+id/switchNotifOverheat"
                             android:layout_width="wrap_content"
@@ -217,7 +209,7 @@
                             android:layout_alignParentEnd="true" />
                     </RelativeLayout>
 
-                    <View android:layout_width="match_parent" android:layout_height="0.5dp" android:background="#1AFFFFFF" />
+                    <View android:layout_width="match_parent" android:layout_height="0.5dp" android:background="@color/divider_color" />
 
                     <RelativeLayout
                         android:layout_width="match_parent"
@@ -227,7 +219,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Peringatan Penggunaan Energi"
-                            android:textColor="@color/white" />
+                            android:textColor="@color/text_head" />
                         <androidx.appcompat.widget.SwitchCompat
                             android:id="@+id/switchNotifEnergy"
                             android:layout_width="wrap_content"
@@ -242,8 +234,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
-                app:cardBackgroundColor="#1E1E2C"
-                app:cardCornerRadius="16dp">
+                app:cardBackgroundColor="@color/card_bg_custom"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -255,14 +248,14 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Tema"
-                        android:textColor="@color/white"
+                        android:textColor="@color/text_head"
                         android:textSize="16sp" />
 
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:layout_marginVertical="8dp"
-                        android:background="#33FFFFFF" />
+                        android:background="@color/divider_color" />
 
                     <RadioGroup
                         android:id="@+id/rgTheme"
@@ -273,15 +266,15 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Mode Gelap"
-                            android:textColor="@color/white"
-                            android:buttonTint="@color/white" />
+                            android:textColor="@color/text_head"
+                            android:buttonTint="@color/primary_blue" />
                         <RadioButton
                             android:id="@+id/rbLight"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Mode Terang"
-                            android:textColor="@color/white"
-                            android:buttonTint="@color/white" />
+                            android:textColor="@color/text_head"
+                            android:buttonTint="@color/primary_blue" />
                     </RadioGroup>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -291,8 +284,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
-                app:cardBackgroundColor="#1E1E2C"
-                app:cardCornerRadius="16dp">
+                app:cardBackgroundColor="@color/card_bg_custom"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -304,14 +298,14 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Bantuan"
-                        android:textColor="@color/white"
+                        android:textColor="@color/text_head"
                         android:textSize="16sp" />
 
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:layout_marginVertical="8dp"
-                        android:background="#33FFFFFF" />
+                        android:background="@color/divider_color" />
 
                     <RelativeLayout
                         android:id="@+id/layoutUserGuide"
@@ -324,17 +318,17 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Panduan Pengguna"
-                            android:textColor="@color/white" />
+                            android:textColor="@color/text_head" />
                         <ImageView
                             android:layout_width="20dp"
                             android:layout_height="20dp"
                             android:layout_alignParentEnd="true"
                             android:src="@drawable/ic_arrow_back"
                             android:rotation="180"
-                            app:tint="#66FFFFFF" />
+                            app:tint="@color/text_sub" />
                     </RelativeLayout>
 
-                    <View android:layout_width="match_parent" android:layout_height="0.5dp" android:background="#1AFFFFFF" />
+                    <View android:layout_width="match_parent" android:layout_height="0.5dp" android:background="@color/divider_color" />
 
                     <RelativeLayout
                         android:layout_width="match_parent"
@@ -344,14 +338,14 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Hubungi Dukungan"
-                            android:textColor="@color/white" />
+                            android:textColor="@color/text_head" />
                         <ImageView
                             android:layout_width="20dp"
                             android:layout_height="20dp"
                             android:layout_alignParentEnd="true"
                             android:src="@drawable/ic_arrow_back"
                             android:rotation="180"
-                            app:tint="#66FFFFFF" />
+                            app:tint="@color/text_sub" />
                     </RelativeLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -360,8 +354,9 @@
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardBackgroundColor="#1E1E2C"
-                app:cardCornerRadius="16dp">
+                app:cardBackgroundColor="@color/card_bg_custom"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp">
 
                 <RelativeLayout
                     android:id="@+id/headerAbout"
@@ -373,7 +368,7 @@
                         android:layout_width="24dp"
                         android:layout_height="24dp"
                         android:src="@android:drawable/ic_dialog_info"
-                        app:tint="#FFC107" />
+                        app:tint="@color/accent_yellow" />
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -381,7 +376,7 @@
                         android:layout_marginStart="12dp"
                         android:layout_toEndOf="@id/ivAbout"
                         android:text="Tentang Aplikasi"
-                        android:textColor="@color/white"
+                        android:textColor="@color/text_head"
                         android:textSize="16sp" />
                     <ImageView
                         android:layout_width="20dp"
@@ -390,7 +385,7 @@
                         android:layout_centerVertical="true"
                         android:src="@drawable/ic_arrow_back"
                         android:rotation="180"
-                        app:tint="#66FFFFFF" />
+                        app:tint="@color/text_sub" />
                 </RelativeLayout>
             </androidx.cardview.widget.CardView>
 
@@ -401,10 +396,10 @@
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavSettings"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#1E1E2C"
-        app:itemIconTint="@color/bottom_nav_color"
-        app:itemTextColor="@color/bottom_nav_color"
+        android:layout_height="80dp"
+        android:background="@color/nav_bg"
+        app:itemIconTint="@drawable/bottom_nav_color"
+        app:itemTextColor="@drawable/bottom_nav_color"
         app:menu="@menu/bottom_menu" />
 
 </LinearLayout>

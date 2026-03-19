@@ -10,6 +10,7 @@ import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.SwitchCompat;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -18,7 +19,6 @@ public class SettingsActivity extends AppCompatActivity {
     private SwitchCompat switchNotifLamp, switchNotifOvertime, switchNotifOverheat, switchNotifEnergy;
     private RadioGroup rgTheme;
     private RadioButton rbDark, rbLight;
-    private ImageView btnBack;
     
     // Help & Device Status Views
     private TextView tvStatusDevice1, tvStatusDevice2;
@@ -27,10 +27,18 @@ public class SettingsActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // Apply theme before super.onCreate
+        SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
+        boolean isDark = prefs.getBoolean("is_dark_theme", true);
+        if (isDark) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        }
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
-        btnBack = findViewById(R.id.btnBack);
         switchNotifLamp = findViewById(R.id.switchNotifLamp);
         switchNotifOvertime = findViewById(R.id.switchNotifOvertime);
         switchNotifOverheat = findViewById(R.id.switchNotifOverheat);
@@ -48,8 +56,6 @@ public class SettingsActivity extends AppCompatActivity {
         loadSettings();
         updateDeviceConnectionUi();
 
-        btnBack.setOnClickListener(v -> finish());
-
         // Navigasi ke Panduan Pengguna
         layoutUserGuide.setOnClickListener(v -> {
             startActivity(new Intent(SettingsActivity.this, UserGuideActivity.class));
@@ -60,8 +66,17 @@ public class SettingsActivity extends AppCompatActivity {
         switchNotifOverheat.setOnCheckedChangeListener((v, isChecked) -> saveSetting("notif_overheat", isChecked));
         switchNotifEnergy.setOnCheckedChangeListener((v, isChecked) -> saveSetting("notif_energy", isChecked));
 
+        // Theme Logic
         rgTheme.setOnCheckedChangeListener((group, checkedId) -> {
-            saveSetting("is_dark_theme", (checkedId == R.id.rbDark));
+            boolean selectedIsDark = (checkedId == R.id.rbDark);
+            saveSetting("is_dark_theme", selectedIsDark);
+            
+            // Apply Theme
+            if (selectedIsDark) {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+            } else {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+            }
         });
 
         setupBottomNav();
@@ -96,8 +111,9 @@ public class SettingsActivity extends AppCompatActivity {
         switchNotifOvertime.setChecked(prefs.getBoolean("notif_overtime", true));
         switchNotifOverheat.setChecked(prefs.getBoolean("notif_overheat", true));
         switchNotifEnergy.setChecked(prefs.getBoolean("notif_energy", true));
-
-        if (prefs.getBoolean("is_dark_theme", true)) rbDark.setChecked(true);
+        
+        boolean isDark = prefs.getBoolean("is_dark_theme", true);
+        if (isDark) rbDark.setChecked(true);
         else rbLight.setChecked(true);
     }
 

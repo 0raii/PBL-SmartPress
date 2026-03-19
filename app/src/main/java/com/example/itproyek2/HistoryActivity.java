@@ -6,6 +6,8 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -17,6 +19,7 @@ import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.github.mikephil.charting.formatter.ValueFormatter;
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.ArrayList;
@@ -32,8 +35,20 @@ public class HistoryActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // Apply theme before super.onCreate
+        SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
+        boolean isDark = prefs.getBoolean("is_dark_theme", true);
+        if (isDark) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        }
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_history);
+
+        MaterialToolbar toolbar = findViewById(R.id.toolbarHistory);
+        // Removed back button click listener as the button is removed from XML
 
         barChart = findViewById(R.id.barChart);
         rvHistory = findViewById(R.id.rvHistory);
@@ -57,26 +72,18 @@ public class HistoryActivity extends AppCompatActivity {
         if (!rawData.isEmpty()) {
             String[] entries = rawData.split(";");
             int count = 0;
-            // Ambil 10 aktivitas terbaru
             for (int i = entries.length - 1; i >= 0 && count < 10; i--) {
                 String[] parts = entries[i].split("\\|");
                 if (parts.length >= 2) {
                     String title = parts[0];
                     String time = parts[1];
                     
-                    int iconRes = R.drawable.ic_history; // Default
-                    
-                    // Logika penentuan ikon berdasarkan kata kunci di pesan log
+                    int iconRes = R.drawable.ic_history;
                     String upperTitle = title.toUpperCase();
-                    if (upperTitle.contains("HIDUP")) {
-                        iconRes = R.drawable.ic_lamp_on;
-                    } else if (upperTitle.contains("MATI")) {
-                        iconRes = R.drawable.ic_lamp_off;
-                    } else if (upperTitle.contains("OTOMATIS")) {
-                        iconRes = R.drawable.ic_star_on;
-                    } else if (upperTitle.contains("MANUAL")) {
-                        iconRes = R.drawable.ic_settings;
-                    }
+                    if (upperTitle.contains("HIDUP")) iconRes = R.drawable.ic_lamp_on;
+                    else if (upperTitle.contains("MATI")) iconRes = R.drawable.ic_lamp_off;
+                    else if (upperTitle.contains("OTOMATIS")) iconRes = R.drawable.ic_star_on;
+                    else if (upperTitle.contains("MANUAL")) iconRes = R.drawable.ic_settings;
                     
                     historyList.add(new HistoryItem(title, time, iconRes));
                     count++;
@@ -93,20 +100,20 @@ public class HistoryActivity extends AppCompatActivity {
 
     private void setupBarChart() {
         ArrayList<BarEntry> entries = new ArrayList<>();
-        // Menggunakan Menit agar lebih mudah dipahami
-        entries.add(new BarEntry(0, 45f));   // 06:00
-        entries.add(new BarEntry(1, 120f));  // 12:00 -> 2 Jam
-        entries.add(new BarEntry(2, 90f));   // 15:00
-        entries.add(new BarEntry(3, 180f));  // 18:00 -> 3 Jam
-        entries.add(new BarEntry(4, 240f));  // 21:00 -> 4 Jam
-        entries.add(new BarEntry(5, 300f));  // 24:00 -> 5 Jam
+        entries.add(new BarEntry(0, 45f));
+        entries.add(new BarEntry(1, 120f));
+        entries.add(new BarEntry(2, 90f));
+        entries.add(new BarEntry(3, 180f));
+        entries.add(new BarEntry(4, 240f));
+        entries.add(new BarEntry(5, 300f));
 
         BarDataSet dataSet = new BarDataSet(entries, "Durasi Menyala (Menit)");
         dataSet.setColor(Color.parseColor("#FFC107"));
-        dataSet.setValueTextColor(Color.WHITE);
+        
+        int textColor = ContextCompat.getColor(this, R.color.text_head);
+        dataSet.setValueTextColor(textColor);
         dataSet.setValueTextSize(9f);
         
-        // Formatter: Jika >= 60 menit, tampilkan (X Jam) disampingnya
         dataSet.setValueFormatter(new ValueFormatter() {
             @Override
             public String getFormattedValue(float value) {
@@ -123,13 +130,12 @@ public class HistoryActivity extends AppCompatActivity {
         barData.setBarWidth(0.5f);
         barChart.setData(barData);
 
-        // Pengaturan Tampilan Grafik
         barChart.getDescription().setEnabled(false);
-        barChart.getLegend().setTextColor(Color.WHITE);
+        barChart.getLegend().setTextColor(textColor);
         barChart.getAxisRight().setEnabled(false);
         
         YAxis leftAxis = barChart.getAxisLeft();
-        leftAxis.setTextColor(Color.WHITE);
+        leftAxis.setTextColor(textColor);
         leftAxis.setAxisMinimum(0f);
         leftAxis.setValueFormatter(new ValueFormatter() {
             @Override
@@ -140,7 +146,7 @@ public class HistoryActivity extends AppCompatActivity {
 
         XAxis xAxis = barChart.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-        xAxis.setTextColor(Color.WHITE);
+        xAxis.setTextColor(textColor);
         xAxis.setDrawGridLines(false);
         xAxis.setGranularity(1f);
         xAxis.setValueFormatter(new IndexAxisValueFormatter(new String[]{"06:00", "12:00", "15:00", "18:00", "21:00", "24:00"}));
