@@ -43,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView tvDaya, tvCostSummary, tvKwhSummary;
     private TextView tvEspStatus, tvWifiStatus;
     private ImageView ivLampIllustration, ivKondisiIcon;
+    private View bulbGlow;
     private LinearLayout layoutStatusCahaya;
     private MaterialButtonToggleGroup toggleGroupLamp, toggleGroupMode;
     private Button btnDetail;
@@ -50,6 +51,8 @@ public class MainActivity extends AppCompatActivity {
     private boolean isLampOn;
     private boolean isAutoMode;
     private boolean isConnected = true;
+    private boolean isDarkManualOverride = false;
+    private boolean useManualLux = false;
     private double totalKwh;
     private long lampOnStartTime = 0;
     
@@ -65,10 +68,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // Apply theme before super.onCreate
         SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
-        boolean isDark = prefs.getBoolean("is_dark_theme", true);
-        if (isDark) {
+        boolean isDarkTheme = prefs.getBoolean("is_dark_theme", true);
+        if (isDarkTheme) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
         } else {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
@@ -98,6 +100,7 @@ public class MainActivity extends AppCompatActivity {
         tvWifiStatus = findViewById(R.id.tvWifiStatus);
         
         ivLampIllustration = findViewById(R.id.ivLampIllustration);
+        bulbGlow = findViewById(R.id.bulbGlow);
         ivKondisiIcon = findViewById(R.id.ivKondisiIcon);
         layoutStatusCahaya = findViewById(R.id.layoutStatusCahaya);
         toggleGroupLamp = findViewById(R.id.toggleGroupLamp);
@@ -128,9 +131,26 @@ public class MainActivity extends AppCompatActivity {
                     isConnected = true;
                     saveAppState();
                     applyUiState();
-                    addLog("Info: Perangkat dihubungkan kembali secara manual");
+                    addLog("Info: Perangkat dihubungkan kembali");
                     showToast("Berhasil: Perangkat Online");
                 }, 1500);
+            } else {
+                isConnected = false;
+                saveAppState();
+                applyUiState();
+                addLog("Peringatan: Perangkat diputuskan (Demo)");
+                showToast("Demo: Perangkat Offline");
+            }
+        });
+
+        layoutStatusCahaya.setOnClickListener(v -> {
+            useManualLux = true;
+            isDarkManualOverride = !isDarkManualOverride;
+            showToast("Demo: Sensor diset ke " + (isDarkManualOverride ? "GELAP" : "TERANG"));
+            updateCahayaUi(isDarkManualOverride);
+            
+            if (isAutoMode && isConnected) {
+                updateLampState(isDarkManualOverride, "Sensor Otomatis (Demo)");
             }
         });
 
@@ -143,6 +163,11 @@ public class MainActivity extends AppCompatActivity {
                     isAutoMode = (checkedId == R.id.btnAuto);
                     saveAppState();
                     addLog("Mode diubah ke " + (isAutoMode ? "OTOMATIS" : "MANUAL"));
+                    
+                    if (isAutoMode) {
+                        boolean isDarkNow = useManualLux ? isDarkManualOverride : (random.nextInt(1000) < 300);
+                        updateLampState(isDarkNow, "Sensor Otomatis");
+                    }
                 }
             }
         });
@@ -243,7 +268,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void applyUiState() {
         tvStatusLampu.setText(isLampOn ? "HIDUP" : "MATI");
-        ivLampIllustration.setColorFilter(ContextCompat.getColor(this, isLampOn ? R.color.accent_yellow : R.color.text_secondary));
+        int accentColor = ContextCompat.getColor(this, isLampOn ? R.color.accent_yellow : R.color.text_secondary);
+        ivLampIllustration.setColorFilter(accentColor);
+        if (bulbGlow != null) bulbGlow.setVisibility(isLampOn ? View.VISIBLE : View.GONE);
+        
         syncLampToggle();
         toggleGroupMode.check(isAutoMode ? R.id.btnAuto : R.id.btnManual);
         
@@ -259,6 +287,7 @@ public class MainActivity extends AppCompatActivity {
             tvWifiStatus.setText("Terputus");
             tvWifiStatus.setTextColor(ContextCompat.getColor(this, R.color.text_secondary));
             ivLampIllustration.setAlpha(0.3f);
+            if (bulbGlow != null) bulbGlow.setVisibility(View.GONE);
             tvStatusLampu.setText("OFFLINE");
             tvDaya.setText("- Watt");
         }
@@ -302,7 +331,8 @@ public class MainActivity extends AppCompatActivity {
         realtimeHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                if (random.nextInt(100) < 2) { 
+                // Randomly disconnect rarely if not in manual demo mode
+                if (!useManualLux && random.nextInt(200) < 1) { 
                     isConnected = !isConnected;
                     saveAppState();
                     runOnUiThread(() -> applyUiState());
@@ -324,17 +354,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void simulateIoTData() {
-        int lux = random.nextInt(1000);
-        boolean isDark = lux < 300;
+        boolean isDarkNow;
+        if (useManualLux) {
+            isDarkNow = isDarkManualOverride;
+        } else {
+            int lux = random.nextInt(1000);
+            isDarkNow = lux < 300;
+        }
         
-        tvKondisiCahaya.setText(isDark ? "Gelap" : "Terang");
-        tvKondisiCahaya.setTextColor(ContextCompat.getColor(this, isDark ? R.color.white : R.color.bg_dark));
-        ivKondisiIcon.setColorFilter(ContextCompat.getColor(this, isDark ? R.color.white : R.color.bg_dark));
-        layoutStatusCahaya.setBackgroundResource(isDark ? R.drawable.status_bg_dark : R.drawable.status_bright_bg);
+        updateCahayaUi(isDarkNow);
 
         if (isAutoMode) {
-            if (isDark && !isLampOn) updateLampState(true, "Sensor Otomatis");
-            else if (!isDark && isLampOn) updateLampState(false, "Sensor Otomatis");
+            if (isDarkNow && !isLampOn) updateLampState(true, "Sensor Otomatis");
+            else if (!isDarkNow && isLampOn) updateLampState(false, "Sensor Otomatis");
         }
 
         if (isLampOn) {
@@ -350,25 +382,40 @@ public class MainActivity extends AppCompatActivity {
         saveAppState();
     }
 
+    private void updateCahayaUi(boolean isDark) {
+        tvKondisiCahaya.setText(isDark ? "Gelap" : "Terang");
+        tvKondisiCahaya.setTextColor(ContextCompat.getColor(this, isDark ? R.color.white : R.color.bg_dark));
+        ivKondisiIcon.setColorFilter(ContextCompat.getColor(this, isDark ? R.color.white : R.color.bg_dark));
+        layoutStatusCahaya.setBackgroundResource(isDark ? R.drawable.status_bg_dark : R.drawable.status_bright_bg);
+        ivKondisiIcon.setImageResource(isDark ? R.drawable.ic_star_on : R.drawable.ic_history);
+    }
+
     private void checkAlerts() {
         if (isLampOn && lampOnStartTime > 0 && notifOvertime) {
             long durationSec = (System.currentTimeMillis() - lampOnStartTime) / 1000;
-            if (durationSec > 60) {
-                sendSystemNotification("Peringatan Durasi", "Lampu sudah menyala lebih dari 1 menit. Matikan jika tidak digunakan!");
+            if (durationSec > 120) { // Extended to 2 mins for demo
+                sendSystemNotification("Peringatan Durasi", "Lampu sudah menyala lebih dari 2 menit.");
                 addLog("Peringatan: Overtime Detected");
                 lampOnStartTime = System.currentTimeMillis(); 
             }
         }
 
         float temp = 30 + random.nextFloat() * 20;
-        if (temp > 45 && notifOverheat) {
-            sendSystemNotification("Peringatan Suhu", "Suhu ESP32 mencapai " + df.format(temp) + "°C. Perangkat terlalu panas!");
+        if (temp > 48 && notifOverheat) {
+            sendSystemNotification("Peringatan Suhu", "Suhu ESP32 mencapai " + df.format(temp) + "°C.");
             addLog("Peringatan: Overheat " + df.format(temp) + "°C");
         }
     }
 
     private void showToast(String message) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadAppState();
+        applyUiState();
     }
 
     @Override

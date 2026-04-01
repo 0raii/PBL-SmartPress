@@ -9,6 +9,9 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.SwitchCompat;
@@ -20,14 +23,13 @@ public class SettingsActivity extends AppCompatActivity {
     private RadioGroup rgTheme;
     private RadioButton rbDark, rbLight;
     
-    // Help & Device Status Views
     private TextView tvStatusDevice1, tvStatusDevice2;
     private ImageView ivDevice1, ivDevice2;
-    private RelativeLayout layoutUserGuide;
+    private RelativeLayout layoutUserGuide, layoutLogout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // Apply theme before super.onCreate
+        // Terapkan tema sebelum super.onCreate
         SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
         boolean isDark = prefs.getBoolean("is_dark_theme", true);
         if (isDark) {
@@ -52,26 +54,27 @@ public class SettingsActivity extends AppCompatActivity {
         ivDevice1 = findViewById(R.id.ivDevice1);
         ivDevice2 = findViewById(R.id.ivDevice2);
         layoutUserGuide = findViewById(R.id.layoutUserGuide);
+        layoutLogout = findViewById(R.id.layoutLogout);
 
         loadSettings();
         updateDeviceConnectionUi();
 
-        // Navigasi ke Panduan Pengguna
         layoutUserGuide.setOnClickListener(v -> {
             startActivity(new Intent(SettingsActivity.this, UserGuideActivity.class));
         });
+
+        // Logika Logout dengan Konfirmasi
+        layoutLogout.setOnClickListener(v -> showLogoutConfirmation());
 
         switchNotifLamp.setOnCheckedChangeListener((v, isChecked) -> saveSetting("notif_lamp", isChecked));
         switchNotifOvertime.setOnCheckedChangeListener((v, isChecked) -> saveSetting("notif_overtime", isChecked));
         switchNotifOverheat.setOnCheckedChangeListener((v, isChecked) -> saveSetting("notif_overheat", isChecked));
         switchNotifEnergy.setOnCheckedChangeListener((v, isChecked) -> saveSetting("notif_energy", isChecked));
 
-        // Theme Logic
         rgTheme.setOnCheckedChangeListener((group, checkedId) -> {
             boolean selectedIsDark = (checkedId == R.id.rbDark);
             saveSetting("is_dark_theme", selectedIsDark);
             
-            // Apply Theme
             if (selectedIsDark) {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
             } else {
@@ -80,6 +83,28 @@ public class SettingsActivity extends AppCompatActivity {
         });
 
         setupBottomNav();
+    }
+
+    private void showLogoutConfirmation() {
+        new AlertDialog.Builder(this)
+                .setTitle("Keluar Akun")
+                .setMessage("Apakah Anda yakin ingin keluar dari aplikasi SmartPress?")
+                .setPositiveButton("Ya, Keluar", (dialog, which) -> {
+                    // Hapus status login
+                    SharedPreferences.Editor editor = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE).edit();
+                    editor.putBoolean("is_logged_in", false);
+                    editor.apply();
+
+                    Toast.makeText(this, "Berhasil Keluar", Toast.LENGTH_SHORT).show();
+
+                    // Pindah ke halaman Login
+                    Intent intent = new Intent(SettingsActivity.this, LoginActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    finish();
+                })
+                .setNegativeButton("Batal", null)
+                .show();
     }
 
     private void updateDeviceConnectionUi() {

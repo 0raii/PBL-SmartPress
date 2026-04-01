@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="main_bg">#121212</color>
-    <color name="card_bg_custom">#1E1E2C</color>
+    <!-- Adaptive Colors (Dark Mode) -->
+    <color name="login_bg_adaptive">#1A1C24</color>
+    <color name="input_bg_adaptive">#2D2D3A</color>
+    <color name="main_bg">#1A1C24</color>
+    <color name="card_bg_custom">#252732</color>
     <color name="text_head">#FFFFFF</color>
-    <color name="text_sub">#B0B0B0</color>
-    <color name="divider_color">#33FFFFFF</color>
-    <color name="nav_bg">#1E1E2C</color>
+    <color name="text_sub">#A0A0A0</color>
+    <color name="divider_color">#333344</color>
+    <color name="nav_bg">#252732</color>
 </resources>

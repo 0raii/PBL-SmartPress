@@ -88,4 +88,16 @@
     <string name="sinyal_wifi">Sinyal Wi-Fi</string>
     <string name="grafik_daya_realtime">Grafik Daya Real-time</string>
     <string name="akumulasi_kwh">Akumulasi kWh</string>
+
+    <!-- Login Page -->
+    <string name="monitoring_lmapu_mushola">Monitoring Lampu Mushola</string>
+    <string name="selamat_datang_di_smartpress">Selamat Datang di SmartPress</string>
+    <string name="masuk_untuk_mengontrol_lampu">Masuk untuk mengontrol lampu mushola.</string>
+    <string name="email">Email</string>
+    <string name="kata_sandi">Kata Sandi</string>
+    <string name="lupa_kata_sandi">Lupa kata sandi?</string>
+    <string name="masuk">Masuk</string>
+    <string name="atau_masuk_dengan">Atau masuk dengan</string>
+    <string name="belum_memiliki_akun">Belum memiliki akun?</string>
+    <string name="buat_akun">Buat akun</string>
 </resources>

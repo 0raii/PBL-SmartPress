@@ -1,5 +1,6 @@
 package com.example.itproyek2;
 
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
@@ -7,6 +8,7 @@ import android.os.Looper;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.XAxis;
@@ -36,10 +38,19 @@ public class DetailActivity extends AppCompatActivity {
     private final NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("id", "ID"));
     
     private long startTime = System.currentTimeMillis();
-    private double totalKwh = 0.45;
+    private double totalKwh;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // Apply theme before super.onCreate
+        SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
+        boolean isDark = prefs.getBoolean("is_dark_theme", true);
+        if (isDark) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        }
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
@@ -47,10 +58,8 @@ public class DetailActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         toolbar.setNavigationOnClickListener(v -> finish());
 
-        // Initialize NumberFormat for no decimals in currency
         currencyFormat.setMaximumFractionDigits(0);
 
-        // Initialize Views
         tvPrediction = findViewById(R.id.tvPrediction);
         tvEfficiency = findViewById(R.id.tvEfficiency);
         tvVoltDetail = findViewById(R.id.tvVoltDetail);
@@ -61,8 +70,24 @@ public class DetailActivity extends AppCompatActivity {
         tvEstimasiBiaya = findViewById(R.id.tvEstimasiBiaya);
         lineChart = findViewById(R.id.lineChart);
 
+        loadCurrentKwh();
         setupChart();
         startDataSimulation();
+    }
+
+    private void loadCurrentKwh() {
+        SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
+        String kwhStr = prefs.getString("total_kwh", "0.45");
+        try {
+            totalKwh = Double.parseDouble(kwhStr.replace(",", "."));
+        } catch (Exception e) {
+            totalKwh = 0.45;
+        }
+    }
+
+    private void saveCurrentKwh() {
+        SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
+        prefs.edit().putString("total_kwh", df.format(totalKwh)).apply();
     }
 
     private void setupChart() {
@@ -73,18 +98,20 @@ public class DetailActivity extends AppCompatActivity {
         lineChart.setPinchZoom(true);
         lineChart.setBackgroundColor(Color.TRANSPARENT);
         lineChart.setNoDataText("Menunggu data...");
-        lineChart.setNoDataTextColor(Color.WHITE);
+        
+        int textColor = AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES ? Color.WHITE : Color.BLACK;
+        lineChart.setNoDataTextColor(textColor);
 
         XAxis xAxis = lineChart.getXAxis();
-        xAxis.setTextColor(Color.WHITE);
+        xAxis.setTextColor(textColor);
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setDrawGridLines(false);
 
-        lineChart.getAxisLeft().setTextColor(Color.WHITE);
+        lineChart.getAxisLeft().setTextColor(textColor);
         lineChart.getAxisLeft().setDrawGridLines(true);
         lineChart.getAxisLeft().setGridColor(Color.parseColor("#333333"));
         lineChart.getAxisRight().setEnabled(false);
-        lineChart.getLegend().setTextColor(Color.WHITE);
+        lineChart.getLegend().setTextColor(textColor);
     }
 
     private void startDataSimulation() {
@@ -98,42 +125,48 @@ public class DetailActivity extends AppCompatActivity {
     }
 
     private void updateDeepMonitoring() {
-        // 1. Electric Simulation
-        double volt = 218 + random.nextDouble() * 5;
-        double watt = 45 + random.nextDouble() * 10;
-        double ampere = watt / volt;
+        SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
+        boolean isLampOn = prefs.getBoolean("is_lamp_on", false);
+        boolean isConnected = prefs.getBoolean("is_connected", true);
+
+        double volt = isConnected ? (218 + random.nextDouble() * 5) : 0;
+        double watt = (isConnected && isLampOn) ? (45 + random.nextDouble() * 10) : 0;
+        double ampere = (volt > 0) ? (watt / volt) : 0;
         
         addEntry((float) watt);
 
-        // 2. Main Stats
         tvVoltDetail.setText(String.format(Locale.getDefault(), "%.1f V", volt));
         tvAmpereDetail.setText(String.format(Locale.getDefault(), "%.2f A", ampere));
         
-        // 3. Duration
-        long elapsedMillis = System.currentTimeMillis() - startTime;
-        int seconds = (int) (elapsedMillis / 1000) % 60;
-        int minutes = (int) ((elapsedMillis / (1000 * 60)) % 60);
-        int hours = (int) ((elapsedMillis / (1000 * 60 * 60)) % 24);
-        tvDurasiNyala.setText(String.format(Locale.getDefault(), "%02d:%02d:%02d", hours, minutes, seconds));
+        if (isLampOn && isConnected) {
+            long elapsedMillis = System.currentTimeMillis() - startTime;
+            int seconds = (int) (elapsedMillis / 1000) % 60;
+            int minutes = (int) ((elapsedMillis / (1000 * 60)) % 60);
+            int hours = (int) ((elapsedMillis / (1000 * 60 * 60)) % 24);
+            tvDurasiNyala.setText(String.format(Locale.getDefault(), "%02d:%02d:%02d", hours, minutes, seconds));
 
-        // 4. Energy & Cost
-        totalKwh += (watt / 1000.0) * (2.0 / 3600.0);
+            totalKwh += (watt / 1000.0) * (2.0 / 3600.0);
+            saveCurrentKwh();
+        } else if (!isLampOn) {
+            startTime = System.currentTimeMillis();
+            tvDurasiNyala.setText("00:00:00");
+        }
+
         tvKwhToday.setText(df.format(totalKwh) + " kWh");
         tvEstimasiBiaya.setText(currencyFormat.format(totalKwh * 1444.70));
 
-        // 5. Prediction (30 days estimate)
         double monthlyPrediction = totalKwh * 30 * 1444.70; 
         tvPrediction.setText(currencyFormat.format(monthlyPrediction));
 
-        // 6. Device health
-        float suhu = 32 + random.nextFloat() * 6;
+        float suhu = isConnected ? (32 + random.nextFloat() * 6) : 25;
         tvSuhuESP.setText(String.format(Locale.getDefault(), "%.1f°C", suhu));
         
-        // 7. Efficiency Analysis
-        if (watt < 50) {
+        if (watt > 0 && watt < 50) {
             tvEfficiency.setText("Status: Sangat Efisien (Eco Mode)");
-        } else {
+        } else if (watt >= 50) {
             tvEfficiency.setText("Status: Pemakaian Normal");
+        } else {
+            tvEfficiency.setText("Status: Perangkat Standby/Off");
         }
     }
 
