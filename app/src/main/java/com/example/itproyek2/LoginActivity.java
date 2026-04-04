@@ -64,7 +64,7 @@ public class LoginActivity extends AppCompatActivity {
         );
 
         tvRegister.setOnClickListener(v -> 
-            Toast.makeText(this, "Silakan gunakan admin@gmail.com / 123456", Toast.LENGTH_LONG).show()
+            startActivity(new Intent(LoginActivity.this, RegisterActivity.class))
         );
     }
 }

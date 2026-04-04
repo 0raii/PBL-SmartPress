@@ -100,4 +100,14 @@
     <string name="atau_masuk_dengan">Atau masuk dengan</string>
     <string name="belum_memiliki_akun">Belum memiliki akun?</string>
     <string name="buat_akun">Buat akun</string>
+    <string name="smart">Smart</string>
+    <string name="press">Press</string>
+    <string name="email_label">Email</string>
+    <string name="password_hint">••••••••••</string>
+    <string name="facebook">Facebook</string>
+    <string name="google">Google</string>
+    <string name="create_an_account">Create an Account?</string>
+    <string name="nama_lengkap">Nama Lengkap</string>
+    <string name="konfirmasi_password">Konfirmasi Kata Sandi</string>
+    <string name="alamat_email">Alamat Email</string>
 </resources>
