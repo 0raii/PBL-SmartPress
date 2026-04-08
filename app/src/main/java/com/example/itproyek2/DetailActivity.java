@@ -42,7 +42,7 @@ public class DetailActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // Apply theme before super.onCreate
+        // pasang tema dulu sebelum super.onCreate
         SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
         boolean isDark = prefs.getBoolean("is_dark_theme", true);
         if (isDark) {
@@ -68,13 +68,14 @@ public class DetailActivity extends AppCompatActivity {
         tvDurasiNyala = findViewById(R.id.tvDurasiNyala);
         tvKwhToday = findViewById(R.id.tvKwhToday);
         tvEstimasiBiaya = findViewById(R.id.tvEstimasiBiaya);
-        lineChart = findViewById(R.id.lineChart);
+        // lineChart = findViewById(R.id.lineChart); // sembunyiin dulu cuy
 
         loadCurrentKwh();
-        setupChart();
+        // setupChart(); // grafik diumpetin dulu sementara
         startDataSimulation();
     }
 
+    // ambil data kwh yg ada
     private void loadCurrentKwh() {
         SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
         String kwhStr = prefs.getString("total_kwh", "0.45");
@@ -85,11 +86,13 @@ public class DetailActivity extends AppCompatActivity {
         }
     }
 
+    // simpen kwh terbaru
     private void saveCurrentKwh() {
         SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
         prefs.edit().putString("total_kwh", df.format(totalKwh)).apply();
     }
 
+    // atur grafik garis nya
     private void setupChart() {
         lineChart.getDescription().setEnabled(false);
         lineChart.setTouchEnabled(true);
@@ -97,7 +100,7 @@ public class DetailActivity extends AppCompatActivity {
         lineChart.setScaleEnabled(true);
         lineChart.setPinchZoom(true);
         lineChart.setBackgroundColor(Color.TRANSPARENT);
-        lineChart.setNoDataText("Menunggu data...");
+        lineChart.setNoDataText("tunggu bentar, datanya lg dijalan...");
         
         int textColor = AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES ? Color.WHITE : Color.BLACK;
         lineChart.setNoDataTextColor(textColor);
@@ -114,6 +117,7 @@ public class DetailActivity extends AppCompatActivity {
         lineChart.getLegend().setTextColor(textColor);
     }
 
+    // mulai simulasi data real-time
     private void startDataSimulation() {
         handler.postDelayed(new Runnable() {
             @Override
@@ -124,6 +128,7 @@ public class DetailActivity extends AppCompatActivity {
         }, 1000);
     }
 
+    // update monitoring lebih dalem
     private void updateDeepMonitoring() {
         SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
         boolean isLampOn = prefs.getBoolean("is_lamp_on", false);
@@ -162,15 +167,18 @@ public class DetailActivity extends AppCompatActivity {
         tvSuhuESP.setText(String.format(Locale.getDefault(), "%.1f°C", suhu));
         
         if (watt > 0 && watt < 50) {
-            tvEfficiency.setText("Status: Sangat Efisien (Eco Mode)");
+            tvEfficiency.setText("status: hemat bgt (eco mode)");
         } else if (watt >= 50) {
-            tvEfficiency.setText("Status: Pemakaian Normal");
+            tvEfficiency.setText("status: pemakaian biasa");
         } else {
-            tvEfficiency.setText("Status: Perangkat Standby/Off");
+            tvEfficiency.setText("status: standby/off");
         }
     }
 
+    // nambahin titik baru ke grafik
     private void addEntry(float val) {
+        if (lineChart == null) return; // cegah crash kalo grafik lg diumpetin
+
         entries.add(new Entry(xValue++, val));
         if (entries.size() > 20) entries.remove(0);
 

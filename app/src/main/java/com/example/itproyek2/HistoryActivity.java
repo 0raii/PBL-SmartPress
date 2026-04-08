@@ -35,7 +35,7 @@ public class HistoryActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // Apply theme before super.onCreate
+        // pasang tema dulu sebelum super.onCreate
         SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
         boolean isDark = prefs.getBoolean("is_dark_theme", true);
         if (isDark) {
@@ -48,7 +48,6 @@ public class HistoryActivity extends AppCompatActivity {
         setContentView(R.layout.activity_history);
 
         MaterialToolbar toolbar = findViewById(R.id.toolbarHistory);
-        // Removed back button click listener as the button is removed from XML
 
         barChart = findViewById(R.id.barChart);
         rvHistory = findViewById(R.id.rvHistory);
@@ -60,6 +59,7 @@ public class HistoryActivity extends AppCompatActivity {
         setupBottomNav();
     }
 
+    // ambil data riwayat dr sharedprefs
     private void loadHistoryData() {
         SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
         String rawData = prefs.getString("history_data", "");
@@ -72,6 +72,7 @@ public class HistoryActivity extends AppCompatActivity {
         if (!rawData.isEmpty()) {
             String[] entries = rawData.split(";");
             int count = 0;
+            // ambil 10 data terakhir aja
             for (int i = entries.length - 1; i >= 0 && count < 10; i--) {
                 String[] parts = entries[i].split("\\|");
                 if (parts.length >= 2) {
@@ -90,7 +91,7 @@ public class HistoryActivity extends AppCompatActivity {
                 }
             }
         } else {
-            historyList.add(new HistoryItem("Belum ada aktivitas", "-", R.drawable.ic_history));
+            historyList.add(new HistoryItem("belum ada aktivitas", "-", R.drawable.ic_history));
         }
 
         adapter = new HistoryAdapter(historyList);
@@ -98,6 +99,7 @@ public class HistoryActivity extends AppCompatActivity {
         rvHistory.setAdapter(adapter);
     }
 
+    // atur grafik batang nya
     private void setupBarChart() {
         ArrayList<BarEntry> entries = new ArrayList<>();
         entries.add(new BarEntry(0, 45f));
@@ -155,6 +157,7 @@ public class HistoryActivity extends AppCompatActivity {
         barChart.invalidate();
     }
 
+    // setting navigasi bawah
     private void setupBottomNav() {
         BottomNavigationView bottomNav = findViewById(R.id.bottomNavHistory);
         bottomNav.setSelectedItemId(R.id.nav_history);

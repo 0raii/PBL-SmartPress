@@ -68,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // cek tema yg disimpen dulu
         SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
         boolean isDarkTheme = prefs.getBoolean("is_dark_theme", true);
         if (isDarkTheme) {
@@ -82,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
 
         createNotificationChannel();
 
+        // atur biar gak nabrak bar atas
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -90,6 +92,7 @@ public class MainActivity extends AppCompatActivity {
 
         currencyFormat.setMaximumFractionDigits(0);
 
+        // hubungin id layout ke variabel
         tvStatusLampu = findViewById(R.id.tvStatusLampu);
         tvKondisiCahaya = findViewById(R.id.tvKondisiCahaya);
         tvLogAktivitas = findViewById(R.id.tvLogAktivitas);
@@ -110,13 +113,14 @@ public class MainActivity extends AppCompatActivity {
         loadAppState();
         applyUiState();
 
+        // klik tombol on/off lampu
         toggleGroupLamp.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
             if (isChecked) {
                 if (!isConnected) {
-                    showToast("Gagal: Perangkat sedang Offline!");
+                    showToast("yah lagi offline perangkatnya!");
                     syncLampToggle();
                 } else if (isAutoMode) {
-                    showToast("Matikan Mode OTOMATIS untuk kontrol manual");
+                    showToast("matiin dulu mode otomatisnya ya");
                     syncLampToggle();
                 } else {
                     updateLampState(checkedId == R.id.btnOn, "Manual");
@@ -124,29 +128,31 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // simulasi klik status buat benerin koneksi
         tvEspStatus.setOnClickListener(v -> {
             if (!isConnected) {
-                showToast("Mencoba menghubungkan kembali...");
+                showToast("nyoba konek lagi...");
                 new Handler().postDelayed(() -> {
                     isConnected = true;
                     saveAppState();
                     applyUiState();
-                    addLog("Info: Perangkat dihubungkan kembali");
-                    showToast("Berhasil: Perangkat Online");
+                    addLog("info: konek lagi cuy");
+                    showToast("siip udah online");
                 }, 1500);
             } else {
                 isConnected = false;
                 saveAppState();
                 applyUiState();
-                addLog("Peringatan: Perangkat diputuskan (Demo)");
-                showToast("Demo: Perangkat Offline");
+                addLog("peringatan: dc nih (demo)");
+                showToast("mode offline aktif (demo)");
             }
         });
 
+        // klik status cahaya buat simulasi gelap terang
         layoutStatusCahaya.setOnClickListener(v -> {
             useManualLux = true;
             isDarkManualOverride = !isDarkManualOverride;
-            showToast("Demo: Sensor diset ke " + (isDarkManualOverride ? "GELAP" : "TERANG"));
+            showToast("demo: sensor kita set " + (isDarkManualOverride ? "GELAP" : "TERANG"));
             updateCahayaUi(isDarkManualOverride);
             
             if (isAutoMode && isConnected) {
@@ -154,15 +160,16 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // ganti mode manual/otomatis
         toggleGroupMode.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
             if (isChecked) {
                 if (!isConnected) {
-                    showToast("Gagal: Perangkat sedang Offline!");
+                    showToast("offilne bro, gak bisa ganti mode");
                     toggleGroupMode.post(() -> toggleGroupMode.check(isAutoMode ? R.id.btnAuto : R.id.btnManual));
                 } else {
                     isAutoMode = (checkedId == R.id.btnAuto);
                     saveAppState();
-                    addLog("Mode diubah ke " + (isAutoMode ? "OTOMATIS" : "MANUAL"));
+                    addLog("mode ganti ke " + (isAutoMode ? "OTOMATIS" : "MANUAL"));
                     
                     if (isAutoMode) {
                         boolean isDarkNow = useManualLux ? isDarkManualOverride : (random.nextInt(1000) < 300);
@@ -176,6 +183,7 @@ public class MainActivity extends AppCompatActivity {
             startActivity(new Intent(MainActivity.this, DetailActivity.class));
         });
 
+        // navigasi bawah
         BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
         bottomNav.setSelectedItemId(R.id.nav_home);
         bottomNav.setOnItemSelectedListener(item -> {
@@ -202,7 +210,7 @@ public class MainActivity extends AppCompatActivity {
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             CharSequence name = "Smart Lamp Channel";
-            String description = "Pemberitahuan Penting Sistem Lampu";
+            String description = "notif penting buat lampu";
             int importance = NotificationManager.IMPORTANCE_HIGH;
             NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
             channel.setDescription(description);
@@ -232,10 +240,12 @@ public class MainActivity extends AppCompatActivity {
         notificationManager.notify((int) System.currentTimeMillis(), builder.build());
     }
 
+    // cocokin status tombol sama aslinya
     private void syncLampToggle() {
         toggleGroupLamp.post(() -> toggleGroupLamp.check(isLampOn ? R.id.btnOn : R.id.btnOff));
     }
 
+    // ambil settingan yg pernah disimpen
     private void loadAppState() {
         SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
         isLampOn = prefs.getBoolean("is_lamp_on", true);
@@ -256,6 +266,7 @@ public class MainActivity extends AppCompatActivity {
         if (isLampOn) lampOnStartTime = System.currentTimeMillis();
     }
 
+    // simpen settingan skrg
     private void saveAppState() {
         SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
@@ -266,6 +277,7 @@ public class MainActivity extends AppCompatActivity {
         editor.apply();
     }
 
+    // update tampilan sesuai status
     private void applyUiState() {
         tvStatusLampu.setText(isLampOn ? "HIDUP" : "MATI");
         int accentColor = ContextCompat.getColor(this, isLampOn ? R.color.accent_yellow : R.color.text_secondary);
@@ -293,23 +305,26 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // ganti status lampu
     private void updateLampState(boolean on, String triggerSource) {
         if (isLampOn != on) {
             isLampOn = on;
             lampOnStartTime = isLampOn ? System.currentTimeMillis() : 0;
             saveAppState();
             applyUiState();
-            addLog("Lampu " + (on ? "HIDUP" : "MATI") + " (" + triggerSource + ")");
-            if (notifLamp) showToast("Notifikasi: Lampu " + (on ? "Menyala" : "Mati"));
+            addLog("lampu " + (on ? "HIDUP" : "MATI") + " (" + triggerSource + ")");
+            if (notifLamp) showToast("notif: lampu " + (on ? "nyala" : "mati"));
         }
     }
 
+    // nambahin log aktivitas
     private void addLog(String message) {
         String currentTime = timeFormat.format(new Date());
         tvLogAktivitas.setText("[" + currentTime + "] " + message);
         saveLogToHistory(message);
     }
 
+    // simpen log biar bisa diliat di riwayat
     private void saveLogToHistory(String message) {
         SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
         String history = prefs.getString("history_data", "");
@@ -327,20 +342,21 @@ public class MainActivity extends AppCompatActivity {
         prefs.edit().putString("history_data", history + newEntry).apply();
     }
 
+    // mulai simulasi data tiap bbrp detik
     private void startRealtimeSimulation() {
         realtimeHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                // Randomly disconnect rarely if not in manual demo mode
+                // simulasi dc bntar biar kaya beneran
                 if (!useManualLux && random.nextInt(200) < 1) { 
                     isConnected = !isConnected;
                     saveAppState();
                     runOnUiThread(() -> applyUiState());
                     if (!isConnected) {
-                        addLog("Peringatan: Perangkat Terputus (Offline)");
-                        sendSystemNotification("Koneksi Terputus", "Perangkat ESP32 Anda tidak dapat dijangkau.");
+                        addLog("peringatan: koneksi putus (offline)");
+                        sendSystemNotification("putus koneksi", "perangkat esp32 gak bisa dikontak nih.");
                     } else {
-                        addLog("Info: Perangkat Terhubung Kembali");
+                        addLog("info: konek lagi");
                     }
                 }
 
@@ -353,6 +369,7 @@ public class MainActivity extends AppCompatActivity {
         }, 1000);
     }
 
+    // simulasi data iot masuk
     private void simulateIoTData() {
         boolean isDarkNow;
         if (useManualLux) {
@@ -378,10 +395,11 @@ public class MainActivity extends AppCompatActivity {
         }
         
         tvCostSummary.setText(currencyFormat.format(totalKwh * 1444.70));
-        tvKwhSummary.setText("Total Pemakaian Hari Ini: " + df.format(totalKwh) + " kWh");
+        tvKwhSummary.setText("total pemakaian hari ini: " + df.format(totalKwh) + " kWh");
         saveAppState();
     }
 
+    // update UI buat kondisi cahaya
     private void updateCahayaUi(boolean isDark) {
         tvKondisiCahaya.setText(isDark ? "Gelap" : "Terang");
         tvKondisiCahaya.setTextColor(ContextCompat.getColor(this, isDark ? R.color.white : R.color.bg_dark));
@@ -390,20 +408,21 @@ public class MainActivity extends AppCompatActivity {
         ivKondisiIcon.setImageResource(isDark ? R.drawable.ic_star_on : R.drawable.ic_history);
     }
 
+    // cek kalo ada yg gak beres
     private void checkAlerts() {
         if (isLampOn && lampOnStartTime > 0 && notifOvertime) {
             long durationSec = (System.currentTimeMillis() - lampOnStartTime) / 1000;
-            if (durationSec > 120) { // Extended to 2 mins for demo
-                sendSystemNotification("Peringatan Durasi", "Lampu sudah menyala lebih dari 2 menit.");
-                addLog("Peringatan: Overtime Detected");
+            if (durationSec > 120) { // set 2 menit buat demo
+                sendSystemNotification("awas kelamaan", "lampu nyala udah lebih dari 2 menit lho.");
+                addLog("peringatan: overtime terdeteksi");
                 lampOnStartTime = System.currentTimeMillis(); 
             }
         }
 
         float temp = 30 + random.nextFloat() * 20;
         if (temp > 48 && notifOverheat) {
-            sendSystemNotification("Peringatan Suhu", "Suhu ESP32 mencapai " + df.format(temp) + "°C.");
-            addLog("Peringatan: Overheat " + df.format(temp) + "°C");
+            sendSystemNotification("panas nih", "suhu esp32 sampe " + df.format(temp) + "°C.");
+            addLog("peringatan: overheat " + df.format(temp) + "°C");
         }
     }
 

@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/login_background_selector"
@@ -104,7 +105,7 @@
                         android:textStyle="bold"
                         android:layout_marginBottom="24dp" />
 
-                    <!-- Nama Lengkap -->
+                    <!-- input nama lengkap -->
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -145,7 +146,7 @@
                             android:textSize="14sp" />
                     </com.google.android.material.textfield.TextInputLayout>
 
-                    <!-- Email -->
+                    <!-- input email nya -->
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -186,7 +187,7 @@
                             android:textSize="14sp" />
                     </com.google.android.material.textfield.TextInputLayout>
 
-                    <!-- Password -->
+                    <!-- bagian password -->
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -229,7 +230,7 @@
                             android:textSize="14sp" />
                     </com.google.android.material.textfield.TextInputLayout>
 
-                    <!-- Confirm Password -->
+                    <!-- konfirmasi pass nya -->
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -272,7 +273,7 @@
                             android:textSize="14sp" />
                     </com.google.android.material.textfield.TextInputLayout>
 
-                    <!-- Register Button -->
+                    <!-- tombol buat akun -->
                     <Button
                         android:id="@+id/btnRegister"
                         android:layout_width="match_parent"
@@ -285,7 +286,7 @@
                         app:cornerRadius="30dp"
                         app:elevation="4dp" />
 
-                    <!-- Divider -->
+                    <!-- garis pembatas -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -314,7 +315,7 @@
                             android:background="@color/divider_color" />
                     </LinearLayout>
 
-                    <!-- Social Register -->
+                    <!-- daftar lewat sosmed -->
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"

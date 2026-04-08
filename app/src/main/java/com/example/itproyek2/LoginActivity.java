@@ -20,7 +20,7 @@ public class LoginActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // Terapkan tema sebelum super.onCreate
+        // atur tema dulu sebelum super.onCreate
         SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
         boolean isDark = prefs.getBoolean("is_dark_theme", true);
         if (isDark) {
@@ -38,7 +38,7 @@ public class LoginActivity extends AppCompatActivity {
         tvRegister = findViewById(R.id.tvRegister);
         tvForgotPassword = findViewById(R.id.tvForgotPassword);
 
-        // Set Data Dummy ke Hint atau langsung isi untuk memudahkan demo
+        // isi data dummy biar gampang demonya atau lgsung isi aja
         // etEmail.setText("admin@gmail.com"); 
         // etPassword.setText("123456");
 
@@ -47,20 +47,20 @@ public class LoginActivity extends AppCompatActivity {
             String password = etPassword.getText().toString().trim();
 
             if (email.isEmpty() || password.isEmpty()) {
-                Toast.makeText(this, "Harap isi email dan kata sandi", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "isi dulu email ama pass nya", Toast.LENGTH_SHORT).show();
             } else if (email.equals("admin@gmail.com") && password.equals("123456")) {
-                Toast.makeText(this, "Login Berhasil!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "sip login berhasil!", Toast.LENGTH_SHORT).show();
                 prefs.edit().putBoolean("is_logged_in", true).apply();
                 
                 startActivity(new Intent(LoginActivity.this, MainActivity.class));
                 finish();
             } else {
-                Toast.makeText(this, "Email atau Kata Sandi salah!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "email ato pass nya salah tuh!", Toast.LENGTH_SHORT).show();
             }
         });
 
         tvForgotPassword.setOnClickListener(v -> 
-            Toast.makeText(this, "Fitur Reset Password belum tersedia", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "fitur reset pass blm ada nih", Toast.LENGTH_SHORT).show()
         );
 
         tvRegister.setOnClickListener(v -> 

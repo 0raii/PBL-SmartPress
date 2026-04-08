@@ -29,7 +29,7 @@ public class SettingsActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // Terapkan tema sebelum super.onCreate
+        // pasang tema dulu sebelum super.onCreate
         SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
         boolean isDark = prefs.getBoolean("is_dark_theme", true);
         if (isDark) {
@@ -63,7 +63,7 @@ public class SettingsActivity extends AppCompatActivity {
             startActivity(new Intent(SettingsActivity.this, UserGuideActivity.class));
         });
 
-        // Logika Logout dengan Konfirmasi
+        // buat logout pake konfirmasi
         layoutLogout.setOnClickListener(v -> showLogoutConfirmation());
 
         switchNotifLamp.setOnCheckedChangeListener((v, isChecked) -> saveSetting("notif_lamp", isChecked));
@@ -87,23 +87,23 @@ public class SettingsActivity extends AppCompatActivity {
 
     private void showLogoutConfirmation() {
         new AlertDialog.Builder(this)
-                .setTitle("Keluar Akun")
-                .setMessage("Apakah Anda yakin ingin keluar dari aplikasi SmartPress?")
-                .setPositiveButton("Ya, Keluar", (dialog, which) -> {
-                    // Hapus status login
+                .setTitle("keluar akun")
+                .setMessage("yakin nih mau keluar dari smartpress?")
+                .setPositiveButton("ya, keluar", (dialog, which) -> {
+                    // hapus status login nya
                     SharedPreferences.Editor editor = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE).edit();
                     editor.putBoolean("is_logged_in", false);
                     editor.apply();
 
-                    Toast.makeText(this, "Berhasil Keluar", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "oke udah keluar", Toast.LENGTH_SHORT).show();
 
-                    // Pindah ke halaman Login
+                    // balik ke login
                     Intent intent = new Intent(SettingsActivity.this, LoginActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
                     finish();
                 })
-                .setNegativeButton("Batal", null)
+                .setNegativeButton("batal", null)
                 .show();
     }
 
@@ -130,6 +130,7 @@ public class SettingsActivity extends AppCompatActivity {
         }
     }
 
+    // ambil settingan dr sharedprefs
     private void loadSettings() {
         SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
         switchNotifLamp.setChecked(prefs.getBoolean("notif_lamp", true));
@@ -142,6 +143,7 @@ public class SettingsActivity extends AppCompatActivity {
         else rbLight.setChecked(true);
     }
 
+    // simpen settingan ke sharedprefs
     private void saveSetting(String key, boolean value) {
         getSharedPreferences("SmartLampPrefs", MODE_PRIVATE).edit().putBoolean(key, value).apply();
     }
