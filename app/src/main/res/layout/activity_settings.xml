@@ -200,24 +200,6 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Peringatan Suhu Perangkat"
-                            android:textColor="@color/text_head" />
-                        <androidx.appcompat.widget.SwitchCompat
-                            android:id="@+id/switchNotifOverheat"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentEnd="true" />
-                    </RelativeLayout>
-
-                    <View android:layout_width="match_parent" android:layout_height="0.5dp" android:background="@color/divider_color" />
-
-                    <RelativeLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:paddingVertical="8dp">
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
                             android:text="Peringatan Penggunaan Energi"
                             android:textColor="@color/text_head" />
                         <androidx.appcompat.widget.SwitchCompat
@@ -311,18 +293,21 @@
                         android:id="@+id/layoutUserGuide"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:paddingVertical="8dp"
+                        android:paddingVertical="12dp"
                         android:clickable="true"
-                        android:focusable="true">
+                        android:focusable="true"
+                        android:background="?attr/selectableItemBackground">
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_centerVertical="true"
                             android:text="Panduan Pengguna"
                             android:textColor="@color/text_head" />
                         <ImageView
                             android:layout_width="20dp"
                             android:layout_height="20dp"
                             android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
                             android:src="@drawable/ic_arrow_back"
                             android:rotation="180"
                             app:tint="@color/text_sub" />
@@ -331,18 +316,24 @@
                     <View android:layout_width="match_parent" android:layout_height="0.5dp" android:background="@color/divider_color" />
 
                     <RelativeLayout
+                        android:id="@+id/layoutContactSupport"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:paddingVertical="8dp">
+                        android:paddingVertical="12dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?attr/selectableItemBackground">
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_centerVertical="true"
                             android:text="Hubungi Dukungan"
                             android:textColor="@color/text_head" />
                         <ImageView
                             android:layout_width="20dp"
                             android:layout_height="20dp"
                             android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
                             android:src="@drawable/ic_arrow_back"
                             android:rotation="180"
                             app:tint="@color/text_sub" />
@@ -414,6 +405,7 @@
         android:background="@color/nav_bg"
         app:itemIconTint="@drawable/bottom_nav_color"
         app:itemTextColor="@drawable/bottom_nav_color"
+        app:labelVisibilityMode="labeled"
         app:menu="@menu/bottom_menu" />
 
 </LinearLayout>

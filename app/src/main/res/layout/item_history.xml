@@ -45,7 +45,7 @@
             android:text="Hari Ini 18:30"
             android:textColor="@color/text_sub"
             android:textSize="12sp"
-            app:layout_constraintEnd_toEndOf="@id/tvHistoryTitle"
+            app:layout_constraintEnd_toStartOf="@id/tvHistoryTime"
             app:layout_constraintStart_toStartOf="@id/tvHistoryTitle"
             app:layout_constraintTop_toBottomOf="@id/tvHistoryTitle" />
 
@@ -56,22 +56,9 @@
             android:text="18:30"
             android:textColor="@color/text_sub"
             android:textSize="12sp"
-            android:layout_marginEnd="8dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/ivArrow"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <ImageView
-            android:id="@+id/ivArrow"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:contentDescription="@string/icon_desc"
-            android:src="@drawable/ic_arrow_back"
-            android:rotation="180"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/text_sub" />
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

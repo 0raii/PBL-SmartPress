@@ -18,10 +18,9 @@
             android:id="@+id/toolbarHistory"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:title="Aktifitas"
+            app:title="Log Aktivitas Sistem"
             app:titleCentered="true"
             app:titleTextColor="@color/text_head" />
-
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
@@ -36,153 +35,81 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Monitoring Penggunaan Lampu -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardBackgroundColor="@color/card_bg_custom"
-                app:cardCornerRadius="24dp"
-                app:cardElevation="2dp"
-                app:strokeWidth="0dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Pemantauan Penggunaan Lampu"
-                        android:textColor="@color/text_head"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Grafik ini menunjukkan durasi lampu menyala pada setiap rentang waktu."
-                        android:textColor="@color/text_sub"
-                        android:textSize="11sp"
-                        android:layout_marginBottom="16dp"/>
-
-                    <com.github.mikephil.charting.charts.BarChart
-                        android:id="@+id/barChart"
-                        android:layout_width="match_parent"
-                        android:layout_height="200dp" />
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="@color/divider_color"
-                        android:layout_marginVertical="12dp"/>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:orientation="vertical">
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Total Penggunaan Lampu Hari Ini"
-                            android:textColor="@color/text_sub"
-                            android:textSize="12sp" />
-                        <TextView
-                            android:id="@+id/tvTotalUsageHours"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="5 Jam"
-                            android:textColor="@color/text_head"
-                            android:textSize="18sp"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Konsumsi Energi -->
+            <!-- Card Ringkasan Singkat -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="24dp"
                 app:cardBackgroundColor="@color/card_bg_custom"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="2dp"
-                app:strokeWidth="0dp">
-
+                app:cardCornerRadius="20dp"
+                app:cardElevation="2dp">
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Konsumsi Energi"
-                        android:textColor="@color/text_head"
-                        android:textSize="14sp"
-                        android:textStyle="bold"
-                        android:layout_marginBottom="8dp"/>
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="@color/divider_color"
-                        android:layout_marginBottom="12dp"/>
-
+                    android:padding="16dp"
+                    android:orientation="horizontal"
+                    android:weightSum="2">
                     <LinearLayout
-                        android:layout_width="match_parent"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:orientation="vertical">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Hari Ini"
+                            android:textColor="@color/text_sub"
+                            android:textSize="12sp" />
                         <TextView
                             android:id="@+id/tvHistoryKwhToday"
-                            android:layout_width="0dp"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Hari Ini : 0,45 kWh"
-                            android:textColor="@color/text_sub"
-                            android:textSize="13sp" />
-
-                        <View
-                            android:layout_width="1dp"
-                            android:layout_height="match_parent"
-                            android:background="@color/divider_color"
-                            android:layout_marginHorizontal="8dp"/>
-
+                            android:text="0.45 kWh"
+                            android:textColor="@color/text_head"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                    <View
+                        android:layout_width="1dp"
+                        android:layout_height="match_parent"
+                        android:background="@color/divider_color"/>
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:orientation="vertical">
                         <TextView
-                            android:id="@+id/tvHistoryKwhWeek"
-                            android:layout_width="0dp"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Minggu : 3,2 kWh"
+                            android:text="Status Sistem"
                             android:textColor="@color/text_sub"
-                            android:textSize="13sp" />
+                            android:textSize="12sp" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Normal"
+                            android:textColor="#4CAF50"
+                            android:textStyle="bold" />
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Aktivitas Terbaru -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Aktivitas Terbaru"
                 android:textColor="@color/text_head"
-                android:textSize="16sp"
+                android:textSize="18sp"
                 android:textStyle="bold"
-                android:layout_marginBottom="12dp"/>
+                android:layout_marginBottom="16dp"/>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvHistory"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:nestedScrollingEnabled="false"
-                tools:listitem="@layout/item_history"
-                tools:itemCount="4"/>
+                tools:listitem="@layout/item_history" />
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

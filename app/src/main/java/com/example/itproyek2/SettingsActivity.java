@@ -19,13 +19,13 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class SettingsActivity extends AppCompatActivity {
 
-    private SwitchCompat switchNotifLamp, switchNotifOvertime, switchNotifOverheat, switchNotifEnergy;
+    private SwitchCompat switchNotifLamp, switchNotifOvertime, switchNotifEnergy;
     private RadioGroup rgTheme;
     private RadioButton rbDark, rbLight;
     
     private TextView tvStatusDevice1, tvStatusDevice2;
     private ImageView ivDevice1, ivDevice2;
-    private RelativeLayout layoutUserGuide, layoutLogout;
+    private RelativeLayout layoutUserGuide, layoutContactSupport, layoutLogout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +43,6 @@ public class SettingsActivity extends AppCompatActivity {
 
         switchNotifLamp = findViewById(R.id.switchNotifLamp);
         switchNotifOvertime = findViewById(R.id.switchNotifOvertime);
-        switchNotifOverheat = findViewById(R.id.switchNotifOverheat);
         switchNotifEnergy = findViewById(R.id.switchNotifEnergy);
         rgTheme = findViewById(R.id.rgTheme);
         rbDark = findViewById(R.id.rbDark);
@@ -54,6 +53,7 @@ public class SettingsActivity extends AppCompatActivity {
         ivDevice1 = findViewById(R.id.ivDevice1);
         ivDevice2 = findViewById(R.id.ivDevice2);
         layoutUserGuide = findViewById(R.id.layoutUserGuide);
+        layoutContactSupport = findViewById(R.id.layoutContactSupport);
         layoutLogout = findViewById(R.id.layoutLogout);
 
         loadSettings();
@@ -63,12 +63,13 @@ public class SettingsActivity extends AppCompatActivity {
             startActivity(new Intent(SettingsActivity.this, UserGuideActivity.class));
         });
 
+        layoutContactSupport.setOnClickListener(v -> showContactSupportDialog());
+
         // buat logout pake konfirmasi
         layoutLogout.setOnClickListener(v -> showLogoutConfirmation());
 
         switchNotifLamp.setOnCheckedChangeListener((v, isChecked) -> saveSetting("notif_lamp", isChecked));
         switchNotifOvertime.setOnCheckedChangeListener((v, isChecked) -> saveSetting("notif_overtime", isChecked));
-        switchNotifOverheat.setOnCheckedChangeListener((v, isChecked) -> saveSetting("notif_overheat", isChecked));
         switchNotifEnergy.setOnCheckedChangeListener((v, isChecked) -> saveSetting("notif_energy", isChecked));
 
         rgTheme.setOnCheckedChangeListener((group, checkedId) -> {
@@ -107,6 +108,18 @@ public class SettingsActivity extends AppCompatActivity {
                 .show();
     }
 
+    private void showContactSupportDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("Hubungi Dukungan")
+                .setMessage("Jika Anda mengalami kendala, silakan hubungi kami melalui:\n\n" +
+                        "📧 Email: -\n" +
+                        "📞 No. Telp: -\n" +
+                        "💬 WhatsApp: -\n\n" +
+                        "Tim kami akan membantu Anda secepat mungkin.")
+                .setPositiveButton("Tutup", null)
+                .show();
+    }
+
     private void updateDeviceConnectionUi() {
         SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
         boolean isConnected = prefs.getBoolean("is_connected", true);
@@ -135,7 +148,6 @@ public class SettingsActivity extends AppCompatActivity {
         SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
         switchNotifLamp.setChecked(prefs.getBoolean("notif_lamp", true));
         switchNotifOvertime.setChecked(prefs.getBoolean("notif_overtime", true));
-        switchNotifOverheat.setChecked(prefs.getBoolean("notif_overheat", true));
         switchNotifEnergy.setChecked(prefs.getBoolean("notif_energy", true));
         
         boolean isDark = prefs.getBoolean("is_dark_theme", true);
@@ -160,6 +172,11 @@ public class SettingsActivity extends AppCompatActivity {
                 return true;
             } else if (id == R.id.nav_history) {
                 startActivity(new Intent(this, HistoryActivity.class));
+                overridePendingTransition(0, 0);
+                finish();
+                return true;
+            } else if (id == R.id.nav_report) {
+                startActivity(new Intent(this, ReportActivity.class));
                 overridePendingTransition(0, 0);
                 finish();
                 return true;

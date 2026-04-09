@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.View;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -27,8 +28,10 @@ public class DetailActivity extends AppCompatActivity {
 
     private LineChart lineChart;
     private TextView tvPrediction, tvEfficiency;
-    private TextView tvVoltDetail, tvAmpereDetail, tvSuhuESP, tvDurasiNyala;
+    private TextView tvVoltDetail, tvAmpereDetail, tvDurasiNyala;
     private TextView tvKwhToday, tvEstimasiBiaya;
+    private com.google.android.material.card.MaterialCardView cardProtectionAlert;
+    private TextView tvProtectionTitle, tvProtectionDesc;
     
     private final ArrayList<Entry> entries = new ArrayList<>();
     private int xValue = 0;
@@ -64,10 +67,12 @@ public class DetailActivity extends AppCompatActivity {
         tvEfficiency = findViewById(R.id.tvEfficiency);
         tvVoltDetail = findViewById(R.id.tvVoltDetail);
         tvAmpereDetail = findViewById(R.id.tvAmpereDetail);
-        tvSuhuESP = findViewById(R.id.tvSuhuESP);
         tvDurasiNyala = findViewById(R.id.tvDurasiNyala);
         tvKwhToday = findViewById(R.id.tvKwhToday);
         tvEstimasiBiaya = findViewById(R.id.tvEstimasiBiaya);
+        cardProtectionAlert = findViewById(R.id.cardProtectionAlert);
+        tvProtectionTitle = findViewById(R.id.tvProtectionTitle);
+        tvProtectionDesc = findViewById(R.id.tvProtectionDesc);
         // lineChart = findViewById(R.id.lineChart); // sembunyiin dulu cuy
 
         loadCurrentKwh();
@@ -78,18 +83,18 @@ public class DetailActivity extends AppCompatActivity {
     // ambil data kwh yg ada
     private void loadCurrentKwh() {
         SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
-        String kwhStr = prefs.getString("total_kwh", "0.45");
+        String kwhStr = prefs.getString("total_kwh", "0.0").replace(",", ".");
         try {
-            totalKwh = Double.parseDouble(kwhStr.replace(",", "."));
+            totalKwh = Double.parseDouble(kwhStr);
         } catch (Exception e) {
-            totalKwh = 0.45;
+            totalKwh = 0.0;
         }
     }
 
     // simpen kwh terbaru
     private void saveCurrentKwh() {
         SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
-        prefs.edit().putString("total_kwh", df.format(totalKwh)).apply();
+        prefs.edit().putString("total_kwh", String.format(Locale.US, "%.4f", totalKwh)).apply();
     }
 
     // atur grafik garis nya
@@ -131,17 +136,40 @@ public class DetailActivity extends AppCompatActivity {
     // update monitoring lebih dalem
     private void updateDeepMonitoring() {
         SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
-        boolean isLampOn = prefs.getBoolean("is_lamp_on", false);
+        boolean isLampOn = prefs.getBoolean("lamp_status", false);
         boolean isConnected = prefs.getBoolean("is_connected", true);
 
-        double volt = isConnected ? (218 + random.nextDouble() * 5) : 0;
-        double watt = (isConnected && isLampOn) ? (45 + random.nextDouble() * 10) : 0;
-        double ampere = (volt > 0) ? (watt / volt) : 0;
+        double volt = isConnected ? (215 + random.nextDouble() * 15) : 0;
+        double ampere = (isConnected && isLampOn) ? (0.2 + random.nextDouble() * 0.2) : 0;
+        double watt = volt * ampere;
         
         addEntry((float) watt);
 
         tvVoltDetail.setText(String.format(Locale.getDefault(), "%.1f V", volt));
         tvAmpereDetail.setText(String.format(Locale.getDefault(), "%.2f A", ampere));
+
+        // Logic Proteksi di Detail
+        if (isLampOn) {
+            if (volt > 240.0) {
+                cardProtectionAlert.setVisibility(View.VISIBLE);
+                tvProtectionTitle.setText("TEGANGAN TINGGI!");
+                tvProtectionDesc.setText("Voltase terdeteksi " + df.format(volt) + "V. Sistem mematikan lampu.");
+                prefs.edit().putBoolean("lamp_status", false).apply();
+            } else if (ampere > 0.5) {
+                cardProtectionAlert.setVisibility(View.VISIBLE);
+                tvProtectionTitle.setText("ARUS BERLEBIH!");
+                tvProtectionDesc.setText("Arus terdeteksi " + df.format(ampere) + "A. Sistem mematikan lampu.");
+                prefs.edit().putBoolean("lamp_status", false).apply();
+            } else {
+                cardProtectionAlert.setVisibility(View.GONE);
+            }
+        } else {
+            // Cek apakah baru saja dimatikan oleh proteksi (misal via MainActivity)
+            // Di sini kita cuma sembunyiin kalo emang normal off
+            if (volt <= 240.0 && ampere <= 0.5) {
+                cardProtectionAlert.setVisibility(View.GONE);
+            }
+        }
         
         if (isLampOn && isConnected) {
             long elapsedMillis = System.currentTimeMillis() - startTime;
@@ -163,9 +191,6 @@ public class DetailActivity extends AppCompatActivity {
         double monthlyPrediction = totalKwh * 30 * 1444.70; 
         tvPrediction.setText(currencyFormat.format(monthlyPrediction));
 
-        float suhu = isConnected ? (32 + random.nextFloat() * 6) : 25;
-        tvSuhuESP.setText(String.format(Locale.getDefault(), "%.1f°C", suhu));
-        
         if (watt > 0 && watt < 50) {
             tvEfficiency.setText("status: hemat bgt (eco mode)");
         } else if (watt >= 50) {

@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#121212"
+    android:background="@color/main_bg"
     android:orientation="vertical">
 
     <!-- Header -->
@@ -17,7 +17,7 @@
             android:layout_height="24dp"
             android:layout_centerVertical="true"
             android:src="@drawable/ic_arrow_back"
-            app:tint="@color/white" />
+            app:tint="@color/text_head" />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -25,12 +25,12 @@
             android:layout_marginStart="32dp"
             android:layout_toEndOf="@id/btnBackGuide"
             android:text="Panduan Pengguna"
-            android:textColor="@color/white"
+            android:textColor="@color/text_head"
             android:textSize="18sp"
             android:textStyle="bold" />
     </RelativeLayout>
 
-    <ScrollView
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -44,7 +44,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Cara Menggunakan Aplikasi"
-                android:textColor="@color/accent_yellow"
+                android:textColor="@color/primary_blue"
                 android:textSize="20sp"
                 android:textStyle="bold"
                 android:layout_marginBottom="16dp"/>
@@ -53,70 +53,70 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="1. Beranda (Kontrol Lampu)"
-                android:textColor="@color/white"
+                android:text="1. Kontrol Lampu Pintar"
+                android:textColor="@color/text_head"
                 android:textSize="16sp"
                 android:textStyle="bold" />
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="● Gunakan tombol ON/OFF untuk mengontrol lampu secara manual.\n● Aktifkan mode OTOMATIS agar lampu menyala sendiri saat kondisi gelap.\n● Jika perangkat OFFLINE, tombol kontrol tidak dapat ditekan."
-                android:textColor="#B0B0B0"
+                android:text="● Gunakan tombol ON/OFF untuk mengontrol lampu secara manual dari jarak jauh.\n● Aktifkan mode OTOMATIS agar lampu menyala sendiri saat sensor mendeteksi kondisi gelap.\n● Status 'Terhubung' menunjukkan perangkat ESP32 Anda aktif."
+                android:textColor="@color/text_sub"
                 android:layout_marginBottom="16dp"
                 android:lineSpacingExtra="4dp"/>
 
-            <!-- Deep Monitoring -->
+            <!-- Monitoring Daya -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="2. Monitoring Mendalam"
-                android:textColor="@color/white"
+                android:text="2. Monitoring Daya &amp; kWh"
+                android:textColor="@color/text_head"
                 android:textSize="16sp"
                 android:textStyle="bold" />
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="● Klik tombol 'Detail' di Beranda untuk melihat grafik penggunaan daya secara real-time.\n● Pantau Voltase, Ampere, dan Suhu Perangkat untuk memastikan keamanan."
-                android:textColor="#B0B0B0"
+                android:text="● Di halaman Beranda, Anda dapat melihat penggunaan listrik (kWh) secara real-time.\n● Klik 'Detail' untuk melihat data Voltase, Ampere, dan Watt yang lebih mendalam."
+                android:textColor="@color/text_sub"
                 android:layout_marginBottom="16dp"
                 android:lineSpacingExtra="4dp"/>
 
-            <!-- Aktifitas -->
+            <!-- Laporan -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="3. Riwayat Aktifitas"
-                android:textColor="@color/white"
+                android:text="3. Laporan Penggunaan"
+                android:textColor="@color/text_head"
                 android:textSize="16sp"
                 android:textStyle="bold" />
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="● Buka menu Aktifitas untuk melihat log penggunaan lampu.\n● Lihat grafik durasi menyala harian dalam satuan menit dan jam."
-                android:textColor="#B0B0B0"
+                android:text="● Gunakan menu Laporan untuk melihat statistik harian, mingguan, hingga bulanan.\n● Pantau estimasi biaya listrik Anda agar lebih hemat."
+                android:textColor="@color/text_sub"
                 android:layout_marginBottom="16dp"
                 android:lineSpacingExtra="4dp"/>
 
-            <!-- Notifikasi -->
+            <!-- Keamanan -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="4. Pengaturan Notifikasi"
-                android:textColor="@color/white"
+                android:text="4. Keamanan &amp; Notifikasi"
+                android:textColor="@color/text_head"
                 android:textSize="16sp"
                 android:textStyle="bold" />
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="● Anda dapat mengaktifkan peringatan durasi menyala (maks 5 jam) agar lebih hemat energi.\n● Aktifkan peringatan suhu agar sistem memberi tahu jika perangkat terlalu panas."
-                android:textColor="#B0B0B0"
+                android:text="● Aktifkan 'Peringatan Durasi' di Pengaturan untuk mendapatkan notifikasi jika lampu menyala terlalu lama (lebih dari 5 jam)."
+                android:textColor="@color/text_sub"
                 android:layout_marginBottom="16dp"
                 android:lineSpacingExtra="4dp"/>
 
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="#33FFFFFF"
+                android:background="@color/divider_color"
                 android:layout_marginVertical="16dp"/>
 
             <TextView
@@ -128,5 +128,5 @@
                 android:textStyle="italic" />
 
         </LinearLayout>
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>
 </LinearLayout>
