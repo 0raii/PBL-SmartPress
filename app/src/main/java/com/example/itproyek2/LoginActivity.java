@@ -2,6 +2,7 @@ package com.example.itproyek2;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
@@ -17,6 +18,7 @@ public class LoginActivity extends AppCompatActivity {
     private TextInputEditText etEmail, etPassword;
     private Button btnLogin;
     private TextView tvRegister, tvForgotPassword;
+    private DatabaseHelper dbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +33,8 @@ public class LoginActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        dbHelper = new DatabaseHelper(this);
 
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
@@ -48,14 +52,35 @@ public class LoginActivity extends AppCompatActivity {
 
             if (email.isEmpty() || password.isEmpty()) {
                 Toast.makeText(this, "isi dulu email ama pass nya", Toast.LENGTH_SHORT).show();
+            } else if (dbHelper.checkUser(email, password)) {
+                // Ambil data user dari SQLite untuk ditaruh di Profile
+                Cursor cursor = dbHelper.getUserData(email);
+                if (cursor != null && cursor.moveToFirst()) {
+                    String name = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COL_NAME));
+                    String phone = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COL_PHONE));
+                    String role = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COL_ROLE));
+                    
+                    SharedPreferences.Editor editor = prefs.edit();
+                    editor.putBoolean("is_logged_in", true);
+                    editor.putString("profile_name", name);
+                    editor.putString("profile_email", email);
+                    editor.putString("profile_phone", phone);
+                    editor.putString("profile_role", role);
+                    editor.apply();
+                    cursor.close();
+                }
+
+                Toast.makeText(this, "Sip, login berhasil!", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                finish();
             } else if (email.equals("admin@gmail.com") && password.equals("123456")) {
-                Toast.makeText(this, "sip login berhasil!", Toast.LENGTH_SHORT).show();
+                // Fallback dummy admin
+                Toast.makeText(this, "Login Admin Berhasil!", Toast.LENGTH_SHORT).show();
                 prefs.edit().putBoolean("is_logged_in", true).apply();
-                
                 startActivity(new Intent(LoginActivity.this, MainActivity.class));
                 finish();
             } else {
-                Toast.makeText(this, "email ato pass nya salah tuh!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Email atau password salah!", Toast.LENGTH_SHORT).show();
             }
         });
 

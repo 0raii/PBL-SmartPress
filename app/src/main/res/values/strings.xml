@@ -110,4 +110,20 @@
     <string name="nama_lengkap">Nama Lengkap</string>
     <string name="konfirmasi_password">Konfirmasi Kata Sandi</string>
     <string name="alamat_email">Alamat Email</string>
+
+    <!-- Settings & About -->
+    <string name="tentang">Tentang</string>
+    <string name="tentang_aplikasi">Tentang Aplikasi</string>
+    <string name="app_version">v1.0.0</string>
+    <string name="about_desc">SmartPress adalah solusi monitoring lampu pintar berbasis IoT untuk efisiensi energi di Mushola.</string>
+    <string name="developer_info">Dikembangkan oleh: Kelompok PBL (Tim 3)</string>
+
+    <!-- Profile Strings -->
+    <string name="profile_name">Sofiani</string>
+    <string name="profile_email">sofiani@gmail.com</string>
+    <string name="edit_profil">Edit Profil</string>
+    <string name="no_hp">No. Hp</string>
+    <string name="role">Role</string>
+    <string name="simpan_perubahan">Simpan Perubahan</string>
+    <string name="ubah_foto">Ubah Foto</string>
 </resources>

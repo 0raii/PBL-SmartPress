@@ -23,9 +23,9 @@ public class SettingsActivity extends AppCompatActivity {
     private RadioGroup rgTheme;
     private RadioButton rbDark, rbLight;
     
-    private TextView tvStatusDevice1, tvStatusDevice2;
+    private TextView tvStatusDevice1, tvStatusDevice2, tvProfileName, tvProfileEmail;
     private ImageView ivDevice1, ivDevice2;
-    private RelativeLayout layoutUserGuide, layoutContactSupport, layoutLogout;
+    private RelativeLayout layoutUserGuide, layoutContactSupport, layoutAbout, layoutLogout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,8 +52,11 @@ public class SettingsActivity extends AppCompatActivity {
         tvStatusDevice2 = findViewById(R.id.tvStatusDevice2);
         ivDevice1 = findViewById(R.id.ivDevice1);
         ivDevice2 = findViewById(R.id.ivDevice2);
+        tvProfileName = findViewById(R.id.tvProfileName);
+        tvProfileEmail = findViewById(R.id.tvProfileEmail);
         layoutUserGuide = findViewById(R.id.layoutUserGuide);
         layoutContactSupport = findViewById(R.id.layoutContactSupport);
+        layoutAbout = findViewById(R.id.layoutAbout);
         layoutLogout = findViewById(R.id.layoutLogout);
 
         loadSettings();
@@ -64,6 +67,14 @@ public class SettingsActivity extends AppCompatActivity {
         });
 
         layoutContactSupport.setOnClickListener(v -> showContactSupportDialog());
+
+        layoutAbout.setOnClickListener(v -> showAboutDialog());
+
+        findViewById(R.id.btnEditProfile).setOnClickListener(v -> {
+            startActivity(new Intent(SettingsActivity.this, EditProfileActivity.class));
+        });
+
+
 
         // buat logout pake konfirmasi
         layoutLogout.setOnClickListener(v -> showLogoutConfirmation());
@@ -84,6 +95,19 @@ public class SettingsActivity extends AppCompatActivity {
         });
 
         setupBottomNav();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadSettings();
+        updateProfileUi();
+    }
+
+    private void updateProfileUi() {
+        SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
+        tvProfileName.setText(prefs.getString("profile_name", "Sofiani"));
+        tvProfileEmail.setText(prefs.getString("profile_email", "sofiani@gmail.com"));
     }
 
     private void showLogoutConfirmation() {
@@ -112,11 +136,21 @@ public class SettingsActivity extends AppCompatActivity {
         new AlertDialog.Builder(this)
                 .setTitle("Hubungi Dukungan")
                 .setMessage("Jika Anda mengalami kendala, silakan hubungi kami melalui:\n\n" +
-                        "📧 Email: -\n" +
-                        "📞 No. Telp: -\n" +
-                        "💬 WhatsApp: -\n\n" +
+                        "📧 Email: support@smartpress.id\n" +
+                        "📞 No. Telp: 0812-3456-7890\n" +
+                        "💬 WhatsApp: +62 812 3456 7890\n\n" +
                         "Tim kami akan membantu Anda secepat mungkin.")
                 .setPositiveButton("Tutup", null)
+                .show();
+    }
+
+    private void showAboutDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle(getString(R.string.tentang_aplikasi))
+                .setMessage(getString(R.string.about_desc) + "\n\n" +
+                        getString(R.string.developer_info) + "\n" +
+                        "Versi Aplikasi: " + getString(R.string.app_version))
+                .setPositiveButton("Oke", null)
                 .show();
     }
 

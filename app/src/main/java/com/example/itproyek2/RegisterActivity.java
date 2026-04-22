@@ -16,12 +16,15 @@ import com.google.android.material.textfield.TextInputEditText;
 public class RegisterActivity extends AppCompatActivity {
 
     private TextInputEditText etName, etEmail, etPassword, etConfirmPassword;
+    private DatabaseHelper dbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_register);
+
+        dbHelper = new DatabaseHelper(this);
 
         // atur padding biar gak ketutup status bar
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -77,8 +80,13 @@ public class RegisterActivity extends AppCompatActivity {
         }
 
         // kalo aman semua
-        Toast.makeText(this, "akun " + name + " udah jadi!", Toast.LENGTH_SHORT).show();
-        finish();
+        boolean registered = dbHelper.registerUser(name, email, password);
+        if (registered) {
+            Toast.makeText(this, "Akun " + name + " berhasil dibuat!", Toast.LENGTH_SHORT).show();
+            finish();
+        } else {
+            showToast("Email sudah terdaftar, coba email lain.");
+        }
     }
 
     private void showToast(String message) {
