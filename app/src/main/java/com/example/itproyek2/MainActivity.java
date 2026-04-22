@@ -217,6 +217,7 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
+    // TEST COMMIT - tidak mengubah fungsi
     @Override
     protected void onDestroy() {
         super.onDestroy();
