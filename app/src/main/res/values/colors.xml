@@ -3,19 +3,25 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
-    <!-- Modern Dark Theme Colors -->
+    <color name="primary_blue">#3D82FF</color>
+    <color name="accent_yellow">#FFC107</color>
+
+    <!-- Adaptive Colors (Light Mode) -->
+    <color name="login_bg_adaptive">#D6E4F0</color>
+    <color name="input_bg_adaptive">#F1F6F9</color>
+    <color name="main_bg">#F5F7FB</color>
+    <color name="card_bg_custom">#FFFFFF</color>
+    <color name="text_head">#1A1A1A</color>
+    <color name="text_sub">#444444</color>
+    <color name="divider_color">#E0E0E0</color>
+    <color name="nav_bg">#FFFFFF</color>
+
+    <!-- IoT & Dashboard Specific -->
     <color name="bg_dark">#121212</color>
-    <color name="card_dark">#1E1E1E</color>
-    <color name="border_dark">#333333</color>
-
-    <!-- Accent Colors -->
-    <color name="purple_light">#D0BCFF</color>
-    <color name="green_light">#B4F8C8</color>
-    <color name="text_secondary">#B0B0B0</color>
-
-    <!-- State List Colors for Toggle Group -->
-    <color name="toggle_bg_selected">#D0BCFF</color>
-    <color name="toggle_bg_unselected">#00000000</color>
-    <color name="toggle_text_selected">#121212</color>
-    <color name="toggle_text_unselected">#FFFFFF</color>
+    <color name="card_dark">#1E1E26</color>
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#9E9E9E</color>
+    <color name="unselected_dark">#25252D</color>
+    <color name="bulb_glow_start">#4DFFC107</color>
+    <color name="bulb_glow_end">#00FFC107</color>
 </resources>
