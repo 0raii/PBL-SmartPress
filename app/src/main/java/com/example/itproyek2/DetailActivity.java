@@ -73,10 +73,10 @@ public class DetailActivity extends AppCompatActivity {
         cardProtectionAlert = findViewById(R.id.cardProtectionAlert);
         tvProtectionTitle = findViewById(R.id.tvProtectionTitle);
         tvProtectionDesc = findViewById(R.id.tvProtectionDesc);
-        // lineChart = findViewById(R.id.lineChart); // sembunyiin dulu cuy
+        lineChart = findViewById(R.id.lineChart); 
 
         loadCurrentKwh();
-        // setupChart(); // grafik diumpetin dulu sementara
+        setupChart(); 
         startDataSimulation();
     }
 
@@ -107,19 +107,23 @@ public class DetailActivity extends AppCompatActivity {
         lineChart.setBackgroundColor(Color.TRANSPARENT);
         lineChart.setNoDataText("tunggu bentar, datanya lg dijalan...");
         
-        int textColor = AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES ? Color.WHITE : Color.BLACK;
+        int textColor = Color.parseColor("#999999"); // Abu-abu lembut agar enak dibaca
         lineChart.setNoDataTextColor(textColor);
 
         XAxis xAxis = lineChart.getXAxis();
         xAxis.setTextColor(textColor);
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setDrawGridLines(false);
+        xAxis.setGranularity(1f);
+        xAxis.setLabelCount(5);
 
         lineChart.getAxisLeft().setTextColor(textColor);
         lineChart.getAxisLeft().setDrawGridLines(true);
-        lineChart.getAxisLeft().setGridColor(Color.parseColor("#333333"));
+        lineChart.getAxisLeft().setGridColor(Color.parseColor("#1AFFFFFF")); // Grid tipis
+        lineChart.getAxisLeft().setAxisMinimum(0f); // Mulai dari 0 biar gampang dibaca
+        
         lineChart.getAxisRight().setEnabled(false);
-        lineChart.getLegend().setTextColor(textColor);
+        lineChart.getLegend().setEnabled(false); // Matikan legend biar bersih
     }
 
     // mulai simulasi data real-time
@@ -202,26 +206,33 @@ public class DetailActivity extends AppCompatActivity {
 
     // nambahin titik baru ke grafik
     private void addEntry(float val) {
-        if (lineChart == null) return; // cegah crash kalo grafik lg diumpetin
+        if (lineChart == null) return;
 
         entries.add(new Entry(xValue++, val));
-        if (entries.size() > 20) entries.remove(0);
+        if (entries.size() > 30) entries.remove(0); // Simpan 30 titik data
 
         LineDataSet dataSet = new LineDataSet(entries, "Daya (Watt)");
-        dataSet.setColor(Color.parseColor("#D0BCFF"));
-        dataSet.setCircleColor(Color.WHITE);
-        dataSet.setLineWidth(2f);
-        dataSet.setDrawValues(false);
-        dataSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
+        
+        // Styling grafik agar "Mudah Dibaca" & "Modern"
+        dataSet.setColor(Color.parseColor("#FFD54F")); // Warna Kuning (identik dengan lampu)
+        dataSet.setLineWidth(3f); // Garis lebih tebal
+        dataSet.setDrawCircles(false); // Hilangkan bulatan biar smooth
+        dataSet.setDrawValues(false); // Hilangkan angka di atas garis biar gak rame
+        dataSet.setMode(LineDataSet.Mode.CUBIC_BEZIER); // Garis melengkung halus
+        
+        // Efek isi di bawah garis (Gradient-like)
         dataSet.setDrawFilled(true);
-        dataSet.setFillColor(Color.parseColor("#D0BCFF"));
-        dataSet.setFillAlpha(50);
+        dataSet.setFillColor(Color.parseColor("#FFD54F"));
+        dataSet.setFillAlpha(30); // Transparan tipis
 
         LineData lineData = new LineData(dataSet);
         lineChart.setData(lineData);
+        
+        // Update grafik tanpa kedip
         lineChart.notifyDataSetChanged();
-        lineChart.setVisibleXRangeMaximum(10);
+        lineChart.setVisibleXRangeMaximum(20); // Tampilkan 20 data sekaligus
         lineChart.moveViewToX(xValue);
+        lineChart.invalidate();
     }
 
     @Override
