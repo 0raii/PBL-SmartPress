@@ -41,7 +41,7 @@ public class EditProfileActivity extends AppCompatActivity {
         btnBack = findViewById(R.id.btnBackEdit);
 
         // Setup Dropdown Role
-        String[] roles = {"Admin", "Pengurus Mushola", "Warga", "Teknisi"};
+        String[] roles = {"Admin", "Pengurus Mushola"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, roles);
         actvRole.setAdapter(adapter);
 
