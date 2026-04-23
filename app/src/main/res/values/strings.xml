@@ -114,7 +114,7 @@
     <!-- Settings & About -->
     <string name="tentang">Tentang</string>
     <string name="tentang_aplikasi">Tentang Aplikasi</string>
-    <string name="app_version">v1.0.0</string>
+    <string name="app_version">v1.1.0</string>
     <string name="about_desc">SmartPress adalah solusi monitoring lampu pintar berbasis IoT untuk efisiensi energi di Mushola.</string>
     <string name="developer_info">Dikembangkan oleh: Kelompok PBL (Tim 3)</string>
 

@@ -49,7 +49,7 @@
                     android:padding="16dp">
 
                     <com.google.android.material.imageview.ShapeableImageView
-                        android:id="@+id/ivProfilePic"
+                        android:id="@+id/ivProfileMain"
                         android:layout_width="80dp"
                         android:layout_height="80dp"
                         android:scaleType="centerCrop"
@@ -62,7 +62,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
-                        android:layout_toEndOf="@id/ivProfilePic"
+                        android:layout_toEndOf="@id/ivProfileMain"
                         android:layout_toStartOf="@id/ivEditProfileArrow"
                         android:orientation="vertical">
 

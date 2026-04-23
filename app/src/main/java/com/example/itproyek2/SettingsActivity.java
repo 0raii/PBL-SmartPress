@@ -3,6 +3,7 @@ package com.example.itproyek2;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.widget.ImageView;
 import android.widget.RadioButton;
@@ -11,6 +12,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
@@ -24,8 +27,16 @@ public class SettingsActivity extends AppCompatActivity {
     private RadioButton rbDark, rbLight;
     
     private TextView tvStatusDevice1, tvStatusDevice2, tvProfileName, tvProfileEmail;
-    private ImageView ivDevice1, ivDevice2;
+    private ImageView ivDevice1, ivDevice2, ivProfileMain;
     private RelativeLayout layoutUserGuide, layoutContactSupport, layoutAbout, layoutLogout;
+
+    private final ActivityResultLauncher<Intent> editProfileLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                // Refresh UI when coming back from EditProfileActivity
+                updateProfileUi();
+            }
+    );
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +65,7 @@ public class SettingsActivity extends AppCompatActivity {
         ivDevice2 = findViewById(R.id.ivDevice2);
         tvProfileName = findViewById(R.id.tvProfileName);
         tvProfileEmail = findViewById(R.id.tvProfileEmail);
+        ivProfileMain = findViewById(R.id.ivProfileMain);
         layoutUserGuide = findViewById(R.id.layoutUserGuide);
         layoutContactSupport = findViewById(R.id.layoutContactSupport);
         layoutAbout = findViewById(R.id.layoutAbout);
@@ -71,7 +83,7 @@ public class SettingsActivity extends AppCompatActivity {
         layoutAbout.setOnClickListener(v -> showAboutDialog());
 
         findViewById(R.id.btnEditProfile).setOnClickListener(v -> {
-            startActivity(new Intent(SettingsActivity.this, EditProfileActivity.class));
+            editProfileLauncher.launch(new Intent(SettingsActivity.this, EditProfileActivity.class));
         });
 
 
@@ -108,6 +120,13 @@ public class SettingsActivity extends AppCompatActivity {
         SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
         tvProfileName.setText(prefs.getString("profile_name", "Sofiani"));
         tvProfileEmail.setText(prefs.getString("profile_email", "sofiani@gmail.com"));
+        
+        String savedImageUri = prefs.getString("profile_image_uri", null);
+        if (savedImageUri != null && ivProfileMain != null) {
+            // Force refresh ImageView by clearing current image and setting to null first
+            ivProfileMain.setImageURI(null);
+            ivProfileMain.setImageURI(Uri.parse(savedImageUri));
+        }
     }
 
     private void showLogoutConfirmation() {
