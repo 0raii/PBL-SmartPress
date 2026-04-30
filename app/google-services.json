@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "637607881737",
+    "firebase_url": "https://smartpress-ea81d-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "smartpress-ea81d",
+    "storage_bucket": "smartpress-ea81d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:637607881737:android:0aa26608148de21a29dcd8",
+        "android_client_info": {
+          "package_name": "com.smartpress"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBDsvnW7GmiAlOoLQR5ZZrkXzAVT7VKehM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

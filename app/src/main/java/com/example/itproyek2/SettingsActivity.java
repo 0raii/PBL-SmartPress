@@ -20,6 +20,13 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.SwitchCompat;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import androidx.annotation.NonNull;
+
 public class SettingsActivity extends AppCompatActivity {
 
     private SwitchCompat switchNotifLamp, switchNotifOvertime, switchNotifEnergy;
@@ -29,6 +36,7 @@ public class SettingsActivity extends AppCompatActivity {
     private TextView tvStatusDevice1, tvStatusDevice2, tvProfileName, tvProfileEmail;
     private ImageView ivDevice1, ivDevice2, ivProfileMain;
     private RelativeLayout layoutUserGuide, layoutContactSupport, layoutAbout, layoutLogout;
+    private DatabaseReference dbRef;
 
     private final ActivityResultLauncher<Intent> editProfileLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -51,6 +59,9 @@ public class SettingsActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
+
+        dbRef = FirebaseDatabase.getInstance("https://smartpress-ea81d-default-rtdb.asia-southeast1.firebasedatabase.app/").getReference();
+        initFirebaseListeners();
 
         switchNotifLamp = findViewById(R.id.switchNotifLamp);
         switchNotifOvertime = findViewById(R.id.switchNotifOvertime);
@@ -173,27 +184,47 @@ public class SettingsActivity extends AppCompatActivity {
                 .show();
     }
 
-    private void updateDeviceConnectionUi() {
-        SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
-        boolean isConnected = prefs.getBoolean("is_connected", true);
+    private void initFirebaseListeners() {
+        // Pantau status koneksi Lampu Teras
+        dbRef.child("is_connected").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                boolean isConnected = false;
+                if (snapshot.exists()) {
+                    isConnected = snapshot.getValue(Boolean.class);
+                }
+                updateTerasStatusUi(isConnected);
+                
+                // Simpan ke SharedPreferences agar MainActivity juga tahu
+                getSharedPreferences("SmartLampPrefs", MODE_PRIVATE).edit()
+                        .putBoolean("is_connected", isConnected).apply();
+            }
 
+            @Override public void onCancelled(@NonNull DatabaseError error) {}
+        });
+    }
+
+    private void updateTerasStatusUi(boolean isConnected) {
         if (isConnected) {
             tvStatusDevice1.setText("● Terhubung");
-            tvStatusDevice1.setTextColor(Color.parseColor("#4CAF50"));
+            tvStatusDevice1.setTextColor(Color.parseColor("#4CAF50")); // Hijau
             ivDevice1.setAlpha(1.0f);
-            
-            tvStatusDevice2.setText("● Terhubung");
-            tvStatusDevice2.setTextColor(Color.parseColor("#4CAF50"));
-            ivDevice2.setAlpha(1.0f);
+            ivDevice1.setColorFilter(null);
         } else {
             tvStatusDevice1.setText("○ Terputus");
-            tvStatusDevice1.setTextColor(Color.parseColor("#F44336"));
-            ivDevice1.setAlpha(0.3f);
-            
-            tvStatusDevice2.setText("○ Terputus");
-            tvStatusDevice2.setTextColor(Color.parseColor("#F44336"));
-            ivDevice2.setAlpha(0.3f);
+            tvStatusDevice1.setTextColor(Color.parseColor("#F44336")); // Merah
+            ivDevice1.setAlpha(0.5f);
+            ivDevice1.setColorFilter(Color.GRAY, android.graphics.PorterDuff.Mode.SRC_IN);
         }
+        
+        // Lampu Dalam (Lampu 2) sementara kita buat Terputus dulu sesuai permintaan
+        tvStatusDevice2.setText("○ Belum Terpasang");
+        tvStatusDevice2.setTextColor(Color.GRAY);
+        ivDevice2.setAlpha(0.3f);
+    }
+
+    private void updateDeviceConnectionUi() {
+        // Fungsi ini sekarang digantikan oleh initFirebaseListeners untuk real-time
     }
 
     // ambil settingan dr sharedprefs

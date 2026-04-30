@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.smartpress" />
+                  <option name="mobileSdkAppId" value="1:637607881737:android:0aa26608148de21a29dcd8" />
+                  <option name="projectId" value="smartpress-ea81d" />
+                  <option name="projectNumber" value="637607881737" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

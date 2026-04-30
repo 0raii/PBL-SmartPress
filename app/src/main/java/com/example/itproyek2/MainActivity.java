@@ -15,12 +15,18 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.button.MaterialButtonToggleGroup;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -28,6 +34,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Random;
+
+import com.google.firebase.auth.FirebaseAuth;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -40,12 +48,17 @@ public class MainActivity extends AppCompatActivity {
     private MaterialButtonToggleGroup toggleGroupLamp, toggleGroupMode;
     private Button btnDetail;
 
-    private boolean isLampOn, isAutoMode, isConnected = true;
-    private boolean isDarkManualOverride = false, useManualLux = false;
-    private double totalKwh;
-    private long lampOnStartTime = 0;
+    private DatabaseReference dbRef;
+    private boolean isLampOn, isAutoMode, isConnected = false;
+    private long lastTickTime = 0;
+    private final Handler offlineCheckHandler = new Handler();
 
     private boolean notifLamp, notifOvertime, notifEnergy;
+    private int currentLdrValue = 0;
+    private double totalKwh = 0;
+    private long lampOnStartTime = 0;
+    private boolean useManualLux = false;
+    private boolean isDarkManualOverride = false;
 
     private Handler realtimeHandler = new Handler();
     private Random random = new Random();
@@ -77,6 +90,19 @@ public class MainActivity extends AppCompatActivity {
         toggleGroupMode = findViewById(R.id.toggleGroupMode);
         btnDetail = findViewById(R.id.btnDetail);
 
+        // Inisialisasi Firebase
+        dbRef = FirebaseDatabase.getInstance("https://smartpress-ea81d-default-rtdb.asia-southeast1.firebasedatabase.app/").getReference();
+        
+        FirebaseAuth.getInstance().signInAnonymously()
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        initFirebaseListeners();
+                    } else {
+                        String error = task.getException() != null ? task.getException().getMessage() : "Unknown Error";
+                        showToast("Firebase Error: " + error);
+                    }
+                });
+
         createNotificationChannel();
         loadAppState();
         applyUiState();
@@ -100,8 +126,9 @@ public class MainActivity extends AppCompatActivity {
         layoutStatusCahaya.setOnClickListener(v -> {
             useManualLux = true;
             isDarkManualOverride = !isDarkManualOverride;
-            showToast("demo: sensor kita set " + (isDarkManualOverride ? "GELAP" : "TERANG"));
-            updateCahayaUi(isDarkManualOverride);
+            int simulatedLdrValue = isDarkManualOverride ? 3500 : 500;
+            showToast("demo: sensor set " + (isDarkManualOverride ? "GELAP" : "TERANG"));
+            updateCahayaUi(simulatedLdrValue);
             
             if (isAutoMode && isConnected) {
                 updateLampState(isDarkManualOverride, "Sensor Otomatis (Demo)");
@@ -115,14 +142,9 @@ public class MainActivity extends AppCompatActivity {
                     showToast("offilne bro, gak bisa ganti mode");
                     toggleGroupMode.post(() -> toggleGroupMode.check(isAutoMode ? R.id.btnAuto : R.id.btnManual));
                 } else {
-                    isAutoMode = (checkedId == R.id.btnAuto);
-                    saveAppState();
-                    addLog("mode ganti ke " + (isAutoMode ? "OTOMATIS" : "MANUAL"));
-                    
-                    if (isAutoMode) {
-                        boolean isDarkNow = useManualLux ? isDarkManualOverride : (random.nextInt(1000) < 300);
-                        updateLampState(isDarkNow, "Sensor Otomatis");
-                    }
+                    boolean newMode = (checkedId == R.id.btnAuto);
+                    dbRef.child("auto_mode").setValue(newMode);
+                    addLog("mode ganti ke " + (newMode ? "OTOMATIS" : "MANUAL"));
                 }
             }
         });
@@ -220,21 +242,86 @@ public class MainActivity extends AppCompatActivity {
         tvWifiStatus.setText(isConnected ? "CONNECTED" : "DISCONNECTED");
         tvWifiStatus.setTextColor(Color.parseColor(isConnected ? "#4CAF50" : "#F44336"));
         
-        updateCahayaUi(false); 
+        updateCahayaUi(useManualLux ? (isDarkManualOverride ? 3500 : 500) : currentLdrValue); 
+    }
+
+    private void initFirebaseListeners() {
+        // Listener untuk Status Lampu
+        dbRef.child("lamp_status").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    boolean status = snapshot.getValue(Boolean.class);
+                    if (isLampOn != status) {
+                        isLampOn = status;
+                        if (isLampOn) lampOnStartTime = System.currentTimeMillis();
+                        applyUiState();
+                        addLog("Lampu " + (isLampOn ? "MENYALA" : "MATI"));
+                    }
+                }
+            }
+            @Override public void onCancelled(@NonNull DatabaseError error) {}
+        });
+
+        // Listener untuk Mode Otomatis
+        dbRef.child("auto_mode").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    isAutoMode = snapshot.getValue(Boolean.class);
+                    applyUiState();
+                }
+            }
+            @Override public void onCancelled(@NonNull DatabaseError error) {}
+        });
+
+        // Listener untuk Sensor Cahaya
+        dbRef.child("sensor_lux").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    currentLdrValue = snapshot.getValue(Integer.class);
+                    updateCahayaUi(currentLdrValue);
+                }
+            }
+            @Override public void onCancelled(@NonNull DatabaseError error) {}
+        });
+
+        // Listener untuk Status Koneksi ESP32 (Heartbeat)
+        dbRef.child("is_connected_tick").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    isConnected = true;
+                    lastTickTime = System.currentTimeMillis();
+                    applyUiState();
+                }
+            }
+            @Override public void onCancelled(@NonNull DatabaseError error) {}
+        });
+
+        // Loop pengecekan offline (Jika 7 detik tidak ada update dari ESP32 = Offline)
+        offlineCheckHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                if (System.currentTimeMillis() - lastTickTime > 7000) {
+                    if (isConnected) {
+                        isConnected = false;
+                        applyUiState();
+                    }
+                }
+                offlineCheckHandler.postDelayed(this, 3000);
+            }
+        });
     }
 
     private void updateLampState(boolean turnOn, String source) {
         if (isLampOn == turnOn) return;
         
-        isLampOn = turnOn;
-        if (isLampOn) lampOnStartTime = System.currentTimeMillis();
-        else lampOnStartTime = 0;
-
-        addLog("lampu di" + (isLampOn ? "HIDUPKAN" : "MATIKAN") + " via " + source);
-        if (notifLamp) sendSystemNotification("Status Lampu", "Lampu sekarang " + (isLampOn ? "MENYALA" : "MATI"));
+        // Kirim perintah ke Firebase
+        dbRef.child("lamp_status").setValue(turnOn);
         
-        applyUiState();
-        saveAppState();
+        // Data lokal akan diupdate otomatis oleh Listener di atas
     }
 
     private void addLog(String message) {
@@ -265,7 +352,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 if (isConnected) {
-                    simulateIoTData();
+                    // Update perhitungan energi tetap berjalan lokal 
+                    // atau bisa diambil dari sensor PZEM jika sudah ada
+                    calculateEnergyLocally();
                     checkAlerts();
                 }
                 realtimeHandler.postDelayed(this, 2000); 
@@ -273,43 +362,35 @@ public class MainActivity extends AppCompatActivity {
         }, 1000);
     }
 
-    private void simulateIoTData() {
-        boolean isDarkNow = useManualLux ? isDarkManualOverride : (random.nextInt(1000) < 300);
-        updateCahayaUi(isDarkNow);
+    private void calculateEnergyLocally() {
+        // Karena sensor tegangan belum ada, kita set nilai ke 0 sesuai permintaan
+        double voltase = 0.0; 
+        double arus = 0.0; 
+        double currentWatt = 0.0;
 
-        if (isAutoMode) {
-            if (isDarkNow && !isLampOn) updateLampState(true, "Sensor Otomatis");
-            else if (!isDarkNow && isLampOn) updateLampState(false, "Sensor Otomatis");
-        }
-
-        double voltase = 215 + random.nextDouble() * 15; // Range 215 - 230V (Lebih stabil)
-        double arus = isLampOn ? (0.2 + random.nextDouble() * 0.2) : 0; // Range 0.2 - 0.4A (Dibawah limit 0.5A)
-
-        if (isLampOn) {
-            if (voltase > 240.0) {
-                updateLampState(false, "Proteksi Tegangan");
-                sendSystemNotification("Bahaya Listrik!", "Tegangan tinggi (" + df.format(voltase) + "V). Lampu dimatikan.");
-            } else if (arus > 0.5) {
-                updateLampState(false, "Proteksi Arus");
-                sendSystemNotification("Bahaya Arus!", "Arus berlebih (" + df.format(arus) + "A). Lampu dimatikan.");
-            }
-
-            double currentWatt = voltase * arus;
-            totalKwh += (currentWatt / 1000.0) * (2.0 / 3600.0);
-            tvDaya.setText(df.format(currentWatt) + " Watt");
-        } else {
-            tvDaya.setText("0 Watt");
-        }
+        tvDaya.setText(df.format(currentWatt) + " Watt");
 
         tvKwhSummary.setText("Total Pemakaian Hari Ini: " + df.format(totalKwh) + " kWh");
         tvCostSummary.setText(currencyFormat.format(totalKwh * 1444.70));
         saveAppState();
     }
 
-    private void updateCahayaUi(boolean isDark) {
-        tvKondisiCahaya.setText(isDark ? "Gelap" : "Terang");
+    private void updateCahayaUi(int ldrValue) {
+        // Hitung persentase kecerahan (0 - 100%)
+        int brightnessPercent = (int) ((1.0 - (ldrValue / 4095.0)) * 100);
+        if (brightnessPercent < 0) brightnessPercent = 0;
+        if (brightnessPercent > 100) brightnessPercent = 100;
+
+        boolean isDark = ldrValue > 2000;
+        
+        tvKondisiCahaya.setText(isDark ? "Gelap (" + brightnessPercent + "%)" : "Terang (" + brightnessPercent + "%)");
         layoutStatusCahaya.setBackgroundResource(isDark ? R.drawable.status_bg_dark : R.drawable.status_bright_bg);
         ivKondisiIcon.setImageResource(isDark ? R.drawable.ic_star_on : R.drawable.ic_history);
+
+        // Logika kontrol otomatis yang sebenarnya
+        if (isAutoMode && isConnected) {
+            updateLampState(isDark, "Sensor Otomatis");
+        }
     }
 
     private void checkAlerts() {
