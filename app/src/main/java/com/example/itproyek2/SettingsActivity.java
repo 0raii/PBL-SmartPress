@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -19,6 +20,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.SwitchCompat;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.button.MaterialButtonToggleGroup;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -26,12 +29,16 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
+
+import java.util.Locale;
 
 public class SettingsActivity extends AppCompatActivity {
 
     private SwitchCompat switchNotifLamp, switchNotifOvertime, switchNotifEnergy;
     private RadioGroup rgTheme;
     private RadioButton rbDark, rbLight;
+    private MaterialButtonToggleGroup toggleThreshold;
     
     private TextView tvStatusDevice1, tvStatusDevice2, tvProfileName, tvProfileEmail;
     private ImageView ivDevice1, ivDevice2, ivProfileMain;
@@ -69,6 +76,7 @@ public class SettingsActivity extends AppCompatActivity {
         rgTheme = findViewById(R.id.rgTheme);
         rbDark = findViewById(R.id.rbDark);
         rbLight = findViewById(R.id.rbLight);
+        toggleThreshold = findViewById(R.id.toggleThreshold);
         
         tvStatusDevice1 = findViewById(R.id.tvStatusDevice1);
         tvStatusDevice2 = findViewById(R.id.tvStatusDevice2);
@@ -105,6 +113,20 @@ public class SettingsActivity extends AppCompatActivity {
         switchNotifLamp.setOnCheckedChangeListener((v, isChecked) -> saveSetting("notif_lamp", isChecked));
         switchNotifOvertime.setOnCheckedChangeListener((v, isChecked) -> saveSetting("notif_overtime", isChecked));
         switchNotifEnergy.setOnCheckedChangeListener((v, isChecked) -> saveSetting("notif_energy", isChecked));
+
+        toggleThreshold.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+            if (isChecked) {
+                int threshold = 2500; // Default Mid
+                if (checkedId == R.id.btnLow) threshold = 1500;
+                else if (checkedId == R.id.btnHigh) threshold = 3500;
+                
+                getSharedPreferences("SmartLampPrefs", MODE_PRIVATE).edit()
+                        .putInt("ldr_threshold", threshold).apply();
+                
+                // Kirim ke firebase juga agar ESP32 tahu
+                dbRef.child("ldr_threshold").setValue(threshold);
+            }
+        });
 
         rgTheme.setOnCheckedChangeListener((group, checkedId) -> {
             boolean selectedIsDark = (checkedId == R.id.rbDark);
@@ -145,9 +167,9 @@ public class SettingsActivity extends AppCompatActivity {
                 .setTitle("keluar akun")
                 .setMessage("yakin nih mau keluar dari smartpress?")
                 .setPositiveButton("ya, keluar", (dialog, which) -> {
-                    // hapus status login nya
+                    // hapus semua data session
                     SharedPreferences.Editor editor = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE).edit();
-                    editor.putBoolean("is_logged_in", false);
+                    editor.clear();
                     editor.apply();
 
                     Toast.makeText(this, "oke udah keluar", Toast.LENGTH_SHORT).show();
@@ -219,7 +241,7 @@ public class SettingsActivity extends AppCompatActivity {
         
         // Lampu Dalam (Lampu 2) sementara kita buat Terputus dulu sesuai permintaan
         tvStatusDevice2.setText("○ Belum Terpasang");
-        tvStatusDevice2.setTextColor(Color.GRAY);
+        tvStatusDevice2.setTextColor(ContextCompat.getColor(this, R.color.text_sub));
         ivDevice2.setAlpha(0.3f);
     }
 
@@ -237,6 +259,11 @@ public class SettingsActivity extends AppCompatActivity {
         boolean isDark = prefs.getBoolean("is_dark_theme", true);
         if (isDark) rbDark.setChecked(true);
         else rbLight.setChecked(true);
+
+        int threshold = prefs.getInt("ldr_threshold", 2500);
+        if (threshold <= 1500) toggleThreshold.check(R.id.btnLow);
+        else if (threshold >= 3500) toggleThreshold.check(R.id.btnHigh);
+        else toggleThreshold.check(R.id.btnMid);
     }
 
     // simpen settingan ke sharedprefs
@@ -247,10 +274,18 @@ public class SettingsActivity extends AppCompatActivity {
     private void setupBottomNav() {
         BottomNavigationView bottomNav = findViewById(R.id.bottomNavSettings);
         bottomNav.setSelectedItemId(R.id.nav_settings);
+        
+        SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
+        String role = prefs.getString("profile_role", "User");
+        
         bottomNav.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
             if (id == R.id.nav_home) {
-                startActivity(new Intent(this, MainActivity.class));
+                if ("Admin".equalsIgnoreCase(role)) {
+                    startActivity(new Intent(this, AdminDashboardActivity.class));
+                } else {
+                    startActivity(new Intent(this, MainActivity.class));
+                }
                 overridePendingTransition(0, 0);
                 finish();
                 return true;

@@ -33,8 +33,13 @@ public class SplashActivity extends AppCompatActivity {
 
             Intent intent;
             if (isLoggedIn) {
-                // Jika sudah login, langsung ke Dashboard
-                intent = new Intent(SplashActivity.this, MainActivity.class);
+                // Ambil role untuk menentukan dashboard
+                String role = prefs.getString("profile_role", "User");
+                if ("Admin".equalsIgnoreCase(role)) {
+                    intent = new Intent(SplashActivity.this, AdminDashboardActivity.class);
+                } else {
+                    intent = new Intent(SplashActivity.this, MainActivity.class);
+                }
             } else {
                 // Jika belum, ke halaman Login
                 intent = new Intent(SplashActivity.this, LoginActivity.class);

@@ -34,28 +34,27 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
         holder.tvTime.setText(item.getTime());
         
         int iconRes = R.drawable.ic_history; // Default
-        int iconColor = Color.GRAY; // Default Color
+        int iconColor = ContextCompat.getColor(holder.itemView.getContext(), R.color.text_sub);
 
         switch (item.getIconRes()) {
             case 1: // Lamp ON
                 iconRes = R.drawable.ic_lamp_on;
-                iconColor = Color.parseColor("#FFD600"); // Kuning Terang
+                iconColor = ContextCompat.getColor(holder.itemView.getContext(), R.color.accent_yellow);
                 break;
             case 2: // Lamp OFF
                 iconRes = R.drawable.ic_lamp_off;
-                iconColor = Color.GRAY;
+                iconColor = ContextCompat.getColor(holder.itemView.getContext(), R.color.text_sub);
                 break;
-            case 3: // Power / Alert
+            case 3: // Power / Alert / Otomatis
                 iconRes = R.drawable.ic_power;
-                iconColor = Color.RED;
+                iconColor = Color.parseColor("#F44336"); // Red
                 break;
-            case 4: // Settings Change
+            case 4: // Manual
                 iconRes = R.drawable.ic_settings;
-                iconColor = Color.BLUE;
+                iconColor = ContextCompat.getColor(holder.itemView.getContext(), R.color.primary_blue);
                 break;
             default:
                 iconRes = R.drawable.ic_history;
-                iconColor = Color.GRAY;
                 break;
         }
         

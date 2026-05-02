@@ -43,6 +43,7 @@ public class DetailActivity extends AppCompatActivity {
     private DatabaseReference dbRef;
     private boolean isLampOn, isConnected;
     private long lastTickTime = 0;
+    private double currentVoltage, currentCurrent, currentPower, totalKwhFromFirebase;
     private int xValue = 0;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final Handler offlineCheckHandler = new Handler(Looper.getMainLooper());
@@ -89,14 +90,14 @@ public class DetailActivity extends AppCompatActivity {
         dbRef = FirebaseDatabase.getInstance("https://smartpress-ea81d-default-rtdb.asia-southeast1.firebasedatabase.app/").getReference();
         initFirebaseListeners();
 
-        // Loop pengecekan offline
+        // Loop pengecekan offline (20 detik toleransi)
         offlineCheckHandler.post(new Runnable() {
             @Override
             public void run() {
-                if (System.currentTimeMillis() - lastTickTime > 7000) {
+                if (System.currentTimeMillis() - lastTickTime > 20000) {
                     isConnected = false;
                 }
-                offlineCheckHandler.postDelayed(this, 3000);
+                offlineCheckHandler.postDelayed(this, 5000);
             }
         });
 
@@ -124,6 +125,12 @@ public class DetailActivity extends AppCompatActivity {
 
     // atur grafik garis nya
     private void setupChart() {
+        // Cek mode malam
+        boolean isDarkMode = (getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK)
+                == android.content.res.Configuration.UI_MODE_NIGHT_YES;
+        int textColor = isDarkMode ? Color.WHITE : Color.DKGRAY;
+        int gridColor = isDarkMode ? Color.parseColor("#33FFFFFF") : Color.parseColor("#1A000000");
+
         lineChart.getDescription().setEnabled(false);
         lineChart.setTouchEnabled(true);
         lineChart.setDragEnabled(true);
@@ -131,8 +138,6 @@ public class DetailActivity extends AppCompatActivity {
         lineChart.setPinchZoom(true);
         lineChart.setBackgroundColor(Color.TRANSPARENT);
         lineChart.setNoDataText("tunggu bentar, datanya lg dijalan...");
-        
-        int textColor = Color.parseColor("#999999"); // Abu-abu lembut agar enak dibaca
         lineChart.setNoDataTextColor(textColor);
 
         XAxis xAxis = lineChart.getXAxis();
@@ -144,11 +149,11 @@ public class DetailActivity extends AppCompatActivity {
 
         lineChart.getAxisLeft().setTextColor(textColor);
         lineChart.getAxisLeft().setDrawGridLines(true);
-        lineChart.getAxisLeft().setGridColor(Color.parseColor("#1AFFFFFF")); // Grid tipis
-        lineChart.getAxisLeft().setAxisMinimum(0f); // Mulai dari 0 biar gampang dibaca
+        lineChart.getAxisLeft().setGridColor(gridColor);
+        lineChart.getAxisLeft().setAxisMinimum(0f);
         
         lineChart.getAxisRight().setEnabled(false);
-        lineChart.getLegend().setEnabled(false); // Matikan legend biar bersih
+        lineChart.getLegend().setEnabled(false);
     }
 
     // mulai simulasi data real-time
@@ -171,12 +176,35 @@ public class DetailActivity extends AppCompatActivity {
             @Override public void onCancelled(@NonNull DatabaseError error) {}
         });
 
+        // PZEM Data Listeners
+        dbRef.child("sensor_voltage").addValueEventListener(new ValueEventListener() {
+            @Override public void onDataChange(@NonNull DataSnapshot s) { if(s.exists()) currentVoltage = s.getValue(Double.class); }
+            @Override public void onCancelled(@NonNull DatabaseError e) {}
+        });
+        dbRef.child("sensor_current").addValueEventListener(new ValueEventListener() {
+            @Override public void onDataChange(@NonNull DataSnapshot s) { if(s.exists()) currentCurrent = s.getValue(Double.class); }
+            @Override public void onCancelled(@NonNull DatabaseError e) {}
+        });
+        dbRef.child("sensor_power").addValueEventListener(new ValueEventListener() {
+            @Override public void onDataChange(@NonNull DataSnapshot s) { if(s.exists()) currentPower = s.getValue(Double.class); }
+            @Override public void onCancelled(@NonNull DatabaseError e) {}
+        });
+        dbRef.child("sensor_energy").addValueEventListener(new ValueEventListener() {
+            @Override public void onDataChange(@NonNull DataSnapshot s) { if(s.exists()) totalKwhFromFirebase = s.getValue(Double.class); }
+            @Override public void onCancelled(@NonNull DatabaseError e) {}
+        });
+
         dbRef.child("is_connected_tick").addValueEventListener(new ValueEventListener() {
+            private Object lastValue = null;
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
-                    isConnected = true;
-                    lastTickTime = System.currentTimeMillis();
+                    Object newValue = snapshot.getValue();
+                    if (lastValue != null && !newValue.equals(lastValue)) {
+                        isConnected = true;
+                        lastTickTime = System.currentTimeMillis();
+                    }
+                    lastValue = newValue;
                 }
             }
             @Override public void onCancelled(@NonNull DatabaseError error) {}
@@ -199,42 +227,46 @@ public class DetailActivity extends AppCompatActivity {
 
     // update monitoring lebih dalem
     private void updateDeepMonitoring() {
-        // Karena sensor fisik belum ada, kita simulasi pakai data lampu 5W milik user
         double volt = 0.0;
         double ampere = 0.0;
         double watt = 0.0;
+        double energy = 0.0;
 
         if (isConnected) {
-            // Simulasi tegangan PLN yang naik turun sedikit (218 - 222V)
-            volt = 220.0 + (random.nextDouble() * 4 - 2);
-            if (isLampOn) {
-                // Simulasi daya lampu 5 Watt
-                watt = 5.0 + (random.nextDouble() * 0.4 - 0.2);
-                ampere = watt / volt;
-
-                // Tambah total kWh secara otomatis
-                totalKwh += (watt * (2.0 / 3600.0)) / 1000.0;
-                saveCurrentKwh();
+            // Gunakan data real dari PZEM jika tersedia (> 0)
+            if (currentVoltage > 0) {
+                volt = currentVoltage;
+                ampere = currentCurrent;
+                watt = currentPower;
+                energy = totalKwhFromFirebase;
+                tvEfficiency.setText("Status: Real-time PZEM Monitoring");
+                tvEfficiency.setTextColor(Color.parseColor("#4CAF50"));
+            } else {
+                // Fallback ke simulasi jika sensor belum kirim data
+                volt = 220.0 + (random.nextDouble() * 4 - 2);
+                if (isLampOn) {
+                    watt = 5.0 + (random.nextDouble() * 0.4 - 0.2);
+                    ampere = watt / volt;
+                    totalKwh += (watt * (2.0 / 3600.0)) / 1000.0;
+                    saveCurrentKwh();
+                }
+                energy = totalKwh;
+                tvEfficiency.setText("Status: Simulasi Lampu (Sensor Pending)");
+                tvEfficiency.setTextColor(Color.parseColor("#FFA000"));
             }
-            tvEfficiency.setText(isLampOn ? "Status: Simulasi Lampu 5W Aktif" : "Status: Lampu Standby");
-            tvEfficiency.setTextColor(Color.parseColor("#4CAF50"));
         } else {
-            // Jika OFFLINE, paksa semua nilai ke nol
-            volt = 0.0;
-            ampere = 0.0;
-            watt = 0.0;
             tvEfficiency.setText("Status: PERANGKAT OFFLINE");
             tvEfficiency.setTextColor(Color.parseColor("#F44336"));
         }
 
-        // UPDATE UI TEKS (PENTING)
+        // UPDATE UI
         tvVoltDetail.setText(String.format(Locale.getDefault(), "%.1f V", volt));
         tvAmpereDetail.setText(String.format(Locale.getDefault(), "%.3f A", ampere));
-        tvKwhToday.setText(String.format(Locale.getDefault(), "%.4f kWh", totalKwh));
-        tvEstimasiBiaya.setText(currencyFormat.format(totalKwh * 1444.70));
+        tvKwhToday.setText(String.format(Locale.getDefault(), "%.4f kWh", energy));
+        tvEstimasiBiaya.setText(currencyFormat.format(energy * 1444.70));
         
         // Prediksi bulanan
-        double monthlyPrediction = totalKwh * 30 * 1444.70; 
+        double monthlyPrediction = energy * 30 * 1444.70;
         tvPrediction.setText(currencyFormat.format(monthlyPrediction));
         
         addEntry((float) watt);

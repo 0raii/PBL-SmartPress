@@ -2,6 +2,8 @@ package com.example.itproyek2;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import com.google.android.material.timepicker.MaterialTimePicker;
+import com.google.android.material.timepicker.TimeFormat;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -22,6 +24,7 @@ import androidx.core.content.ContextCompat;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.button.MaterialButtonToggleGroup;
+import com.google.android.material.materialswitch.MaterialSwitch;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -47,15 +50,23 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout layoutStatusCahaya;
     private MaterialButtonToggleGroup toggleGroupLamp, toggleGroupMode;
     private Button btnDetail;
+    private MaterialSwitch switchTimer;
+    private Button btnStartTime, btnEndTime;
 
     private DatabaseReference dbRef;
-    private boolean isLampOn, isAutoMode, isConnected = false;
+    private boolean isLampOn, isAutoMode, isConnected = false; 
+    private boolean isTimerEnabled = false;
     private long lastTickTime = 0;
+    private static boolean hasShownOfflineToastOnce = false;
     private final Handler offlineCheckHandler = new Handler();
 
     private boolean notifLamp, notifOvertime, notifEnergy;
     private int currentLdrValue = 0;
+    private int ldrThreshold = 2500;
+    private String timerOnStr = "18:00";
+    private String timerOffStr = "06:00";
     private double totalKwh = 0;
+    private double currentVoltage = 0, currentArus = 0, currentWatt = 0;
     private long lampOnStartTime = 0;
     private boolean useManualLux = false;
     private boolean isDarkManualOverride = false;
@@ -89,6 +100,9 @@ public class MainActivity extends AppCompatActivity {
         toggleGroupLamp = findViewById(R.id.toggleGroupLamp);
         toggleGroupMode = findViewById(R.id.toggleGroupMode);
         btnDetail = findViewById(R.id.btnDetail);
+        switchTimer = findViewById(R.id.switchTimer);
+        btnStartTime = findViewById(R.id.btnStartTime);
+        btnEndTime = findViewById(R.id.btnEndTime);
 
         // Inisialisasi Firebase
         dbRef = FirebaseDatabase.getInstance("https://smartpress-ea81d-default-rtdb.asia-southeast1.firebasedatabase.app/").getReference();
@@ -111,7 +125,10 @@ public class MainActivity extends AppCompatActivity {
         toggleGroupLamp.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
             if (isChecked) {
                 if (!isConnected) {
-                    showToast("waduh, device lagi offline nih");
+                    if (!hasShownOfflineToastOnce) {
+                        showToast("Perangkat sedang Offline");
+                        hasShownOfflineToastOnce = true;
+                    }
                     toggleGroupLamp.post(() -> toggleGroupLamp.check(isLampOn ? R.id.btnOn : R.id.btnOff));
                 } else if (isAutoMode) {
                     showToast("matiin mode OTOMATIS dulu kalo mau manual");
@@ -122,24 +139,14 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // klik status cahaya buat simulasi gelap terang
-        layoutStatusCahaya.setOnClickListener(v -> {
-            useManualLux = true;
-            isDarkManualOverride = !isDarkManualOverride;
-            int simulatedLdrValue = isDarkManualOverride ? 3500 : 500;
-            showToast("demo: sensor set " + (isDarkManualOverride ? "GELAP" : "TERANG"));
-            updateCahayaUi(simulatedLdrValue);
-            
-            if (isAutoMode && isConnected) {
-                updateLampState(isDarkManualOverride, "Sensor Otomatis (Demo)");
-            }
-        });
-
         // ganti mode manual/otomatis
         toggleGroupMode.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
             if (isChecked) {
                 if (!isConnected) {
-                    showToast("offilne bro, gak bisa ganti mode");
+                    if (!hasShownOfflineToastOnce) {
+                        showToast("Perangkat sedang Offline");
+                        hasShownOfflineToastOnce = true;
+                    }
                     toggleGroupMode.post(() -> toggleGroupMode.check(isAutoMode ? R.id.btnAuto : R.id.btnManual));
                 } else {
                     boolean newMode = (checkedId == R.id.btnAuto);
@@ -152,6 +159,27 @@ public class MainActivity extends AppCompatActivity {
         btnDetail.setOnClickListener(v -> {
             startActivity(new Intent(MainActivity.this, DetailActivity.class));
         });
+
+        switchTimer.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isConnected) {
+                dbRef.child("timer_enabled").setValue(isChecked);
+                addLog("Jadwal lampu " + (isChecked ? "DIAKTIFKAN" : "DIMATIKAN"));
+                
+                // Beri tahu user jika mode otomatis sedang aktif
+                if (isChecked && isAutoMode) {
+                    showToast("Mode Otomatis ditangguhkan selama Penjadwalan aktif");
+                }
+            } else {
+                if (!hasShownOfflineToastOnce) {
+                    showToast("Perangkat sedang Offline");
+                    hasShownOfflineToastOnce = true;
+                }
+                switchTimer.setChecked(isTimerEnabled);
+            }
+        });
+
+        btnStartTime.setOnClickListener(v -> showTimePicker(true));
+        btnEndTime.setOnClickListener(v -> showTimePicker(false));
 
         // navigasi bawah
         BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
@@ -242,7 +270,17 @@ public class MainActivity extends AppCompatActivity {
         tvWifiStatus.setText(isConnected ? "CONNECTED" : "DISCONNECTED");
         tvWifiStatus.setTextColor(Color.parseColor(isConnected ? "#4CAF50" : "#F44336"));
         
-        updateCahayaUi(useManualLux ? (isDarkManualOverride ? 3500 : 500) : currentLdrValue); 
+        updateCahayaUi(currentLdrValue);
+
+        switchTimer.setChecked(isTimerEnabled);
+        btnStartTime.setText(timerOnStr);
+        btnEndTime.setText(timerOffStr);
+
+        // Kontrol akses tombol jam berdasarkan status switch
+        btnStartTime.setEnabled(isTimerEnabled);
+        btnEndTime.setEnabled(isTimerEnabled);
+        btnStartTime.setAlpha(isTimerEnabled ? 1.0f : 0.5f);
+        btnEndTime.setAlpha(isTimerEnabled ? 1.0f : 0.5f);
     }
 
     private void initFirebaseListeners() {
@@ -287,30 +325,102 @@ public class MainActivity extends AppCompatActivity {
             @Override public void onCancelled(@NonNull DatabaseError error) {}
         });
 
-        // Listener untuk Status Koneksi ESP32 (Heartbeat)
-        dbRef.child("is_connected_tick").addValueEventListener(new ValueEventListener() {
+        // Listener untuk PZEM (Voltage, Current, Power, Energy)
+        dbRef.child("sensor_voltage").addValueEventListener(new ValueEventListener() {
+            @Override public void onDataChange(@NonNull DataSnapshot s) { if(s.exists()) currentVoltage = s.getValue(Double.class); applyUiState(); }
+            @Override public void onCancelled(@NonNull DatabaseError e) {}
+        });
+        dbRef.child("sensor_current").addValueEventListener(new ValueEventListener() {
+            @Override public void onDataChange(@NonNull DataSnapshot s) { if(s.exists()) currentArus = s.getValue(Double.class); applyUiState(); }
+            @Override public void onCancelled(@NonNull DatabaseError e) {}
+        });
+        dbRef.child("sensor_power").addValueEventListener(new ValueEventListener() {
+            @Override public void onDataChange(@NonNull DataSnapshot s) { if(s.exists()) currentWatt = s.getValue(Double.class); applyUiState(); }
+            @Override public void onCancelled(@NonNull DatabaseError e) {}
+        });
+        dbRef.child("sensor_energy").addValueEventListener(new ValueEventListener() {
+            @Override public void onDataChange(@NonNull DataSnapshot s) { if(s.exists()) totalKwh = s.getValue(Double.class); applyUiState(); }
+            @Override public void onCancelled(@NonNull DatabaseError e) {}
+        });
+
+        // Listener untuk Threshold LDR
+        dbRef.child("ldr_threshold").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
-                    isConnected = true;
-                    lastTickTime = System.currentTimeMillis();
+                    ldrThreshold = snapshot.getValue(Integer.class);
+                    updateCahayaUi(currentLdrValue);
+                }
+            }
+            @Override public void onCancelled(@NonNull DatabaseError error) {}
+        });
+
+        // Listener untuk Timer
+        dbRef.child("timer_off").addValueEventListener(new ValueEventListener() {
+            @Override public void onDataChange(@NonNull DataSnapshot s) { if(s.exists()) { timerOffStr = s.getValue(String.class); applyUiState(); } }
+            @Override public void onCancelled(@NonNull DatabaseError e) {}
+        });
+
+        // Listener untuk Timer Enabled
+        dbRef.child("timer_enabled").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    isTimerEnabled = snapshot.getValue(Boolean.class);
                     applyUiState();
                 }
             }
             @Override public void onCancelled(@NonNull DatabaseError error) {}
         });
 
-        // Loop pengecekan offline (Jika 7 detik tidak ada update dari ESP32 = Offline)
+        // Listener untuk Timer On
+        dbRef.child("timer_on").addValueEventListener(new ValueEventListener() {
+            @Override public void onDataChange(@NonNull DataSnapshot s) { if(s.exists()) { timerOnStr = s.getValue(String.class); applyUiState(); } }
+            @Override public void onCancelled(@NonNull DatabaseError e) {}
+        });
+
+        // Listener untuk Status Koneksi ESP32 (Heartbeat)
+        dbRef.child("is_connected_tick").addValueEventListener(new ValueEventListener() {
+            private Object lastValue = null;
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    Object newValue = snapshot.getValue();
+                    // Hanya anggap online jika nilai tick berubah (artinya ada aktifitas baru)
+                    if (lastValue != null && !newValue.equals(lastValue)) {
+                        isConnected = true;
+                        lastTickTime = System.currentTimeMillis();
+                        applyUiState();
+                    }
+                    lastValue = newValue;
+                }
+            }
+            @Override public void onCancelled(@NonNull DatabaseError error) {}
+        });
+
+        // Loop pengecekan offline (Jika 20 detik tidak ada update dari ESP32 = Offline)
         offlineCheckHandler.post(new Runnable() {
             @Override
             public void run() {
-                if (System.currentTimeMillis() - lastTickTime > 7000) {
+                if (System.currentTimeMillis() - lastTickTime > 20000) {
                     if (isConnected) {
                         isConnected = false;
                         applyUiState();
+                        
+                        if (!hasShownOfflineToastOnce) {
+                            showToast("Perangkat Terputus (Offline)");
+                            hasShownOfflineToastOnce = true;
+                        }
+                    }
+                } else {
+                    // Jika kembali Online, reset flag toast agar bisa muncul lagi nanti jika putus lagi
+                    if (!isConnected) {
+                        isConnected = true;
+                        hasShownOfflineToastOnce = false;
+                        applyUiState();
                     }
                 }
-                offlineCheckHandler.postDelayed(this, 3000);
+                offlineCheckHandler.postDelayed(this, 5000);
             }
         });
     }
@@ -352,25 +462,23 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 if (isConnected) {
-                    // Update perhitungan energi tetap berjalan lokal 
-                    // atau bisa diambil dari sensor PZEM jika sudah ada
                     calculateEnergyLocally();
                     checkAlerts();
+                    checkTimers();
                 }
-                realtimeHandler.postDelayed(this, 2000); 
+                realtimeHandler.postDelayed(this, 1000);
             }
         }, 1000);
     }
 
     private void calculateEnergyLocally() {
-        // Karena sensor tegangan belum ada, kita set nilai ke 0 sesuai permintaan
-        double voltase = 0.0; 
-        double arus = 0.0; 
-        double currentWatt = 0.0;
+        // Karena sensor PZEM belum ada/belum kirim data, nilai default adalah 0 dari inisialisasi variabel
+        // Jika sudah ada data dari Firebase, listener akan mengupdate variabel secara otomatis.
 
         tvDaya.setText(df.format(currentWatt) + " Watt");
-
         tvKwhSummary.setText("Total Pemakaian Hari Ini: " + df.format(totalKwh) + " kWh");
+        
+        // Menampilkan estimasi biaya berdasarkan totalKwh dari PZEM
         tvCostSummary.setText(currencyFormat.format(totalKwh * 1444.70));
         saveAppState();
     }
@@ -381,16 +489,65 @@ public class MainActivity extends AppCompatActivity {
         if (brightnessPercent < 0) brightnessPercent = 0;
         if (brightnessPercent > 100) brightnessPercent = 100;
 
-        boolean isDark = ldrValue > 2000;
+        boolean isDark = ldrValue > ldrThreshold;
         
         tvKondisiCahaya.setText(isDark ? "Gelap (" + brightnessPercent + "%)" : "Terang (" + brightnessPercent + "%)");
+        tvKondisiCahaya.setTextColor(isDark ? Color.WHITE : Color.BLACK);
         layoutStatusCahaya.setBackgroundResource(isDark ? R.drawable.status_bg_dark : R.drawable.status_bright_bg);
         ivKondisiIcon.setImageResource(isDark ? R.drawable.ic_star_on : R.drawable.ic_history);
+        ivKondisiIcon.setColorFilter(isDark ? Color.WHITE : Color.BLACK);
 
-        // Logika kontrol otomatis yang sebenarnya
-        if (isAutoMode && isConnected) {
+        // Logika kontrol otomatis: Hanya jalan jika Timer MATI untuk menghindari konflik
+        if (isAutoMode && isConnected && !isTimerEnabled) {
             updateLampState(isDark, "Sensor Otomatis");
         }
+    }
+
+    private void checkTimers() {
+        if (!isTimerEnabled || !isConnected) return;
+
+        try {
+            String currentTimeStr = new SimpleDateFormat("HH:mm", Locale.getDefault()).format(new Date());
+            
+            if (currentTimeStr.equals(timerOnStr)) {
+                if (!isLampOn) {
+                    updateLampState(true, "Jadwal Lampu (Mulai)");
+                }
+            } else if (currentTimeStr.equals(timerOffStr)) {
+                if (isLampOn) {
+                    updateLampState(false, "Jadwal Lampu (Selesai)");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void showTimePicker(boolean isStartTime) {
+        String currentTime = isStartTime ? timerOnStr : timerOffStr;
+        String[] parts = currentTime.split(":");
+        int hour = Integer.parseInt(parts[0]);
+        int minute = Integer.parseInt(parts[1]);
+
+        MaterialTimePicker picker = new MaterialTimePicker.Builder()
+                .setTimeFormat(TimeFormat.CLOCK_24H)
+                .setHour(hour)
+                .setMinute(minute)
+                .setTitleText(isStartTime ? "Pilih Jam Mulai" : "Pilih Jam Selesai")
+                .setInputMode(MaterialTimePicker.INPUT_MODE_KEYBOARD)
+                .build();
+
+        picker.addOnPositiveButtonClickListener(v -> {
+            String selectedTime = String.format(Locale.getDefault(), "%02d:%02d", picker.getHour(), picker.getMinute());
+            if (isStartTime) {
+                dbRef.child("timer_on").setValue(selectedTime);
+            } else {
+                dbRef.child("timer_off").setValue(selectedTime);
+            }
+            showToast("Jadwal " + (isStartTime ? "mulai" : "selesai") + " diatur ke " + selectedTime);
+        });
+
+        picker.show(getSupportFragmentManager(), "MATERIAL_TIME_PICKER");
     }
 
     private void checkAlerts() {

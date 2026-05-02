@@ -55,10 +55,11 @@ public class LoginActivity extends AppCompatActivity {
             } else if (dbHelper.checkUser(email, password)) {
                 // Ambil data user dari SQLite untuk ditaruh di Profile
                 Cursor cursor = dbHelper.getUserData(email);
+                String role = "User"; // Default
                 if (cursor != null && cursor.moveToFirst()) {
                     String name = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COL_NAME));
                     String phone = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COL_PHONE));
-                    String role = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COL_ROLE));
+                    role = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COL_ROLE));
                     
                     SharedPreferences.Editor editor = prefs.edit();
                     editor.putBoolean("is_logged_in", true);
@@ -71,13 +72,22 @@ public class LoginActivity extends AppCompatActivity {
                 }
 
                 Toast.makeText(this, "Sip, login berhasil!", Toast.LENGTH_SHORT).show();
-                startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                
+                // Arahkan berdasarkan Role
+                if ("Admin".equalsIgnoreCase(role)) {
+                    startActivity(new Intent(LoginActivity.this, AdminDashboardActivity.class));
+                } else {
+                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                }
                 finish();
             } else if (email.equals("admin@gmail.com") && password.equals("123456")) {
                 // Fallback dummy admin
                 Toast.makeText(this, "Login Admin Berhasil!", Toast.LENGTH_SHORT).show();
-                prefs.edit().putBoolean("is_logged_in", true).apply();
-                startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putBoolean("is_logged_in", true);
+                editor.putString("profile_role", "Admin");
+                editor.apply();
+                startActivity(new Intent(LoginActivity.this, AdminDashboardActivity.class));
                 finish();
             } else {
                 Toast.makeText(this, "Email atau password salah!", Toast.LENGTH_SHORT).show();

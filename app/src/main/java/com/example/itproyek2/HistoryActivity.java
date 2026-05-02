@@ -61,10 +61,18 @@ public class HistoryActivity extends AppCompatActivity {
     private void setupBottomNav() {
         BottomNavigationView bottomNav = findViewById(R.id.bottomNavHistory);
         bottomNav.setSelectedItemId(R.id.nav_history);
+        
+        SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
+        String role = prefs.getString("profile_role", "User");
+        
         bottomNav.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
             if (id == R.id.nav_home) {
-                startActivity(new Intent(this, MainActivity.class));
+                if ("Admin".equalsIgnoreCase(role)) {
+                    startActivity(new Intent(this, AdminDashboardActivity.class));
+                } else {
+                    startActivity(new Intent(this, MainActivity.class));
+                }
                 overridePendingTransition(0, 0);
                 finish();
                 return true;

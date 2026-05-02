@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">SmartPress</string>
     <string name="smart_press_app">Dashboard SmartPress</string>
-    <string name="smart_lamp_controller">Kontrol Lampu Pintar</string>
+    <string name="smart_lamp_controller">SmartPress</string>
     <string name="welcome_user">Selamat Datang, Pengguna</string>
 
     <string name="status_device">Status Perangkat IoT</string>
@@ -71,6 +71,13 @@
     <string name="kondisi_cahaya">Kondisi Cahaya</string>
     <string name="kondisi_cahaya_default">: --</string>
     <string name="icon_desc">Deskripsi Ikon</string>
+
+    <!-- Timer / Scheduling -->
+    <string name="penjadwalan_lampu">Penjadwalan Lampu</string>
+    <string name="aktifkan_jadwal">Aktifkan Jadwal</string>
+    <string name="waktu_mulai">Waktu Mulai</string>
+    <string name="waktu_selesai">Waktu Selesai</string>
+    <string name="pilih_waktu">Pilih Waktu</string>
 
     <!-- Additional Strings for Activity/History -->
     <string name="activity_title">Aktivitas</string>
