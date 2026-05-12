@@ -106,6 +106,12 @@ public class EditProfileActivity extends AppCompatActivity {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, roles);
         actvRole.setAdapter(adapter);
 
+        // Sembunyikan Role jika bukan Admin
+        String currentRole = prefs.getString("profile_role", "User");
+        if (!"Admin".equalsIgnoreCase(currentRole)) {
+            findViewById(R.id.layoutRoleSection).setVisibility(android.view.View.GONE);
+        }
+
         // Load data saat ini
         etName.setText(prefs.getString("profile_name", "Sofiani"));
         etEmail.setText(prefs.getString("profile_email", "sofiani@gmail.com"));

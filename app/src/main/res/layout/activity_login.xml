@@ -205,11 +205,14 @@
                 </com.google.android.material.card.MaterialCardView>
 
                 <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/btnGoogleLogin"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     app:cardCornerRadius="12dp"
                     app:cardElevation="2dp"
-                    app:strokeWidth="0dp">
+                    app:strokeWidth="0dp"
+                    android:clickable="true"
+                    android:focusable="true">
                     <ImageView
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"

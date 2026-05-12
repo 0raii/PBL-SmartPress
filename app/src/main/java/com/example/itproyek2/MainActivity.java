@@ -54,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
     private Button btnStartTime, btnEndTime;
 
     private DatabaseReference dbRef;
+    private DatabaseHelper dbHelper;
     private boolean isLampOn, isAutoMode, isConnected = false; 
     private boolean isTimerEnabled = false;
     private long lastTickTime = 0;
@@ -62,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean notifLamp, notifOvertime, notifEnergy;
     private int currentLdrValue = 0;
+    private int currentLumen = 0;
     private int ldrThreshold = 2500;
     private String timerOnStr = "18:00";
     private String timerOffStr = "06:00";
@@ -103,6 +105,8 @@ public class MainActivity extends AppCompatActivity {
         switchTimer = findViewById(R.id.switchTimer);
         btnStartTime = findViewById(R.id.btnStartTime);
         btnEndTime = findViewById(R.id.btnEndTime);
+
+        dbHelper = new DatabaseHelper(this);
 
         // Inisialisasi Firebase
         dbRef = FirebaseDatabase.getInstance("https://smartpress-ea81d-default-rtdb.asia-southeast1.firebasedatabase.app/").getReference();
@@ -484,22 +488,41 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateCahayaUi(int ldrValue) {
-        // Hitung persentase kecerahan (0 - 100%)
-        int brightnessPercent = (int) ((1.0 - (ldrValue / 4095.0)) * 100);
-        if (brightnessPercent < 0) brightnessPercent = 0;
-        if (brightnessPercent > 100) brightnessPercent = 100;
+        // Konversi ADC (0-4095) ke Lumen (0-1000)
+        // 4095 (Gelap) -> 0 Lumen
+        // 0 (Terang) -> 1000 Lumen
+        currentLumen = (int) (((4095.0 - ldrValue) / 4095.0) * 1000);
+        if (currentLumen < 0) currentLumen = 0;
+        if (currentLumen > 1000) currentLumen = 1000;
 
         boolean isDark = ldrValue > ldrThreshold;
         
-        tvKondisiCahaya.setText(isDark ? "Gelap (" + brightnessPercent + "%)" : "Terang (" + brightnessPercent + "%)");
+        tvKondisiCahaya.setText(currentLumen + " Lumen");
         tvKondisiCahaya.setTextColor(isDark ? Color.WHITE : Color.BLACK);
         layoutStatusCahaya.setBackgroundResource(isDark ? R.drawable.status_bg_dark : R.drawable.status_bright_bg);
         ivKondisiIcon.setImageResource(isDark ? R.drawable.ic_star_on : R.drawable.ic_history);
         ivKondisiIcon.setColorFilter(isDark ? Color.WHITE : Color.BLACK);
 
-        // Logika kontrol otomatis: Hanya jalan jika Timer MATI untuk menghindari konflik
+        // Logika kontrol otomatis: Mengikuti Hysteresis ESP32 (-500)
         if (isAutoMode && isConnected && !isTimerEnabled) {
-            updateLampState(isDark, "Sensor Otomatis");
+            SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
+            int userId = prefs.getInt("profile_id", -1);
+            
+            if (!isLampOn && ldrValue > ldrThreshold) {
+                // Sangat Gelap -> Hidupkan
+                updateLampState(true, "Sensor Otomatis");
+                if (userId != -1) {
+                    dbHelper.addAutoLog(userId, "HIDUP", currentLumen, currentWatt);
+                    dbHelper.updateDailyStats(userId, new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date()), totalKwh, 1);
+                }
+            } else if (isLampOn && ldrValue < (ldrThreshold - 500)) {
+                // Sudah Terang -> Matikan
+                updateLampState(false, "Sensor Otomatis");
+                if (userId != -1) {
+                    dbHelper.addAutoLog(userId, "MATI", currentLumen, currentWatt);
+                    dbHelper.updateDailyStats(userId, new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date()), totalKwh, 1);
+                }
+            }
         }
     }
 
@@ -538,7 +561,7 @@ public class MainActivity extends AppCompatActivity {
                 .build();
 
         picker.addOnPositiveButtonClickListener(v -> {
-            String selectedTime = String.format(Locale.getDefault(), "%02d:%02d", picker.getHour(), picker.getMinute());
+            String selectedTime = String.format(Locale.US, "%02d:%02d", picker.getHour(), picker.getMinute());
             if (isStartTime) {
                 dbRef.child("timer_on").setValue(selectedTime);
             } else {

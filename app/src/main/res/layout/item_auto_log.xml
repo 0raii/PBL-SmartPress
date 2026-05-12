@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="8dp"
+    app:cardBackgroundColor="@color/card_bg_custom"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="0dp"
+    app:strokeColor="@color/divider_color"
+    app:strokeWidth="1dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="12dp"
+        android:baselineAligned="false"
+        android:weightSum="3">
+
+        <!-- Kolom Waktu -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Waktu"
+                android:textColor="@color/text_sub"
+                android:textSize="10sp" />
+            <TextView
+                android:id="@+id/tvActionTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="12 Mei, 18:30"
+                android:textColor="@color/text_head"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Kolom Aksi -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Aksi"
+                android:textColor="@color/text_sub"
+                android:textSize="10sp" />
+            <TextView
+                android:id="@+id/tvActionTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="HIDUP"
+                android:textColor="@color/accent_yellow"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Kolom Cahaya -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="end"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Cahaya (Lm)"
+                android:textColor="@color/text_sub"
+                android:textSize="10sp" />
+            <TextView
+                android:id="@+id/tvLumenValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="250 Lm"
+                android:textColor="@color/primary_blue"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/tvWattValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="15.5 W"
+                android:textColor="@color/text_sub"
+                android:textSize="10sp" />
+        </LinearLayout>
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

@@ -84,17 +84,38 @@
                             android:textColor="@color/text_sub"
                             android:textSize="14sp" />
 
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btnEditProfile"
-                            style="@style/Widget.Material3.Button.TonalButton"
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:minHeight="0dp"
-                            android:paddingVertical="4dp"
-                            android:text="@string/edit_profil"
-                            android:textSize="12sp"
-                            app:cornerRadius="12dp" />
+                            android:orientation="horizontal">
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnEditProfile"
+                                style="@style/Widget.Material3.Button.TonalButton"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:minHeight="0dp"
+                                android:paddingVertical="4dp"
+                                android:text="@string/edit_profil"
+                                android:textSize="12sp"
+                                app:cornerRadius="12dp" />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnSetPassword"
+                                style="@style/Widget.Material3.Button.TonalButton"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:layout_marginStart="8dp"
+                                android:minHeight="0dp"
+                                android:paddingVertical="4dp"
+                                android:text="Set Password"
+                                android:textColor="@color/accent_yellow"
+                                android:textSize="12sp"
+                                android:visibility="gone"
+                                app:cornerRadius="12dp" />
+                        </LinearLayout>
                     </LinearLayout>
 
                     <ImageView
@@ -338,24 +359,24 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Redup"
-                            android:textSize="12sp" />
+                            android:text="@string/label_redup"
+                            android:textSize="11sp" />
                         <Button
                             android:id="@+id/btnMid"
                             style="@style/Widget.Material3.Button.OutlinedButton"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Standar"
-                            android:textSize="12sp" />
+                            android:text="@string/label_standar"
+                            android:textSize="11sp" />
                         <Button
                             android:id="@+id/btnHigh"
                             style="@style/Widget.Material3.Button.OutlinedButton"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Gelap"
-                            android:textSize="12sp" />
+                            android:text="@string/label_gelap"
+                            android:textSize="11sp" />
                     </com.google.android.material.button.MaterialButtonToggleGroup>
 
                     <!-- Keterangan Sensitivitas -->
@@ -363,7 +384,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
-                        android:text="Keterangan:\n• Redup: Lampu menyala lebih awal pas sore hari.\n• Standar: Lampu menyala pas mendung atau malam normal.\n• Gelap: Lampu baru nyala kalau sudah gelap gulita."
+                        android:text="@string/desc_sensitivity"
                         android:textColor="@color/text_sub"
                         android:textSize="12sp"
                         android:lineSpacingExtra="4dp" />

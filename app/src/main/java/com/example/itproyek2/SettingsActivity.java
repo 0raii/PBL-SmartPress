@@ -43,6 +43,7 @@ public class SettingsActivity extends AppCompatActivity {
     private TextView tvStatusDevice1, tvStatusDevice2, tvProfileName, tvProfileEmail;
     private ImageView ivDevice1, ivDevice2, ivProfileMain;
     private RelativeLayout layoutUserGuide, layoutContactSupport, layoutAbout, layoutLogout;
+    private MaterialButton btnSetPassword;
     private DatabaseReference dbRef;
 
     private final ActivityResultLauncher<Intent> editProfileLauncher = registerForActivityResult(
@@ -53,9 +54,16 @@ public class SettingsActivity extends AppCompatActivity {
             }
     );
 
+    private final ActivityResultLauncher<Intent> setPasswordLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                updateProfileUi();
+            }
+    );
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // pasang tema dulu sebelum super.onCreate
+        // ... (tema logic tetap sama)
         SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
         boolean isDark = prefs.getBoolean("is_dark_theme", true);
         if (isDark) {
@@ -89,6 +97,7 @@ public class SettingsActivity extends AppCompatActivity {
         layoutContactSupport = findViewById(R.id.layoutContactSupport);
         layoutAbout = findViewById(R.id.layoutAbout);
         layoutLogout = findViewById(R.id.layoutLogout);
+        btnSetPassword = findViewById(R.id.btnSetPassword);
 
         loadSettings();
         updateDeviceConnectionUi();
@@ -103,6 +112,10 @@ public class SettingsActivity extends AppCompatActivity {
 
         findViewById(R.id.btnEditProfile).setOnClickListener(v -> {
             editProfileLauncher.launch(new Intent(SettingsActivity.this, EditProfileActivity.class));
+        });
+
+        btnSetPassword.setOnClickListener(v -> {
+            setPasswordLauncher.launch(new Intent(SettingsActivity.this, SetPasswordActivity.class));
         });
 
 
@@ -154,6 +167,13 @@ public class SettingsActivity extends AppCompatActivity {
         tvProfileName.setText(prefs.getString("profile_name", "Sofiani"));
         tvProfileEmail.setText(prefs.getString("profile_email", "sofiani@gmail.com"));
         
+        boolean hasPassword = prefs.getBoolean("has_password", true);
+        if (!hasPassword) {
+            btnSetPassword.setVisibility(android.view.View.VISIBLE);
+        } else {
+            btnSetPassword.setVisibility(android.view.View.GONE);
+        }
+
         String savedImageUri = prefs.getString("profile_image_uri", null);
         if (savedImageUri != null && ivProfileMain != null) {
             // Force refresh ImageView by clearing current image and setting to null first

@@ -145,34 +145,40 @@
                 android:importantForAutofill="no"
                 android:layout_marginBottom="16dp"/>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/role"
-                android:textColor="@color/text_head"
-                android:textStyle="bold"
-                android:layout_marginBottom="8dp"/>
-
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            <LinearLayout
+                android:id="@+id/layoutRoleSection"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="32dp"
-                app:boxCornerRadiusBottomEnd="12dp"
-                app:boxCornerRadiusBottomStart="12dp"
-                app:boxCornerRadiusTopEnd="12dp"
-                app:boxCornerRadiusTopStart="12dp"
-                app:boxBackgroundColor="@color/card_bg_custom">
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/role"
+                    android:textColor="@color/text_head"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp"/>
 
-                <AutoCompleteTextView
-                    android:id="@+id/actvEditRole"
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                     android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:inputType="none"
-                    android:paddingHorizontal="16dp"
-                    android:hint="Pilih Role"
-                    android:textColor="@color/text_head" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="32dp"
+                    app:boxCornerRadiusBottomEnd="12dp"
+                    app:boxCornerRadiusBottomStart="12dp"
+                    app:boxCornerRadiusTopEnd="12dp"
+                    app:boxCornerRadiusTopStart="12dp"
+                    app:boxBackgroundColor="@color/card_bg_custom">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/actvEditRole"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:inputType="none"
+                        android:paddingHorizontal="16dp"
+                        android:hint="Pilih Role"
+                        android:textColor="@color/text_head" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSimpanProfil"

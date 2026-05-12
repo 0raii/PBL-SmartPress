@@ -68,9 +68,17 @@
     <string name="notif_overload">OVERLOAD! Sistem proteksi aktif.</string>
     <string name="reset">Reset Sistem</string>
     <string name="lamp_icon_desc">Ikon Status Lampu</string>
-    <string name="kondisi_cahaya">Kondisi Cahaya</string>
-    <string name="kondisi_cahaya_default">: --</string>
+    <string name="kondisi_cahaya">Intensitas Cahaya</string>
+    <string name="kondisi_cahaya_default">: -- Lumen</string>
     <string name="icon_desc">Deskripsi Ikon</string>
+
+    <!-- Settings Sensitivity Descriptions -->
+    <string name="label_redup">Redup (&gt; 600 Lm)</string>
+    <string name="label_standar">Standar (~ 400 Lm)</string>
+    <string name="label_gelap">Gelap (&lt; 150 Lm)</string>
+    <string name="desc_sensitivity">Keterangan:\n• Redup: Lampu menyala lebih awal pas sore hari (masih agak terang sudah nyala).\n• Standar: Lampu menyala pas mendung atau malam normal.\n• Gelap: Lampu baru nyala kalau sudah benar-benar gelap gulita.</string>
+    <string name="pdf_report_title">Laporan Monitoring SmartPress</string>
+    <string name="download_pdf">Unduh Laporan PDF</string>
 
     <!-- Timer / Scheduling -->
     <string name="penjadwalan_lampu">Penjadwalan Lampu</string>

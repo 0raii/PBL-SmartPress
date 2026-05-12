@@ -48,7 +48,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:padding="20dp"
-                    android:weightSum="3">
+                    android:weightSum="4">
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -59,16 +59,16 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Total kWh"
+                            android:text="kWh"
                             android:textColor="@color/text_sub"
-                            android:textSize="12sp" />
+                            android:textSize="11sp" />
                         <TextView
                             android:id="@+id/tvTotalKwhReport"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="12.5"
                             android:textColor="@color/text_head"
-                            android:textSize="16sp"
+                            android:textSize="14sp"
                             android:textStyle="bold" />
                     </LinearLayout>
 
@@ -83,16 +83,16 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Estimasi Biaya"
+                            android:text="Biaya"
                             android:textColor="@color/text_sub"
-                            android:textSize="12sp" />
+                            android:textSize="11sp" />
                         <TextView
                             android:id="@+id/tvTotalCostReport"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Rp 18k"
                             android:textColor="@color/accent_yellow"
-                            android:textSize="16sp"
+                            android:textSize="14sp"
                             android:textStyle="bold" />
                     </LinearLayout>
 
@@ -107,17 +107,107 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Rata-rata Nyala"
+                            android:text="Durasi"
                             android:textColor="@color/text_sub"
-                            android:textSize="12sp" />
+                            android:textSize="11sp" />
                         <TextView
                             android:id="@+id/tvAvgDurationReport"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="6 Jam"
                             android:textColor="@color/primary_blue"
-                            android:textSize="16sp"
+                            android:textSize="14sp"
                             android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <View android:layout_width="1dp" android:layout_height="match_parent" android:background="@color/divider_color" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:orientation="vertical">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Otomatis"
+                            android:textColor="@color/text_sub"
+                            android:textSize="10sp" />
+                        <TextView
+                            android:id="@+id/tvAutoLogCount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textColor="@color/accent_yellow"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Label Khusus Mode Otomatis -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="Statistik Khusus Mode Otomatis"
+                android:textColor="@color/text_head"
+                android:textStyle="bold"
+                android:textSize="14sp"/>
+
+            <!-- Card Rekap Detail Otomatis -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardBackgroundColor="@color/card_bg_custom"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="2dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="16dp"
+                    android:weightSum="2">
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center">
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@drawable/ic_lamp_on"
+                            app:tint="@color/accent_yellow"/>
+                        <TextView
+                            android:id="@+id/tvCountHidup"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:text="Hidup: 0"
+                            android:textColor="@color/text_head"
+                            android:textStyle="bold"/>
+                    </LinearLayout>
+                    <View android:layout_width="1dp" android:layout_height="20dp" android:background="@color/divider_color" android:layout_gravity="center"/>
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center">
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@drawable/ic_power"
+                            app:tint="@color/text_sub"/>
+                        <TextView
+                            android:id="@+id/tvCountMati"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:text="Mati: 0"
+                            android:textColor="@color/text_head"
+                            android:textStyle="bold"/>
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -184,32 +274,118 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Card Kesimpulan -->
-            <com.google.android.material.card.MaterialCardView
+            <!-- List Log Otomatis -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Riwayat Sensor Otomatis"
+                android:textColor="@color/text_head"
+                android:textStyle="bold"
+                android:textSize="16sp"/>
+
+            <!-- Header Tabel Manual (Biar kelihatan kaya tabel di PDF) -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardBackgroundColor="@color/primary_blue"
-                app:cardCornerRadius="24dp">
-                <LinearLayout
-                    android:layout_width="match_parent"
+                android:orientation="horizontal"
+                android:padding="12dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/status_bg_dark"
+                android:weightSum="3">
+                <TextView
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:padding="20dp"
-                    android:orientation="vertical">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Ringkasan Laporan"
-                        android:textColor="@color/white"
-                        android:textStyle="bold"/>
-                    <TextView
-                        android:id="@+id/tvSummaryText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="Penggunaan listrik kamu minggu ini turun 12% dibanding minggu lalu. Bagus!"
-                        android:textColor="#E0E0E0"/>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+                    android:layout_weight="1"
+                    android:text="Waktu"
+                    android:textColor="@color/white"
+                    android:textStyle="bold"
+                    android:textSize="12sp"/>
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Aksi"
+                    android:gravity="center"
+                    android:textColor="@color/white"
+                    android:textStyle="bold"
+                    android:textSize="12sp"/>
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Cahaya (Lm)"
+                    android:gravity="end"
+                    android:textColor="@color/white"
+                    android:textStyle="bold"
+                    android:textSize="12sp"/>
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvAutoLogs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                tools:listitem="@layout/item_auto_log"/>
+
+            <!-- Navigasi Halaman (Pagination) -->
+            <LinearLayout
+                android:id="@+id/layoutPagination"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="16dp">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnPrevPage"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Sblmnya"
+                    app:icon="@drawable/ic_history" />
+
+                <TextView
+                    android:id="@+id/tvPageInfo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="16dp"
+                    android:text="Hal 1"
+                    android:textColor="@color/text_head"
+                    android:textStyle="bold" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnNextPage"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Brktnya"
+                    app:icon="@drawable/ic_history"
+                    app:iconGravity="end" />
+            </LinearLayout>
+
+            <!-- View jika data kosong -->
+            <TextView
+                android:id="@+id/tvEmptyLog"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="20dp"
+                android:text="Belum ada aktivitas sensor untuk periode ini."
+                android:textColor="@color/text_sub"
+                android:gravity="center"
+                android:visibility="gone"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnDownloadPdf"
+                style="@style/Widget.Material3.Button.Icon"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="32dp"
+                android:text="@string/download_pdf"
+                app:icon="@drawable/ic_history"
+                app:cornerRadius="16dp" />
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

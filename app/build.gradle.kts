@@ -43,6 +43,7 @@ dependencies {
     implementation(libs.constraintlayout)
     implementation(libs.mpandroidchart)
     implementation(libs.ucrop)
+    implementation(libs.play.services.auth)
     
     // Firebase
     implementation("com.google.firebase:firebase-database:21.0.0")
