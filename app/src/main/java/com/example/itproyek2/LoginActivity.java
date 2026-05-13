@@ -53,19 +53,32 @@ public class LoginActivity extends AppCompatActivity {
         tvForgotPassword = findViewById(R.id.tvForgotPassword);
         btnGoogle = findViewById(R.id.btnGoogleLogin);
 
+        if (btnGoogle == null) {
+            android.util.Log.e("LoginActivity", "btnGoogleLogin not found in layout!");
+        }
+
         // Configure Google Sign In
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken("637607881737-pibjogl2ime1c5prl8gr801rpdkh8sd2.apps.googleusercontent.com")
-                .requestEmail()
-                .requestProfile()
-                .build();
+        try {
+            GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                    .requestIdToken("637607881737-pibjogl2ime1c5prl8gr801rpdkh8sd2.apps.googleusercontent.com")
+                    .requestEmail()
+                    .requestProfile()
+                    .build();
 
-        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
+            mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
-        btnGoogle.setOnClickListener(v -> {
-            Intent signInIntent = mGoogleSignInClient.getSignInIntent();
-            startActivityForResult(signInIntent, RC_SIGN_IN);
-        });
+            if (btnGoogle != null) {
+                btnGoogle.setOnClickListener(v -> {
+                    // Paksa Google Sign Out dulu agar selalu muncul pilihan akun (tidak otomatis login)
+                    mGoogleSignInClient.signOut().addOnCompleteListener(task -> {
+                        Intent signInIntent = mGoogleSignInClient.getSignInIntent();
+                        startActivityForResult(signInIntent, RC_SIGN_IN);
+                    });
+                });
+            }
+        } catch (Exception e) {
+            android.util.Log.e("LoginActivity", "GoogleSignIn init error: " + e.getMessage());
+        }
 
         btnLogin.setOnClickListener(v -> {
             String email = etEmail.getText().toString().trim();

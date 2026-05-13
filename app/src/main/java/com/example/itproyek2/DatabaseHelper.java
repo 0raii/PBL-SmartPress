@@ -43,7 +43,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String createTable = "CREATE TABLE " + TABLE_USERS + " (" +
+        String createTable = "CREATE TABLE IF NOT EXISTS " + TABLE_USERS + " (" +
                 COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COL_NAME + " TEXT, " +
                 COL_EMAIL + " TEXT UNIQUE, " +
@@ -53,7 +53,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 COL_PHOTO + " TEXT)";
         db.execSQL(createTable);
 
-        String createAutoLogsTable = "CREATE TABLE " + TABLE_AUTO_LOGS + " (" +
+        String createAutoLogsTable = "CREATE TABLE IF NOT EXISTS " + TABLE_AUTO_LOGS + " (" +
                 COL_LOG_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COL_LOG_USER_ID + " INTEGER, " +
                 COL_TIMESTAMP + " LONG, " +
@@ -62,7 +62,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 COL_WATT + " REAL)";
         db.execSQL(createAutoLogsTable);
 
-        String createDailyStatsTable = "CREATE TABLE " + TABLE_DAILY_STATS + " (" +
+        String createDailyStatsTable = "CREATE TABLE IF NOT EXISTS " + TABLE_DAILY_STATS + " (" +
                 COL_STATS_USER_ID + " INTEGER, " +
                 COL_DATE + " TEXT, " +
                 COL_KWH + " REAL, " +
