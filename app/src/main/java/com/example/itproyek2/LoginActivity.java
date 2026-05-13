@@ -76,35 +76,43 @@ public class LoginActivity extends AppCompatActivity {
             } else if (dbHelper.checkUser(email, password)) {
                 // Ambil data user dari SQLite untuk ditaruh di Profile
                 Cursor cursor = dbHelper.getUserData(email);
-                String role = "User"; // Default
                 if (cursor != null && cursor.moveToFirst()) {
-                    int id = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.COL_ID));
-                    String name = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COL_NAME));
-                    String phone = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COL_PHONE));
-                    role = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COL_ROLE));
-                    
-                    SharedPreferences.Editor editor = prefs.edit();
-                    editor.putBoolean("is_logged_in", true);
-                    editor.putInt("profile_id", id);
-                    editor.putString("profile_name", name);
-                    editor.putString("profile_email", email);
-                    editor.putString("profile_phone", phone);
-                    editor.putString("profile_role", role);
-                    // Clear history when logging in as a new user
-                    editor.remove("history_data");
-                    editor.apply();
-                    cursor.close();
-                }
+                    try {
+                        int idIndex = cursor.getColumnIndex(DatabaseHelper.COL_ID);
+                        int nameIndex = cursor.getColumnIndex(DatabaseHelper.COL_NAME);
+                        int phoneIndex = cursor.getColumnIndex(DatabaseHelper.COL_PHONE);
+                        int roleIndex = cursor.getColumnIndex(DatabaseHelper.COL_ROLE);
 
-                Toast.makeText(this, "Sip, login berhasil!", Toast.LENGTH_SHORT).show();
-                
-                // Arahkan berdasarkan Role
-                if ("Admin".equalsIgnoreCase(role)) {
-                    startActivity(new Intent(LoginActivity.this, AdminDashboardActivity.class));
-                } else {
-                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                        int id = (idIndex != -1) ? cursor.getInt(idIndex) : -1;
+                        String name = (nameIndex != -1) ? cursor.getString(nameIndex) : "User";
+                        String phone = (phoneIndex != -1) ? cursor.getString(phoneIndex) : "";
+                        String role = (roleIndex != -1) ? cursor.getString(roleIndex) : "User";
+                        
+                        SharedPreferences.Editor editor = prefs.edit();
+                        editor.putBoolean("is_logged_in", true);
+                        editor.putInt("profile_id", id);
+                        editor.putString("profile_name", name);
+                        editor.putString("profile_email", email);
+                        editor.putString("profile_phone", phone);
+                        editor.putString("profile_role", role);
+                        // Clear history when logging in as a new user
+                        editor.remove("history_data");
+                        editor.apply();
+                        
+                        Toast.makeText(this, "Sip, login berhasil!", Toast.LENGTH_SHORT).show();
+                        
+                        if ("Admin".equalsIgnoreCase(role)) {
+                            startActivity(new Intent(LoginActivity.this, AdminDashboardActivity.class));
+                        } else {
+                            startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                        }
+                        finish();
+                    } catch (Exception e) {
+                        Toast.makeText(this, "Error saat ambil data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    } finally {
+                        cursor.close();
+                    }
                 }
-                finish();
             } else if (email.equals("admin@gmail.com") && password.equals("123456")) {
                 // Fallback dummy admin
                 Toast.makeText(this, "Login Admin Berhasil!", Toast.LENGTH_SHORT).show();
@@ -150,32 +158,41 @@ public class LoginActivity extends AppCompatActivity {
             if (dbHelper.updateGoogleUser(name, email, photoUrl)) {
                 Cursor cursor = dbHelper.getUserData(email);
                 if (cursor != null && cursor.moveToFirst()) {
-                    int id = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.COL_ID));
-                    String role = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COL_ROLE));
-                    String pass = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COL_PASSWORD));
-                    
-                    SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
-                    SharedPreferences.Editor editor = prefs.edit();
-                    editor.putBoolean("is_logged_in", true);
-                    editor.putInt("profile_id", id);
-                    editor.putString("profile_name", name);
-                    editor.putString("profile_email", email);
-                    editor.putString("profile_role", role);
-                    editor.putString("profile_image_uri", photoUrl);
-                    editor.putBoolean("has_password", (pass != null && !pass.isEmpty()));
-                    // Clear history when logging in as a new user
-                    editor.remove("history_data");
-                    editor.apply();
-                    cursor.close();
+                    try {
+                        int idIndex = cursor.getColumnIndex(DatabaseHelper.COL_ID);
+                        int roleIndex = cursor.getColumnIndex(DatabaseHelper.COL_ROLE);
+                        int passIndex = cursor.getColumnIndex(DatabaseHelper.COL_PASSWORD);
 
-                    Toast.makeText(this, "Login Google Berhasil!", Toast.LENGTH_SHORT).show();
-                    
-                    if ("Admin".equalsIgnoreCase(role)) {
-                        startActivity(new Intent(LoginActivity.this, AdminDashboardActivity.class));
-                    } else {
-                        startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                        int id = (idIndex != -1) ? cursor.getInt(idIndex) : -1;
+                        String role = (roleIndex != -1) ? cursor.getString(roleIndex) : "User";
+                        String pass = (passIndex != -1) ? cursor.getString(passIndex) : "";
+                        
+                        SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
+                        SharedPreferences.Editor editor = prefs.edit();
+                        editor.putBoolean("is_logged_in", true);
+                        editor.putInt("profile_id", id);
+                        editor.putString("profile_name", name);
+                        editor.putString("profile_email", email);
+                        editor.putString("profile_role", role);
+                        editor.putString("profile_image_uri", photoUrl);
+                        editor.putBoolean("has_password", (pass != null && !pass.isEmpty()));
+                        // Clear history when logging in as a new user
+                        editor.remove("history_data");
+                        editor.apply();
+
+                        Toast.makeText(this, "Login Google Berhasil!", Toast.LENGTH_SHORT).show();
+                        
+                        if ("Admin".equalsIgnoreCase(role)) {
+                            startActivity(new Intent(LoginActivity.this, AdminDashboardActivity.class));
+                        } else {
+                            startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                        }
+                        finish();
+                    } catch (Exception e) {
+                        Toast.makeText(this, "Error saat ambil data Google: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    } finally {
+                        cursor.close();
                     }
-                    finish();
                 }
             }
         } catch (ApiException e) {
