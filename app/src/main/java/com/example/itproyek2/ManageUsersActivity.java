@@ -45,7 +45,19 @@ public class ManageUsersActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        loadUsers();
+        // Coba sinkron dari Firebase setiap kali masuk halaman ini
+        dbHelper.syncAllUsersFromFirebase(new DatabaseHelper.OnSyncCompleteListener() {
+            @Override
+            public void onSyncSuccess() {
+                loadUsers(); // Refresh list setelah sinkron sukses
+            }
+
+            @Override
+            public void onSyncFailure(String error) {
+                Toast.makeText(ManageUsersActivity.this, "Gagal sinkron cloud: " + error, Toast.LENGTH_SHORT).show();
+                loadUsers(); // Tetap load data lokal jika gagal
+            }
+        });
     }
 
     private void setupRecyclerView() {
@@ -77,6 +89,14 @@ public class ManageUsersActivity extends AppCompatActivity {
                         })
                         .setNegativeButton("Tidak", null)
                         .show();
+            }
+
+            @Override
+            public void onMonitorClick(UserModel user) {
+                Intent intent = new Intent(ManageUsersActivity.this, AdminMonitoringActivity.class);
+                intent.putExtra("TARGET_NAME", user.getName());
+                intent.putExtra("TARGET_EMAIL", user.getEmail());
+                startActivity(intent);
             }
         });
         rvUsers.setLayoutManager(new LinearLayoutManager(this));

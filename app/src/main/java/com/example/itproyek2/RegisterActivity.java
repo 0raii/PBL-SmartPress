@@ -62,9 +62,22 @@ public class RegisterActivity extends AppCompatActivity {
         }
 
         // cek format email bener gak
-        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            showToast("emailnya gak valid tuh");
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches() || !email.contains(".")) {
+            showToast("Gunakan format email asli yang benar (contoh: user@gmail.com)");
+            etEmail.setError("Format email tidak valid");
             return;
+        }
+
+        // Cek domain email populer (Opsional tapi membantu memastikan email asli)
+        String[] parts = email.split("@");
+        if (parts.length == 2) {
+            String domain = parts[1].toLowerCase();
+            if (!domain.contains("gmail.com") && !domain.contains("yahoo.co.id") && 
+                !domain.contains("yahoo.com") && !domain.contains("outlook.com") && 
+                !domain.contains("icloud.com")) {
+                showToast("Gunakan layanan email populer (Gmail/Yahoo/Outlook/iCloud)");
+                return;
+            }
         }
 
         // cek panjang pass nya
@@ -79,7 +92,7 @@ public class RegisterActivity extends AppCompatActivity {
             return;
         }
 
-        // kalo aman semua
+        // SIMPAN KE DATABASE LOKAL
         boolean registered = dbHelper.registerUser(name, email, password);
         if (registered) {
             Toast.makeText(this, "Akun " + name + " berhasil dibuat!", Toast.LENGTH_SHORT).show();

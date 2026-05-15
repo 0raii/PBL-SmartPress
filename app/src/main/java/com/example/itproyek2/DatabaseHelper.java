@@ -5,6 +5,14 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import androidx.annotation.NonNull;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import java.util.HashMap;
+import java.util.Map;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
@@ -162,7 +170,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return db.rawQuery("SELECT * FROM " + TABLE_USERS, null);
     }
 
-    // Registrasi User (dari halaman Register)
+    // Registrasi User (dari halaman Register) - Sekarang Sinkron ke Firebase
     public boolean registerUser(String name, String email, String password) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -173,7 +181,82 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COL_ROLE, "User");
         values.put(COL_PHOTO, "");
         long result = db.insert(TABLE_USERS, null, values);
-        return result != -1;
+        
+        if (result != -1) {
+            // SINKRON KE FIREBASE (Untuk Admin)
+            syncUserToFirebase((int)result, name, email, password, "", "User", "");
+            return true;
+        }
+        return false;
+    }
+
+    // Interface untuk callback sinkronisasi
+    public interface OnSyncCompleteListener {
+        void onSyncSuccess();
+        void onSyncFailure(String error);
+    }
+
+    private void syncUserToFirebase(int id, String name, String email, String password, String phone, String role, String photo) {
+        DatabaseReference ref = FirebaseDatabase.getInstance("https://smartpress-ea81d-default-rtdb.asia-southeast1.firebasedatabase.app/").getReference("users");
+        String safeEmail = email.replace(".", ",");
+        
+        Map<String, Object> userMap = new HashMap<>();
+        userMap.put("id", id);
+        userMap.put("name", name);
+        userMap.put("email", email);
+        userMap.put("password", password);
+        userMap.put("phone", phone);
+        userMap.put("role", role);
+        userMap.put("photo", photo);
+        
+        ref.child(safeEmail).setValue(userMap);
+    }
+
+    public void syncAllUsersFromFirebase(OnSyncCompleteListener listener) {
+        DatabaseReference ref = FirebaseDatabase.getInstance("https://smartpress-ea81d-default-rtdb.asia-southeast1.firebasedatabase.app/").getReference("users");
+        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                SQLiteDatabase db = getWritableDatabase();
+                for (DataSnapshot userSnap : snapshot.getChildren()) {
+                    String email = userSnap.child("email").getValue(String.class);
+                    String name = userSnap.child("name").getValue(String.class);
+                    String password = userSnap.child("password").getValue(String.class);
+                    String phone = userSnap.child("phone").getValue(String.class);
+                    String role = userSnap.child("role").getValue(String.class);
+                    String photo = userSnap.child("photo").getValue(String.class);
+
+                    ContentValues values = new ContentValues();
+                    values.put(COL_NAME, name);
+                    values.put(COL_EMAIL, email);
+                    values.put(COL_PASSWORD, password);
+                    values.put(COL_PHONE, phone);
+                    values.put(COL_ROLE, role);
+                    values.put(COL_PHOTO, photo);
+
+                    // Cek jika user sudah ada di lokal
+                    Cursor cursor = db.rawQuery("SELECT " + COL_ID + " FROM " + TABLE_USERS + " WHERE " + COL_EMAIL + " = ?", new String[]{email});
+                    if (cursor.moveToFirst()) {
+                        db.update(TABLE_USERS, values, COL_EMAIL + " = ?", new String[]{email});
+                    } else {
+                        db.insert(TABLE_USERS, null, values);
+                    }
+                    cursor.close();
+                }
+                if (listener != null) listener.onSyncSuccess();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                if (listener != null) listener.onSyncFailure(error.getMessage());
+            }
+        });
+    }
+
+    private void deleteUserFromFirebase(String email) {
+        DatabaseReference ref = FirebaseDatabase.getInstance("https://smartpress-ea81d-default-rtdb.asia-southeast1.firebasedatabase.app/").getReference("users");
+        String safeEmail = email.replace(".", ",");
+        ref.child(safeEmail).removeValue();
     }
 
     // Update data dari Google Login
@@ -181,16 +264,33 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = getUserData(email);
         ContentValues values = new ContentValues();
-        values.put(COL_NAME, name);
-        values.put(COL_PHOTO, photo);
         
         if (cursor.moveToFirst()) {
-            // User sudah ada, update saja (jangan timpa password jika sudah ada)
-            db.update(TABLE_USERS, values, COL_EMAIL + " = ?", new String[]{email});
+            // User sudah ada
+            // JANGAN timpa Nama, Foto, atau data lain jika user sudah pernah mengubahnya secara manual
+            // Kita hanya update jika data di database masih kosong atau default
+            String currentName = cursor.getString(cursor.getColumnIndexOrThrow(COL_NAME));
+            String currentPhoto = cursor.getString(cursor.getColumnIndexOrThrow(COL_PHOTO));
+            
+            // Jika nama saat ini kosong atau masih default, baru update pakai data Google
+            if (currentName == null || currentName.isEmpty() || currentName.equals("User")) {
+                values.put(COL_NAME, name);
+            }
+            
+            // Jika foto saat ini kosong, baru update pakai foto Google
+            if (currentPhoto == null || currentPhoto.isEmpty()) {
+                values.put(COL_PHOTO, photo);
+            }
+            
+            if (values.size() > 0) {
+                db.update(TABLE_USERS, values, COL_EMAIL + " = ?", new String[]{email});
+            }
             cursor.close();
             return true;
         } else {
-            // User baru dari Google
+            // User baru dari Google - Simpan semua data awal
+            values.put(COL_NAME, name);
+            values.put(COL_PHOTO, photo);
             values.put(COL_EMAIL, email);
             values.put(COL_PASSWORD, ""); // Password kosong untuk nanti diset manual
             values.put(COL_PHONE, "");
@@ -209,7 +309,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return db.update(TABLE_USERS, values, COL_EMAIL + " = ?", new String[]{email}) > 0;
     }
 
-    // Tambah User oleh Admin
+    // Tambah User oleh Admin - Sinkron ke Firebase
     public boolean addUserByAdmin(String name, String email, String password, String phone, String role) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -220,26 +320,63 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COL_ROLE, role);
         values.put(COL_PHOTO, "");
         long result = db.insert(TABLE_USERS, null, values);
-        return result != -1;
+        if (result != -1) {
+            syncUserToFirebase((int)result, name, email, password, phone, role, "");
+            return true;
+        }
+        return false;
     }
 
-    // Update User
+    // Update User - Sinkron ke Firebase
     public boolean updateUser(int id, String name, String email, String password, String phone, String role, String photo) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COL_NAME, name);
         values.put(COL_EMAIL, email);
-        values.put(COL_PASSWORD, password);
+        if (password != null && !password.isEmpty()) {
+            values.put(COL_PASSWORD, password);
+        }
         values.put(COL_PHONE, phone);
         values.put(COL_ROLE, role);
-        values.put(COL_PHOTO, photo);
-        return db.update(TABLE_USERS, values, COL_ID + " = ?", new String[]{String.valueOf(id)}) > 0;
+        if (photo != null && !photo.isEmpty()) {
+            values.put(COL_PHOTO, photo);
+        }
+        boolean success = db.update(TABLE_USERS, values, COL_ID + " = ?", new String[]{String.valueOf(id)}) > 0;
+        
+        if (success) {
+            // Ambil data terbaru untuk sinkron
+            Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_USERS + " WHERE " + COL_ID + " = ?", new String[]{String.valueOf(id)});
+            if (cursor.moveToFirst()) {
+                syncUserToFirebase(id, 
+                    cursor.getString(cursor.getColumnIndexOrThrow(COL_NAME)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COL_EMAIL)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COL_PASSWORD)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COL_PHONE)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COL_ROLE)),
+                    cursor.getString(cursor.getColumnIndexOrThrow(COL_PHOTO)));
+            }
+            cursor.close();
+        }
+        return success;
     }
 
     // Hapus User
     public boolean deleteUser(int id) {
         SQLiteDatabase db = this.getWritableDatabase();
-        return db.delete(TABLE_USERS, COL_ID + " = ?", new String[]{String.valueOf(id)}) > 0;
+        
+        // Ambil email dulu sebelum dihapus untuk hapus di firebase
+        String email = "";
+        Cursor cursor = db.rawQuery("SELECT " + COL_EMAIL + " FROM " + TABLE_USERS + " WHERE " + COL_ID + " = ?", new String[]{String.valueOf(id)});
+        if (cursor.moveToFirst()) {
+            email = cursor.getString(0);
+        }
+        cursor.close();
+
+        boolean success = db.delete(TABLE_USERS, COL_ID + " = ?", new String[]{String.valueOf(id)}) > 0;
+        if (success && !email.isEmpty()) {
+            deleteUserFromFirebase(email);
+        }
+        return success;
     }
 
     // Reset Semua User (Kecuali Admin Hardcoded jika perlu, atau semua)

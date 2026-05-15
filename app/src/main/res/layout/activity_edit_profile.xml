@@ -145,6 +145,24 @@
                 android:importantForAutofill="no"
                 android:layout_marginBottom="16dp"/>
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ubah Password (Kosongkan jika tidak ingin diubah)"
+                android:textColor="@color/text_head"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp"/>
+            <EditText
+                android:id="@+id/etEditPassword"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:background="@drawable/bg_input_login"
+                android:paddingHorizontal="16dp"
+                android:hint="Password Baru"
+                android:textColor="@color/text_head"
+                android:inputType="textPassword"
+                android:layout_marginBottom="16dp"/>
+
             <LinearLayout
                 android:id="@+id/layoutRoleSection"
                 android:layout_width="match_parent"

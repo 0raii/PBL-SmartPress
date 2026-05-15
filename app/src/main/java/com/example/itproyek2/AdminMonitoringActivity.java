@@ -22,10 +22,11 @@ import java.util.Locale;
 public class AdminMonitoringActivity extends AppCompatActivity {
 
     private TextView tvHardwareStatus, tvLampStatus, tvLuxValue;
-    private TextView tvVoltage, tvCurrent, tvPowerWatt;
+    private TextView tvVoltage, tvCurrent, tvPowerWatt, tvTitle;
     private MaterialCardView btnBack;
 
     private DatabaseReference dbRef;
+    private String targetPath = "";
     private long lastTickTime = 0;
     private boolean isConnected = false;
     private final Handler offlineCheckHandler = new Handler();
@@ -41,11 +42,24 @@ public class AdminMonitoringActivity extends AppCompatActivity {
         tvVoltage = findViewById(R.id.tvVoltage);
         tvCurrent = findViewById(R.id.tvCurrent);
         tvPowerWatt = findViewById(R.id.tvPowerWatt);
+        tvTitle = findViewById(R.id.tvTitle);
         btnBack = findViewById(R.id.btnBack);
 
         btnBack.setOnClickListener(v -> finish());
 
-        dbRef = FirebaseDatabase.getInstance("https://smartpress-ea81d-default-rtdb.asia-southeast1.firebasedatabase.app/").getReference();
+        String targetName = getIntent().getStringExtra("TARGET_NAME");
+        String targetEmail = getIntent().getStringExtra("TARGET_EMAIL");
+
+        if (targetEmail != null && !targetEmail.isEmpty()) {
+            tvTitle.setText("Monitoring: " + targetName);
+            String safeEmail = targetEmail.replace(".", ",");
+            targetPath = "monitoring/" + safeEmail;
+        } else {
+            tvTitle.setText("Monitoring Sistem IoT");
+            targetPath = ""; // Root path
+        }
+
+        dbRef = FirebaseDatabase.getInstance("https://smartpress-ea81d-default-rtdb.asia-southeast1.firebasedatabase.app/").getReference(targetPath);
         
         initFirebaseListeners();
         startOfflineCheckLoop();

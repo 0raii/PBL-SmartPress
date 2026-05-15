@@ -8,6 +8,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 
@@ -19,6 +20,11 @@ import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -32,7 +38,6 @@ public class LoginActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // ... (tema logic tetap sama)
         SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
         boolean isDark = prefs.getBoolean("is_dark_theme", true);
         if (isDark) {
@@ -53,10 +58,6 @@ public class LoginActivity extends AppCompatActivity {
         tvForgotPassword = findViewById(R.id.tvForgotPassword);
         btnGoogle = findViewById(R.id.btnGoogleLogin);
 
-        if (btnGoogle == null) {
-            android.util.Log.e("LoginActivity", "btnGoogleLogin not found in layout!");
-        }
-
         // Configure Google Sign In
         try {
             GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -69,7 +70,6 @@ public class LoginActivity extends AppCompatActivity {
 
             if (btnGoogle != null) {
                 btnGoogle.setOnClickListener(v -> {
-                    // Paksa Google Sign Out dulu agar selalu muncul pilihan akun (tidak otomatis login)
                     mGoogleSignInClient.signOut().addOnCompleteListener(task -> {
                         Intent signInIntent = mGoogleSignInClient.getSignInIntent();
                         startActivityForResult(signInIntent, RC_SIGN_IN);
@@ -87,56 +87,9 @@ public class LoginActivity extends AppCompatActivity {
             if (email.isEmpty() || password.isEmpty()) {
                 Toast.makeText(this, "isi dulu email ama pass nya", Toast.LENGTH_SHORT).show();
             } else if (dbHelper.checkUser(email, password)) {
-                // Ambil data user dari SQLite untuk ditaruh di Profile
-                Cursor cursor = dbHelper.getUserData(email);
-                if (cursor != null && cursor.moveToFirst()) {
-                    try {
-                        int idIndex = cursor.getColumnIndex(DatabaseHelper.COL_ID);
-                        int nameIndex = cursor.getColumnIndex(DatabaseHelper.COL_NAME);
-                        int phoneIndex = cursor.getColumnIndex(DatabaseHelper.COL_PHONE);
-                        int roleIndex = cursor.getColumnIndex(DatabaseHelper.COL_ROLE);
-
-                        int id = (idIndex != -1) ? cursor.getInt(idIndex) : -1;
-                        String name = (nameIndex != -1) ? cursor.getString(nameIndex) : "User";
-                        String phone = (phoneIndex != -1) ? cursor.getString(phoneIndex) : "";
-                        String role = (roleIndex != -1) ? cursor.getString(roleIndex) : "User";
-                        
-                        SharedPreferences.Editor editor = prefs.edit();
-                        editor.putBoolean("is_logged_in", true);
-                        editor.putInt("profile_id", id);
-                        editor.putString("profile_name", name);
-                        editor.putString("profile_email", email);
-                        editor.putString("profile_phone", phone);
-                        editor.putString("profile_role", role);
-                        // Clear history when logging in as a new user
-                        editor.remove("history_data");
-                        editor.apply();
-                        
-                        Toast.makeText(this, "Sip, login berhasil!", Toast.LENGTH_SHORT).show();
-                        
-                        if ("Admin".equalsIgnoreCase(role)) {
-                            startActivity(new Intent(LoginActivity.this, AdminDashboardActivity.class));
-                        } else {
-                            startActivity(new Intent(LoginActivity.this, MainActivity.class));
-                        }
-                        finish();
-                    } catch (Exception e) {
-                        Toast.makeText(this, "Error saat ambil data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    } finally {
-                        cursor.close();
-                    }
-                }
-            } else if (email.equals("admin@gmail.com") && password.equals("123456")) {
-                // Fallback dummy admin
-                Toast.makeText(this, "Login Admin Berhasil!", Toast.LENGTH_SHORT).show();
-                SharedPreferences.Editor editor = prefs.edit();
-                editor.putBoolean("is_logged_in", true);
-                editor.putString("profile_role", "Admin");
-                editor.apply();
-                startActivity(new Intent(LoginActivity.this, AdminDashboardActivity.class));
-                finish();
+                proceedLogin(email, prefs);
             } else {
-                Toast.makeText(this, "Email atau password salah!", Toast.LENGTH_SHORT).show();
+                checkFirebaseLogin(email, password, prefs);
             }
         });
 
@@ -149,10 +102,88 @@ public class LoginActivity extends AppCompatActivity {
         );
     }
 
+    private void proceedLogin(String email, SharedPreferences prefs) {
+        Cursor cursor = dbHelper.getUserData(email);
+        if (cursor != null && cursor.moveToFirst()) {
+            try {
+                int idIndex = cursor.getColumnIndex(DatabaseHelper.COL_ID);
+                int nameIndex = cursor.getColumnIndex(DatabaseHelper.COL_NAME);
+                int phoneIndex = cursor.getColumnIndex(DatabaseHelper.COL_PHONE);
+                int roleIndex = cursor.getColumnIndex(DatabaseHelper.COL_ROLE);
+
+                int id = (idIndex != -1) ? cursor.getInt(idIndex) : -1;
+                String name = (nameIndex != -1) ? cursor.getString(nameIndex) : "User";
+                String phone = (phoneIndex != -1) ? cursor.getString(phoneIndex) : "";
+                String role = (roleIndex != -1) ? cursor.getString(roleIndex) : "User";
+                
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putBoolean("is_logged_in", true);
+                editor.putInt("profile_id", id);
+                editor.putString("profile_name", name);
+                editor.putString("profile_email", email);
+                editor.putString("profile_phone", phone);
+                editor.putString("profile_role", role);
+                editor.remove("history_data");
+                editor.apply();
+                
+                Toast.makeText(this, "Sip, login berhasil!", Toast.LENGTH_SHORT).show();
+                
+                if ("Admin".equalsIgnoreCase(role)) {
+                    startActivity(new Intent(LoginActivity.this, AdminDashboardActivity.class));
+                } else {
+                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                }
+                finish();
+            } catch (Exception e) {
+                Toast.makeText(this, "Error saat ambil data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            } finally {
+                cursor.close();
+            }
+        }
+    }
+
+    private void checkFirebaseLogin(String email, String password, SharedPreferences prefs) {
+        String safeEmail = email.replace(".", ",");
+        DatabaseReference ref = FirebaseDatabase.getInstance("https://smartpress-ea81d-default-rtdb.asia-southeast1.firebasedatabase.app/").getReference("users").child(safeEmail);
+        
+        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    String dbPass = snapshot.child("password").getValue(String.class);
+                    if (password.equals(dbPass)) {
+                        String name = snapshot.child("name").getValue(String.class);
+                        String phone = snapshot.child("phone").getValue(String.class);
+                        String role = snapshot.child("role").getValue(String.class);
+                        
+                        dbHelper.addUserByAdmin(name, email, password, phone, role); 
+                        proceedLogin(email, prefs);
+                    } else {
+                        Toast.makeText(LoginActivity.this, "Password salah!", Toast.LENGTH_SHORT).show();
+                    }
+                } else if (email.equals("admin@gmail.com") && password.equals("123456")) {
+                    Toast.makeText(LoginActivity.this, "Login Admin Berhasil!", Toast.LENGTH_SHORT).show();
+                    SharedPreferences.Editor editor = prefs.edit();
+                    editor.putBoolean("is_logged_in", true);
+                    editor.putString("profile_role", "Admin");
+                    editor.apply();
+                    startActivity(new Intent(LoginActivity.this, AdminDashboardActivity.class));
+                    finish();
+                } else {
+                    Toast.makeText(LoginActivity.this, "Email tidak terdaftar!", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(LoginActivity.this, "Error Cloud: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
         if (requestCode == RC_SIGN_IN) {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             handleSignInResult(task);
@@ -162,8 +193,6 @@ public class LoginActivity extends AppCompatActivity {
     private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
         try {
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);
-
-            // Signed in successfully, show authenticated UI.
             String name = account.getDisplayName();
             String email = account.getEmail();
             String photoUrl = account.getPhotoUrl() != null ? account.getPhotoUrl().toString() : "";
@@ -173,23 +202,29 @@ public class LoginActivity extends AppCompatActivity {
                 if (cursor != null && cursor.moveToFirst()) {
                     try {
                         int idIndex = cursor.getColumnIndex(DatabaseHelper.COL_ID);
+                        int nameIndex = cursor.getColumnIndex(DatabaseHelper.COL_NAME);
+                        int phoneIndex = cursor.getColumnIndex(DatabaseHelper.COL_PHONE);
                         int roleIndex = cursor.getColumnIndex(DatabaseHelper.COL_ROLE);
+                        int photoIndex = cursor.getColumnIndex(DatabaseHelper.COL_PHOTO);
                         int passIndex = cursor.getColumnIndex(DatabaseHelper.COL_PASSWORD);
 
                         int id = (idIndex != -1) ? cursor.getInt(idIndex) : -1;
+                        String dbName = (nameIndex != -1) ? cursor.getString(nameIndex) : name;
+                        String dbPhone = (phoneIndex != -1) ? cursor.getString(phoneIndex) : "";
                         String role = (roleIndex != -1) ? cursor.getString(roleIndex) : "User";
+                        String dbPhoto = (photoIndex != -1) ? cursor.getString(photoIndex) : photoUrl;
                         String pass = (passIndex != -1) ? cursor.getString(passIndex) : "";
                         
                         SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
                         SharedPreferences.Editor editor = prefs.edit();
                         editor.putBoolean("is_logged_in", true);
                         editor.putInt("profile_id", id);
-                        editor.putString("profile_name", name);
+                        editor.putString("profile_name", dbName);
                         editor.putString("profile_email", email);
+                        editor.putString("profile_phone", dbPhone);
                         editor.putString("profile_role", role);
-                        editor.putString("profile_image_uri", photoUrl);
+                        editor.putString("profile_image_uri", dbPhoto);
                         editor.putBoolean("has_password", (pass != null && !pass.isEmpty()));
-                        // Clear history when logging in as a new user
                         editor.remove("history_data");
                         editor.apply();
 

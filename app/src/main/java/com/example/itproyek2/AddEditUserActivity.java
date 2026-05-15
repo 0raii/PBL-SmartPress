@@ -57,26 +57,38 @@ public class AddEditUserActivity extends AppCompatActivity {
             String phone = etPhone.getText().toString().trim();
             String role = actvRole.getText().toString().trim();
 
-            if (name.isEmpty() || email.isEmpty() || password.isEmpty() || phone.isEmpty() || role.isEmpty()) {
-                Toast.makeText(this, "Please fill all required fields", Toast.LENGTH_SHORT).show();
+            if (name.isEmpty() || email.isEmpty() || password.isEmpty() || role.isEmpty()) {
+                Toast.makeText(this, "Nama, Email, Password, dan Role wajib diisi!", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            boolean success;
-            if (userId == -1) {
-                // Add new user
-                success = dbHelper.addUserByAdmin(name, email, password, phone, role);
+            if (phone.isEmpty()) {
+                // Tampilkan konfirmasi jika No HP kosong
+                new androidx.appcompat.app.AlertDialog.Builder(this)
+                        .setTitle("Konfirmasi")
+                        .setMessage("Nomor ponsel kosong, tetap simpan?")
+                        .setPositiveButton("Ya", (dialog, which) -> saveUserData(name, email, password, phone, role))
+                        .setNegativeButton("Tidak", null)
+                        .show();
             } else {
-                // Update existing user (photo passed as empty string as requested to remove it)
-                success = dbHelper.updateUser(userId, name, email, password, phone, role, "");
-            }
-
-            if (success) {
-                Toast.makeText(this, "User saved successfully", Toast.LENGTH_SHORT).show();
-                finish();
-            } else {
-                Toast.makeText(this, "Error saving user", Toast.LENGTH_SHORT).show();
+                saveUserData(name, email, password, phone, role);
             }
         });
+    }
+
+    private void saveUserData(String name, String email, String password, String phone, String role) {
+        boolean success;
+        if (userId == -1) {
+            success = dbHelper.addUserByAdmin(name, email, password, phone, role);
+        } else {
+            success = dbHelper.updateUser(userId, name, email, password, phone, role, "");
+        }
+
+        if (success) {
+            Toast.makeText(this, "User berhasil disimpan", Toast.LENGTH_SHORT).show();
+            finish();
+        } else {
+            Toast.makeText(this, "Gagal menyimpan user", Toast.LENGTH_SHORT).show();
+        }
     }
 }

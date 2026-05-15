@@ -18,6 +18,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
     public interface OnUserClickListener {
         void onEditClick(UserModel user);
         void onDeleteClick(UserModel user);
+        void onMonitorClick(UserModel user);
     }
 
     public UserAdapter(List<UserModel> userList, OnUserClickListener listener) {
@@ -44,6 +45,12 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
             }
         });
 
+        holder.btnMonitor.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onMonitorClick(user);
+            }
+        });
+
         holder.btnDelete.setOnClickListener(v -> {
             if (listener != null) {
                 listener.onDeleteClick(user);
@@ -59,7 +66,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvUserName, tvUserRole;
         ImageView ivUserAvatar;
-        ImageButton btnEdit, btnDelete;
+        ImageButton btnEdit, btnDelete, btnMonitor;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -68,6 +75,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
             ivUserAvatar = itemView.findViewById(R.id.ivUserAvatar);
             btnEdit = itemView.findViewById(R.id.btnEditUser);
             btnDelete = itemView.findViewById(R.id.btnDeleteUser);
+            btnMonitor = itemView.findViewById(R.id.btnMonitorUser);
         }
     }
 }
