@@ -52,11 +52,11 @@ public class AdminMonitoringActivity extends AppCompatActivity {
 
         if (targetEmail != null && !targetEmail.isEmpty()) {
             tvTitle.setText("Monitoring: " + targetName);
-            String safeEmail = targetEmail.replace(".", ",");
-            targetPath = "monitoring/" + safeEmail;
+            // Tetap arahkan ke perangkat utama karena hanya ada 1 alat fisik
+            targetPath = "monitoring/perangkat_utama";
         } else {
             tvTitle.setText("Monitoring Sistem IoT");
-            targetPath = ""; // Root path
+            targetPath = "monitoring/perangkat_utama";
         }
 
         dbRef = FirebaseDatabase.getInstance("https://smartpress-ea81d-default-rtdb.asia-southeast1.firebasedatabase.app/").getReference(targetPath);

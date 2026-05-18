@@ -108,13 +108,9 @@ public class MainActivity extends AppCompatActivity {
 
         dbHelper = new DatabaseHelper(this);
 
-        // Inisialisasi Firebase dengan path khusus User
-        SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
-        String userEmail = prefs.getString("profile_email", "");
-        String targetPath = "";
-        if (!userEmail.isEmpty()) {
-            targetPath = "monitoring/" + userEmail.replace(".", ",");
-        }
+        // Inisialisasi Firebase - SEMUA USER konek ke perangkat yang sama
+        // Agar mudah untuk pengguna (Orang Tua)
+        String targetPath = "monitoring/perangkat_utama";
         
         dbRef = FirebaseDatabase.getInstance("https://smartpress-ea81d-default-rtdb.asia-southeast1.firebasedatabase.app/").getReference(targetPath);
         

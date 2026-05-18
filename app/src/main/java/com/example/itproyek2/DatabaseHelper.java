@@ -28,6 +28,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COL_PHONE = "phone";
     public static final String COL_ROLE = "role";
     public static final String COL_PHOTO = "photo";
+    public static final String COL_DEVICE_ID = "device_id"; // Kolom baru
 
     // Tabel Automatic Logs
     public static final String TABLE_AUTO_LOGS = "automatic_logs";
@@ -58,7 +59,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 COL_PASSWORD + " TEXT, " +
                 COL_PHONE + " TEXT, " +
                 COL_ROLE + " TEXT, " +
-                COL_PHOTO + " TEXT)";
+                COL_PHOTO + " TEXT, " +
+                COL_DEVICE_ID + " TEXT)" ;
         db.execSQL(createTable);
 
         String createAutoLogsTable = "CREATE TABLE IF NOT EXISTS " + TABLE_AUTO_LOGS + " (" +
