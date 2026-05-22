@@ -120,6 +120,9 @@
     <string name="email_label">Email</string>
     <string name="password_hint">••••••••••</string>
     <string name="facebook">Facebook</string>
+    <string name="facebook_app_id">1004734918598257</string>
+    <string name="facebook_client_token">ed9e9da829a2ae37bcef34b08b3834a9</string>
+    <string name="fb_login_protocol_scheme">fb1004734918598257</string>
     <string name="google">Google</string>
     <string name="create_an_account">Create an Account?</string>
     <string name="nama_lengkap">Nama Lengkap</string>

@@ -1,5 +1,5 @@
 [versions]
-agp = "9.2.1"
+agp = "9.0.0"
 junit = "4.13.2"
 junitVersion = "1.3.0"
 espressoCore = "3.7.0"
@@ -13,6 +13,7 @@ googleServices = "4.4.2"
 playServicesAuth = "21.3.0"
 firebaseDatabase = "21.0.0"
 firebaseAuth = "23.1.0"
+facebookLogin = "18.2.3"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -27,6 +28,7 @@ ucrop = { group = "com.github.yalantis", name = "ucrop", version.ref = "ucrop" }
 play-services-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "playServicesAuth" }
 firebase-database = { group = "com.google.firebase", name = "firebase-database", version.ref = "firebaseDatabase" }
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth", version.ref = "firebaseAuth" }
+facebook-login = { group = "com.facebook.android", name = "facebook-login", version.ref = "facebookLogin" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

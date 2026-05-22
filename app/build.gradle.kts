@@ -44,6 +44,7 @@ dependencies {
     implementation(libs.mpandroidchart)
     implementation(libs.ucrop)
     implementation(libs.play.services.auth)
+    implementation(libs.facebook.login)
     
     // Firebase
     implementation("com.google.firebase:firebase-database:21.0.0")

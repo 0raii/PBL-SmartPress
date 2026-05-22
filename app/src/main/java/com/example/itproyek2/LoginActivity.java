@@ -12,6 +12,13 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 
+import com.facebook.AccessToken;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.GraphRequest;
+import com.facebook.login.LoginManager;
+import com.facebook.login.LoginResult;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -31,9 +38,10 @@ public class LoginActivity extends AppCompatActivity {
     private TextInputEditText etEmail, etPassword;
     private Button btnLogin;
     private TextView tvRegister, tvForgotPassword;
-    private MaterialCardView btnGoogle;
+    private MaterialCardView btnGoogle, btnFacebook;
     private DatabaseHelper dbHelper;
     private GoogleSignInClient mGoogleSignInClient;
+    private CallbackManager mCallbackManager;
     private static final int RC_SIGN_IN = 9001;
 
     @Override
@@ -49,6 +57,31 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        // Code to print KeyHash for Facebook Console
+        try {
+            android.content.pm.PackageInfo info;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+                info = getPackageManager().getPackageInfo("com.smartpress", android.content.pm.PackageManager.GET_SIGNING_CERTIFICATES);
+                android.content.pm.Signature[] signatures = info.signingInfo.getApkContentsSigners();
+                for (android.content.pm.Signature signature : signatures) {
+                    java.security.MessageDigest md = java.security.MessageDigest.getInstance("SHA");
+                    md.update(signature.toByteArray());
+                    String cleanHash = android.util.Base64.encodeToString(md.digest(), android.util.Base64.NO_WRAP);
+                    android.util.Log.e("HASH_FB", "COPY INI: " + cleanHash);
+                }
+            } else {
+                info = getPackageManager().getPackageInfo("com.smartpress", android.content.pm.PackageManager.GET_SIGNATURES);
+                for (android.content.pm.Signature signature : info.signatures) {
+                    java.security.MessageDigest md = java.security.MessageDigest.getInstance("SHA");
+                    md.update(signature.toByteArray());
+                    String cleanHash = android.util.Base64.encodeToString(md.digest(), android.util.Base64.NO_WRAP);
+                    android.util.Log.e("HASH_FB", "COPY INI: " + cleanHash);
+                }
+            }
+        } catch (Exception e) {
+            android.util.Log.e("HASH_FB", "Error: " + e.getMessage());
+        }
+
         dbHelper = new DatabaseHelper(this);
 
         etEmail = findViewById(R.id.etEmail);
@@ -57,6 +90,32 @@ public class LoginActivity extends AppCompatActivity {
         tvRegister = findViewById(R.id.tvRegister);
         tvForgotPassword = findViewById(R.id.tvForgotPassword);
         btnGoogle = findViewById(R.id.btnGoogleLogin);
+        btnFacebook = findViewById(R.id.btnFacebookLogin);
+
+        // Configure Facebook Login
+        mCallbackManager = CallbackManager.Factory.create();
+        if (btnFacebook != null) {
+            btnFacebook.setOnClickListener(v -> {
+                LoginManager.getInstance().logInWithReadPermissions(this, java.util.Arrays.asList("public_profile", "email"));
+            });
+        }
+
+        LoginManager.getInstance().registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
+            @Override
+            public void onSuccess(LoginResult loginResult) {
+                handleFacebookLoginSuccess(loginResult.getAccessToken());
+            }
+
+            @Override
+            public void onCancel() {
+                Toast.makeText(LoginActivity.this, "Login Facebook dibatalkan", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onError(FacebookException error) {
+                Toast.makeText(LoginActivity.this, "Error Facebook: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
 
         // Configure Google Sign In
         try {
@@ -183,11 +242,34 @@ public class LoginActivity extends AppCompatActivity {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        mCallbackManager.onActivityResult(requestCode, resultCode, data);
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == RC_SIGN_IN) {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             handleSignInResult(task);
         }
+    }
+
+    private void handleFacebookLoginSuccess(AccessToken accessToken) {
+        GraphRequest request = GraphRequest.newMeRequest(accessToken, (object, response) -> {
+            try {
+                String name = object.getString("name");
+                String email = object.optString("email", "");
+                String id = object.getString("id");
+                String photoUrl = "https://graph.facebook.com/" + id + "/picture?type=large";
+
+                if (dbHelper.updateGoogleUser(name, email, photoUrl)) {
+                    proceedLogin(email, getSharedPreferences("SmartLampPrefs", MODE_PRIVATE));
+                }
+            } catch (Exception e) {
+                Toast.makeText(this, "Error ambil data Facebook: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        Bundle parameters = new Bundle();
+        parameters.putString("fields", "id,name,email,picture.type(large)");
+        request.setParameters(parameters);
+        request.executeAsync();
     }
 
     private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
