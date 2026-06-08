@@ -61,7 +61,7 @@ public class LoginActivity extends AppCompatActivity {
         try {
             android.content.pm.PackageInfo info;
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
-                info = getPackageManager().getPackageInfo("com.smartpress", android.content.pm.PackageManager.GET_SIGNING_CERTIFICATES);
+                info = getPackageManager().getPackageInfo(getPackageName(), android.content.pm.PackageManager.GET_SIGNING_CERTIFICATES);
                 android.content.pm.Signature[] signatures = info.signingInfo.getApkContentsSigners();
                 for (android.content.pm.Signature signature : signatures) {
                     java.security.MessageDigest md = java.security.MessageDigest.getInstance("SHA");
@@ -70,7 +70,7 @@ public class LoginActivity extends AppCompatActivity {
                     android.util.Log.e("HASH_FB", "COPY INI: " + cleanHash);
                 }
             } else {
-                info = getPackageManager().getPackageInfo("com.smartpress", android.content.pm.PackageManager.GET_SIGNATURES);
+                info = getPackageManager().getPackageInfo(getPackageName(), android.content.pm.PackageManager.GET_SIGNATURES);
                 for (android.content.pm.Signature signature : info.signatures) {
                     java.security.MessageDigest md = java.security.MessageDigest.getInstance("SHA");
                     md.update(signature.toByteArray());

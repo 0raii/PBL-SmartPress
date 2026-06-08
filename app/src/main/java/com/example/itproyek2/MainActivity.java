@@ -301,7 +301,23 @@ public class MainActivity extends AppCompatActivity {
                         isLampOn = status;
                         if (isLampOn) lampOnStartTime = System.currentTimeMillis();
                         applyUiState();
-                        addLog("Lampu " + (isLampOn ? "MENYALA" : "MATI"));
+                        
+                        String source = "Sistem";
+                        if (isAutoMode) source = "Otomatis";
+                        else if (isTimerEnabled) source = "Jadwal";
+                        else source = "Manual/Alat";
+
+                        addLog("Lampu " + (isLampOn ? "MENYALA" : "MATI") + " (" + source + ")");
+                        
+                        // Log ke SQLite untuk Report jika ini otomatis/jadwal
+                        if (isAutoMode || isTimerEnabled) {
+                            SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
+                            int userId = prefs.getInt("profile_id", -1);
+                            if (userId != -1) {
+                                dbHelper.addAutoLog(userId, isLampOn ? "HIDUP" : "MATI", currentLumen, currentWatt);
+                                dbHelper.updateDailyStats(userId, new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date()), totalKwh, 1);
+                            }
+                        }
                     }
                 }
             }
@@ -471,7 +487,7 @@ public class MainActivity extends AppCompatActivity {
                 if (isConnected) {
                     calculateEnergyLocally();
                     checkAlerts();
-                    checkTimers();
+                    // checkTimers() dihapus karena sudah ditangani ESP32
                 }
                 realtimeHandler.postDelayed(this, 1000);
             }
@@ -492,8 +508,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void updateCahayaUi(int ldrValue) {
         // Konversi ADC (0-4095) ke Lumen (0-1000)
-        // 4095 (Gelap) -> 0 Lumen
-        // 0 (Terang) -> 1000 Lumen
         currentLumen = (int) (((4095.0 - ldrValue) / 4095.0) * 1000);
         if (currentLumen < 0) currentLumen = 0;
         if (currentLumen > 1000) currentLumen = 1000;
@@ -506,47 +520,8 @@ public class MainActivity extends AppCompatActivity {
         ivKondisiIcon.setImageResource(isDark ? R.drawable.ic_star_on : R.drawable.ic_history);
         ivKondisiIcon.setColorFilter(isDark ? Color.WHITE : Color.BLACK);
 
-        // Logika kontrol otomatis: Mengikuti Hysteresis ESP32 (-500)
-        if (isAutoMode && isConnected && !isTimerEnabled) {
-            SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
-            int userId = prefs.getInt("profile_id", -1);
-            
-            if (!isLampOn && ldrValue > ldrThreshold) {
-                // Sangat Gelap -> Hidupkan
-                updateLampState(true, "Sensor Otomatis");
-                if (userId != -1) {
-                    dbHelper.addAutoLog(userId, "HIDUP", currentLumen, currentWatt);
-                    dbHelper.updateDailyStats(userId, new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date()), totalKwh, 1);
-                }
-            } else if (isLampOn && ldrValue < (ldrThreshold - 500)) {
-                // Sudah Terang -> Matikan
-                updateLampState(false, "Sensor Otomatis");
-                if (userId != -1) {
-                    dbHelper.addAutoLog(userId, "MATI", currentLumen, currentWatt);
-                    dbHelper.updateDailyStats(userId, new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date()), totalKwh, 1);
-                }
-            }
-        }
-    }
-
-    private void checkTimers() {
-        if (!isTimerEnabled || !isConnected) return;
-
-        try {
-            String currentTimeStr = new SimpleDateFormat("HH:mm", Locale.getDefault()).format(new Date());
-            
-            if (currentTimeStr.equals(timerOnStr)) {
-                if (!isLampOn) {
-                    updateLampState(true, "Jadwal Lampu (Mulai)");
-                }
-            } else if (currentTimeStr.equals(timerOffStr)) {
-                if (isLampOn) {
-                    updateLampState(false, "Jadwal Lampu (Selesai)");
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        // Logika kontrol otomatis sekarang sepenuhnya ditangani oleh ESP32.
+        // Aplikasi hanya bertugas memantau status dan menampilkan data.
     }
 
     private void showTimePicker(boolean isStartTime) {
@@ -579,8 +554,8 @@ public class MainActivity extends AppCompatActivity {
     private void checkAlerts() {
         if (isLampOn && lampOnStartTime > 0 && notifOvertime) {
             long durationSec = (System.currentTimeMillis() - lampOnStartTime) / 1000;
-            if (durationSec > 120) { 
-                sendSystemNotification("Awas Kelamaan", "Lampu sudah nyala > 2 menit.");
+            if (durationSec > 3600) { // Beri peringatan jika nyala lebih dari 1 jam
+                sendSystemNotification("Peringatan Pemakaian", "Lampu sudah menyala lebih dari 1 jam.");
                 addLog("Peringatan: Overtime");
                 lampOnStartTime = System.currentTimeMillis(); 
             }

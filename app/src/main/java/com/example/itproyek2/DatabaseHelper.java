@@ -17,7 +17,7 @@ import java.util.Map;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "SmartPress.db";
-    private static final int DATABASE_VERSION = 2; // Incremented version
+    private static final int DATABASE_VERSION = 3; // Samakan dengan constructor
 
     // Tabel User
     public static final String TABLE_USERS = "users";
@@ -47,7 +47,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COL_AUTO_COUNT = "auto_count";
 
     public DatabaseHelper(Context context) {
-        super(context, DATABASE_NAME, null, 3); // Upgraded to version 3
+        super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
     @Override
