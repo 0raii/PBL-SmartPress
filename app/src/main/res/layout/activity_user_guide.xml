@@ -53,14 +53,14 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="1. Kontrol Lampu Pintar"
+                android:text="1. Kontrol Lampu &amp; Mode"
                 android:textColor="@color/text_head"
                 android:textSize="16sp"
                 android:textStyle="bold" />
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="● Gunakan tombol ON/OFF untuk mengontrol lampu secara manual dari jarak jauh.\n● Aktifkan mode OTOMATIS agar lampu menyala sendiri saat sensor mendeteksi kondisi gelap.\n● Status 'Terhubung' menunjukkan perangkat ESP32 Anda aktif."
+                android:text="● Gunakan tombol ON/OFF untuk kontrol manual jarak jauh.\n● Mode OTOMATIS: Lampu akan menyala otomatis berdasarkan tingkat kegelapan yang dideteksi sensor.\n● Penjadwalan (Timer): Atur jam mulai dan selesai agar lampu bekerja sesuai jadwal tertentu."
                 android:textColor="@color/text_sub"
                 android:layout_marginBottom="16dp"
                 android:lineSpacingExtra="4dp"/>
@@ -69,14 +69,14 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="2. Monitoring Daya &amp; kWh"
+                android:text="2. Monitoring Energi &amp; Biaya"
                 android:textColor="@color/text_head"
                 android:textSize="16sp"
                 android:textStyle="bold" />
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="● Di halaman Beranda, Anda dapat melihat penggunaan listrik (kWh) secara real-time.\n● Klik 'Detail' untuk melihat data Voltase, Ampere, dan Watt yang lebih mendalam."
+                android:text="● Pantau Watt, Voltase, dan Arus secara real-time.\n● Lihat total penggunaan energi dalam kWh serta estimasi biaya listrik harian Anda."
                 android:textColor="@color/text_sub"
                 android:layout_marginBottom="16dp"
                 android:lineSpacingExtra="4dp"/>
@@ -85,14 +85,14 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="3. Laporan Penggunaan"
+                android:text="3. Laporan &amp; Riwayat"
                 android:textColor="@color/text_head"
                 android:textSize="16sp"
                 android:textStyle="bold" />
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="● Gunakan menu Laporan untuk melihat statistik harian, mingguan, hingga bulanan.\n● Pantau estimasi biaya listrik Anda agar lebih hemat."
+                android:text="● Menu Aktivitas: Melihat riwayat interaksi sistem (Sistem, Manual, Otomatis).\n● Menu Laporan: Melihat grafik statistik harian/mingguan/bulanan dan mengunduh laporan dalam format PDF."
                 android:textColor="@color/text_sub"
                 android:layout_marginBottom="16dp"
                 android:lineSpacingExtra="4dp"/>
@@ -101,14 +101,30 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="4. Keamanan &amp; Notifikasi"
+                android:text="4. Sistem Proteksi &amp; Notifikasi"
                 android:textColor="@color/text_head"
                 android:textSize="16sp"
                 android:textStyle="bold" />
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="● Aktifkan 'Peringatan Durasi' di Pengaturan untuk mendapatkan notifikasi jika lampu menyala terlalu lama (lebih dari 5 jam)."
+                android:text="● Proteksi Tegangan/Arus: Sistem akan memberi peringatan jika terdeteksi kondisi listrik yang tidak stabil atau bahaya korsleting.\n● Notifikasi: Dapatkan pemberitahuan langsung di HP saat lampu menyala, saat ada peringatan energi, atau saat pemakaian melebihi durasi wajar."
+                android:textColor="@color/text_sub"
+                android:layout_marginBottom="16dp"
+                android:lineSpacingExtra="4dp"/>
+
+            <!-- Pengaturan -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="5. Pengaturan Sensitivitas &amp; Tema"
+                android:textColor="@color/text_head"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="● Atur ambang batas (threshold) sensor cahaya sesuai keinginan (Level 1-3).\n● Ganti tema aplikasi (Terang/Gelap) sesuai kenyamanan mata Anda."
                 android:textColor="@color/text_sub"
                 android:layout_marginBottom="16dp"
                 android:lineSpacingExtra="4dp"/>

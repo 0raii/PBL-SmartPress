@@ -31,12 +31,12 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.security.SecureRandom;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-import java.util.Random;
 
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -70,19 +70,33 @@ public class MainActivity extends AppCompatActivity {
     private double totalKwh = 0;
     private double currentVoltage = 0, currentArus = 0, currentWatt = 0;
     private long lampOnStartTime = 0;
-    private boolean useManualLux = false;
-    private boolean isDarkManualOverride = false;
 
     private Handler realtimeHandler = new Handler();
-    private Random random = new Random();
+    private SecureRandom random = new SecureRandom();
     private DecimalFormat df = new DecimalFormat("0.00");
     private NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("id", "ID"));
     private SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
 
     private static final String CHANNEL_ID = "SMART_LAMP_NOTIF";
+    private static final int NOTIF_ID_LAMP = 1;
+    private static final int NOTIF_ID_PROTECTION = 2;
+    private static final int NOTIF_ID_SCHEDULE = 3;
+    private static final int NOTIF_ID_TEST = 4;
+    private static final int NOTIF_ID_ENERGY = 5;
+
+    private boolean isAppInForeground = false;
+    private boolean isProtectionAlertSent = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        SharedPreferences prefs = SecurityUtils.getEncryptedPrefs(this);
+        boolean isDark = prefs.getBoolean("is_dark_theme", true);
+        if (isDark) {
+            androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES);
+        } else {
+            androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO);
+        }
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -131,17 +145,17 @@ public class MainActivity extends AppCompatActivity {
         // ganti status lampu on/off
         toggleGroupLamp.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
             if (isChecked) {
-                if (!isConnected) {
-                    if (!hasShownOfflineToastOnce) {
-                        showToast("Perangkat sedang Offline");
-                        hasShownOfflineToastOnce = true;
-                    }
-                    toggleGroupLamp.post(() -> toggleGroupLamp.check(isLampOn ? R.id.btnOn : R.id.btnOff));
-                } else if (isAutoMode) {
-                    showToast("matiin mode OTOMATIS dulu kalo mau manual");
+                if (isAutoMode) {
+                    showToast("Matiin mode OTOMATIS dulu kalo mau manual");
                     toggleGroupLamp.post(() -> toggleGroupLamp.check(isLampOn ? R.id.btnOn : R.id.btnOff));
                 } else {
+                    if (isTimerEnabled) {
+                        showToast("Penjadwalan Aktif: Kontrol manual akan menunda jadwal sementara");
+                    }
                     updateLampState(checkedId == R.id.btnOn, "Kontrol Manual");
+                    if (!isConnected) {
+                        showToast("Perintah dikirim (Perangkat sedang offline)");
+                    }
                 }
             }
         });
@@ -149,16 +163,11 @@ public class MainActivity extends AppCompatActivity {
         // ganti mode manual/otomatis
         toggleGroupMode.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
             if (isChecked) {
+                boolean newMode = (checkedId == R.id.btnAuto);
+                dbRef.child("auto_mode").setValue(newMode);
+                addLog("Mode ganti ke " + (newMode ? "OTOMATIS" : "MANUAL"));
                 if (!isConnected) {
-                    if (!hasShownOfflineToastOnce) {
-                        showToast("Perangkat sedang Offline");
-                        hasShownOfflineToastOnce = true;
-                    }
-                    toggleGroupMode.post(() -> toggleGroupMode.check(isAutoMode ? R.id.btnAuto : R.id.btnManual));
-                } else {
-                    boolean newMode = (checkedId == R.id.btnAuto);
-                    dbRef.child("auto_mode").setValue(newMode);
-                    addLog("mode ganti ke " + (newMode ? "OTOMATIS" : "MANUAL"));
+                    showToast("Pengaturan mode dikirim (Perangkat sedang offline)");
                 }
             }
         });
@@ -168,20 +177,14 @@ public class MainActivity extends AppCompatActivity {
         });
 
         switchTimer.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isConnected) {
-                dbRef.child("timer_enabled").setValue(isChecked);
-                addLog("Jadwal lampu " + (isChecked ? "DIAKTIFKAN" : "DIMATIKAN"));
-                
-                // Beri tahu user jika mode otomatis sedang aktif
-                if (isChecked && isAutoMode) {
-                    showToast("Mode Otomatis ditangguhkan selama Penjadwalan aktif");
-                }
-            } else {
-                if (!hasShownOfflineToastOnce) {
-                    showToast("Perangkat sedang Offline");
-                    hasShownOfflineToastOnce = true;
-                }
-                switchTimer.setChecked(isTimerEnabled);
+            dbRef.child("timer_enabled").setValue(isChecked);
+            addLog("Jadwal lampu " + (isChecked ? "DIAKTIFKAN" : "DIMATIKAN"));
+            
+            if (isChecked && isAutoMode) {
+                showToast("Mode Otomatis ditangguhkan selama Penjadwalan aktif");
+            }
+            if (!isConnected) {
+                showToast("Pengaturan jadwal dikirim (Perangkat sedang offline)");
             }
         });
 
@@ -220,22 +223,45 @@ public class MainActivity extends AppCompatActivity {
 
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "Smart Lamp Notifications", NotificationManager.IMPORTANCE_DEFAULT);
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "Smart Lamp Notifications", NotificationManager.IMPORTANCE_HIGH);
+            channel.setDescription("Notifikasi untuk status lampu dan penggunaan energi");
+            channel.enableLights(true);
+            channel.setLightColor(Color.YELLOW);
+            channel.enableVibration(true);
+            
             NotificationManager manager = getSystemService(NotificationManager.class);
             if (manager != null) manager.createNotificationChannel(channel);
         }
     }
 
     private void sendSystemNotification(String title, String message) {
+        sendSystemNotification(title, message, random.nextInt(1000));
+    }
+
+    private void sendSystemNotification(String title, String message, int id) {
+        // Jangan kirim notifikasi jika user sedang membuka aplikasi (agar tidak mengganggu)
+        if (isAppInForeground) return;
+
+        // Cek permission untuk Android 13+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (androidx.core.content.ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS)
+                    != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                androidx.core.app.ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, 101);
+                return;
+            }
+        }
+
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_logo_smartpress)
                 .setContentTitle(title)
                 .setContentText(message)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setAutoCancel(true);
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+                .setAutoCancel(true)
+                .setDefaults(NotificationCompat.DEFAULT_ALL);
 
         NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        if (manager != null) manager.notify(random.nextInt(1000), builder.build());
+        if (manager != null) manager.notify(id, builder.build());
     }
 
     private void syncLampToggle() {
@@ -243,7 +269,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadAppState() {
-        SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
+        SharedPreferences prefs = SecurityUtils.getEncryptedPrefs(this);
         isLampOn = prefs.getBoolean("lamp_status", false);
         isAutoMode = prefs.getBoolean("auto_mode", false);
         totalKwh = Double.parseDouble(prefs.getString("total_kwh", "0.0").replace(",", "."));
@@ -254,7 +280,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void saveAppState() {
-        SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
+        SharedPreferences prefs = SecurityUtils.getEncryptedPrefs(this);
         SharedPreferences.Editor editor = prefs.edit();
         editor.putBoolean("lamp_status", isLampOn);
         editor.putBoolean("auto_mode", isAutoMode);
@@ -276,6 +302,18 @@ public class MainActivity extends AppCompatActivity {
         tvEspStatus.setTextColor(Color.parseColor(isConnected ? "#4CAF50" : "#F44336"));
         tvWifiStatus.setText(isConnected ? "CONNECTED" : "DISCONNECTED");
         tvWifiStatus.setTextColor(Color.parseColor(isConnected ? "#4CAF50" : "#F44336"));
+
+        if (!isConnected) {
+            tvDaya.setText("0.00 Watt");
+            tvKwhSummary.setText("Total Pemakaian Hari Ini: 0.00 kWh");
+            tvCostSummary.setText(currencyFormat.format(0));
+            tvStatusLampu.setText("OFFLINE");
+            tvStatusLampu.setTextColor(Color.parseColor("#F44336"));
+        } else {
+            tvDaya.setText(df.format(currentWatt) + " Watt");
+            tvKwhSummary.setText("Total Pemakaian Hari Ini: " + df.format(totalKwh) + " kWh");
+            tvCostSummary.setText(currencyFormat.format(totalKwh * 1500.0)); // Gunakan default 1500
+        }
         
         updateCahayaUi(currentLdrValue);
 
@@ -308,10 +346,19 @@ public class MainActivity extends AppCompatActivity {
                         else source = "Manual/Alat";
 
                         addLog("Lampu " + (isLampOn ? "MENYALA" : "MATI") + " (" + source + ")");
+
+                        // NOTIFIKASI PENTING: Perubahan status via Otomatis atau Jadwal
+                        if (notifLamp) {
+                            if (isAutoMode) {
+                                sendSystemNotification("Mode Otomatis Beraksi", "Lampu " + (isLampOn ? "Dinyalakan" : "Dimatikan") + " karena sensor cahaya.", NOTIF_ID_LAMP);
+                            } else if (isTimerEnabled) {
+                                sendSystemNotification("Jadwal Berjalan", "Lampu " + (isLampOn ? "Dinyalakan" : "Dimatikan") + " sesuai jadwal yang Anda atur.", NOTIF_ID_SCHEDULE);
+                            }
+                        }
                         
                         // Log ke SQLite untuk Report jika ini otomatis/jadwal
-                        if (isAutoMode || isTimerEnabled) {
-                            SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
+                        if (isConnected && (isAutoMode || isTimerEnabled)) {
+                            SharedPreferences prefs = SecurityUtils.getEncryptedPrefs(MainActivity.this);
                             int userId = prefs.getInt("profile_id", -1);
                             if (userId != -1) {
                                 dbHelper.addAutoLog(userId, isLampOn ? "HIDUP" : "MATI", currentLumen, currentWatt);
@@ -432,12 +479,13 @@ public class MainActivity extends AppCompatActivity {
                         
                         if (!hasShownOfflineToastOnce) {
                             showToast("Perangkat Terputus (Offline)");
+                            lastTickTime = 0; // Reset lastTickTime to avoid immediate online status on re-entry
                             hasShownOfflineToastOnce = true;
                         }
                     }
                 } else {
                     // Jika kembali Online, reset flag toast agar bisa muncul lagi nanti jika putus lagi
-                    if (!isConnected) {
+                    if (!isConnected && lastTickTime != 0) {
                         isConnected = true;
                         hasShownOfflineToastOnce = false;
                         applyUiState();
@@ -458,13 +506,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void addLog(String message) {
+        if (!isConnected) return; // Jangan simpan aktifitas jika perangkat offline
+
         String currentTime = timeFormat.format(new Date());
         tvLogAktivitas.setText("[" + currentTime + "] " + message);
         saveLogToHistory(message);
     }
 
     private void saveLogToHistory(String message) {
-        SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
+        SharedPreferences prefs = SecurityUtils.getEncryptedPrefs(this);
         String history = prefs.getString("history_data", "");
         String currentTime = new SimpleDateFormat("HH:mm", Locale.getDefault()).format(new Date());
         
@@ -498,27 +548,49 @@ public class MainActivity extends AppCompatActivity {
         // Karena sensor PZEM belum ada/belum kirim data, nilai default adalah 0 dari inisialisasi variabel
         // Jika sudah ada data dari Firebase, listener akan mengupdate variabel secara otomatis.
 
-        tvDaya.setText(df.format(currentWatt) + " Watt");
-        tvKwhSummary.setText("Total Pemakaian Hari Ini: " + df.format(totalKwh) + " kWh");
-        
-        // Menampilkan estimasi biaya berdasarkan totalKwh dari PZEM
-        tvCostSummary.setText(currencyFormat.format(totalKwh * 1444.70));
-        saveAppState();
+        if (isConnected) {
+            tvDaya.setText(df.format(currentWatt) + " Watt");
+            tvKwhSummary.setText("Total Pemakaian Hari Ini: " + df.format(totalKwh) + " kWh");
+            
+            SharedPreferences prefs = SecurityUtils.getEncryptedPrefs(this);
+            double tariff = prefs.getFloat("electricity_tariff", 1500.0f);
+            
+            // Menampilkan estimasi biaya berdasarkan totalKwh dari PZEM
+            tvCostSummary.setText(currencyFormat.format(totalKwh * tariff));
+
+            // NOTIFIKASI ENERGI (Contoh: setiap 1 kWh)
+            if (notifEnergy && totalKwh > 0 && Math.floor(totalKwh) > Math.floor(totalKwh - (currentWatt / 3600000.0))) {
+                 sendSystemNotification("Laporan Penggunaan", "Pemakaian listrik telah mencapai " + Math.floor(totalKwh) + " kWh.", NOTIF_ID_ENERGY);
+            }
+
+            saveAppState();
+        }
     }
 
     private void updateCahayaUi(int ldrValue) {
-        // Konversi ADC (0-4095) ke Lumen (0-1000)
-        currentLumen = (int) (((4095.0 - ldrValue) / 4095.0) * 1000);
-        if (currentLumen < 0) currentLumen = 0;
-        if (currentLumen > 1000) currentLumen = 1000;
+        // Konversi ADC (0-4095) ke Persen (0-100%)
+        // 4095 (Gelap) -> 0%
+        // 0 (Terang) -> 100%
+        int percent = (int) (((4095.0 - ldrValue) / 4095.0) * 100);
+        if (percent < 0) percent = 0;
+        if (percent > 100) percent = 100;
 
         boolean isDark = ldrValue > ldrThreshold;
         
-        tvKondisiCahaya.setText(currentLumen + " Lumen");
+        tvKondisiCahaya.setText(percent + "%");
         tvKondisiCahaya.setTextColor(isDark ? Color.WHITE : Color.BLACK);
         layoutStatusCahaya.setBackgroundResource(isDark ? R.drawable.status_bg_dark : R.drawable.status_bright_bg);
         ivKondisiIcon.setImageResource(isDark ? R.drawable.ic_star_on : R.drawable.ic_history);
         ivKondisiIcon.setColorFilter(isDark ? Color.WHITE : Color.BLACK);
+
+        // UI Feedback untuk status kontrol
+        if (isTimerEnabled) {
+            tvStatusLampu.setText(isLampOn ? "ON (Jadwal)" : "OFF (Jadwal)");
+        } else if (isAutoMode) {
+            tvStatusLampu.setText(isLampOn ? "ON (Otomatis)" : "OFF (Otomatis)");
+        } else {
+            tvStatusLampu.setText(isLampOn ? "ON" : "OFF");
+        }
 
         // Logika kontrol otomatis sekarang sepenuhnya ditangani oleh ESP32.
         // Aplikasi hanya bertugas memantau status dan menampilkan data.
@@ -539,10 +611,32 @@ public class MainActivity extends AppCompatActivity {
                 .build();
 
         picker.addOnPositiveButtonClickListener(v -> {
-            String selectedTime = String.format(Locale.US, "%02d:%02d", picker.getHour(), picker.getMinute());
+            int selectedHour = picker.getHour();
+            int selectedMinute = picker.getMinute();
+            String selectedTime = String.format(Locale.US, "%02d:%02d", selectedHour, selectedMinute);
+            
+            // Logika Validasi Waktu
+            java.util.Calendar now = java.util.Calendar.getInstance();
+            int currentHour = now.get(java.util.Calendar.HOUR_OF_DAY);
+            int currentMinute = now.get(java.util.Calendar.MINUTE);
+
             if (isStartTime) {
+                // 1. Cek apakah jam mulai sudah lewat dari jam sekarang
+                if (selectedHour < currentHour || (selectedHour == currentHour && selectedMinute <= currentMinute)) {
+                    showToast("Jam mulai tidak boleh kurang dari jam sekarang (" + String.format(Locale.US, "%02d:%02d", currentHour, currentMinute) + ")");
+                    return;
+                }
                 dbRef.child("timer_on").setValue(selectedTime);
             } else {
+                // 2. Cek apakah jam selesai lebih kecil dari jam mulai
+                String[] startParts = timerOnStr.split(":");
+                int startHour = Integer.parseInt(startParts[0]);
+                int startMin = Integer.parseInt(startParts[1]);
+                
+                if (selectedHour < startHour || (selectedHour == startHour && selectedMinute <= startMin)) {
+                    showToast("Jam selesai harus lebih besar dari jam mulai (" + timerOnStr + ")");
+                    return;
+                }
                 dbRef.child("timer_off").setValue(selectedTime);
             }
             showToast("Jadwal " + (isStartTime ? "mulai" : "selesai") + " diatur ke " + selectedTime);
@@ -552,11 +646,30 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void checkAlerts() {
+        // 1. PROTEKSI LISTRIK (SANGAT PENTING)
+        // Jika tegangan > 245V atau arus > 1A (Misal lampu konslet/tidak wajar)
+        if (isConnected) {
+            if (currentVoltage > 245.0) {
+                if (!isProtectionAlertSent) {
+                    sendSystemNotification("⚠️ PERINGATAN TEGANGAN", "Tegangan listrik tidak stabil (" + currentVoltage + "V). Segera cek sambungan!", NOTIF_ID_PROTECTION);
+                    isProtectionAlertSent = true;
+                }
+            } else if (currentArus > 1.0) {
+                 if (!isProtectionAlertSent) {
+                    sendSystemNotification("⚠️ PERINGATAN ARUS", "Beban arus tidak wajar (" + currentArus + "A). Bahaya korsleting!", NOTIF_ID_PROTECTION);
+                    isProtectionAlertSent = true;
+                }
+            } else {
+                isProtectionAlertSent = false; // Reset jika sudah stabil
+            }
+        }
+
+        // 2. PERINGATAN DURASI (OVERTIME)
+        // Kita kurangi frekuensinya, hanya kirim jika benar-benar sudah sangat lama (misal 5 jam)
         if (isLampOn && lampOnStartTime > 0 && notifOvertime) {
             long durationSec = (System.currentTimeMillis() - lampOnStartTime) / 1000;
-            if (durationSec > 3600) { // Beri peringatan jika nyala lebih dari 1 jam
-                sendSystemNotification("Peringatan Pemakaian", "Lampu sudah menyala lebih dari 1 jam.");
-                addLog("Peringatan: Overtime");
+            if (durationSec > 18000) { // 5 Jam
+                sendSystemNotification("Peringatan Pemakaian", "Lampu sudah menyala lebih dari 5 jam. Pastikan dimatikan jika tidak perlu.", NOTIF_ID_LAMP);
                 lampOnStartTime = System.currentTimeMillis(); 
             }
         }
@@ -564,6 +677,18 @@ public class MainActivity extends AppCompatActivity {
 
     private void showToast(String message) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        isAppInForeground = true;
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        isAppInForeground = false;
     }
 
     // TEST COMMIT - tidak mengubah fungsi

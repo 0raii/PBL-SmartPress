@@ -73,10 +73,10 @@
     <string name="icon_desc">Deskripsi Ikon</string>
 
     <!-- Settings Sensitivity Descriptions -->
-    <string name="label_redup">Redup (&gt; 600 Lm)</string>
-    <string name="label_standar">Standar (~ 400 Lm)</string>
-    <string name="label_gelap">Gelap (&lt; 150 Lm)</string>
-    <string name="desc_sensitivity">Keterangan:\n• Redup: Lampu menyala lebih awal pas sore hari (masih agak terang sudah nyala).\n• Standar: Lampu menyala pas mendung atau malam normal.\n• Gelap: Lampu baru nyala kalau sudah benar-benar gelap gulita.</string>
+    <string name="label_redup">Level 1 (Paling Sensitif)</string>
+    <string name="label_standar">Level 2 (Standar)</string>
+    <string name="label_gelap">Level 3 (Kurang Sensitif)</string>
+    <string name="desc_sensitivity">Keterangan:\n• Level 1: Paling sensitif, gelap sedikit saja lampu langsung hidup.\n• Level 2: Sensitivitas standar, menyala saat mendung atau menjelang malam.\n• Level 3: Lampu baru menyala saat kondisi sudah benar-benar gelap.</string>
     <string name="pdf_report_title">Laporan Monitoring SmartPress</string>
     <string name="download_pdf">Unduh Laporan PDF</string>
 
@@ -132,13 +132,12 @@
     <!-- Settings & About -->
     <string name="tentang">Tentang</string>
     <string name="tentang_aplikasi">Tentang Aplikasi</string>
-    <string name="app_version">v1.1.0</string>
     <string name="about_desc">SmartPress adalah solusi monitoring lampu pintar berbasis IoT untuk efisiensi energi di Mushola.</string>
-    <string name="developer_info">Dikembangkan oleh: Kelompok PBL (Tim 3)</string>
+    <string name="developer_info">Dikembangkan oleh: Kelompok 3 Kelas 4D\n\nAnggota Kelompok:\n1. Aldevianuri Handayani (2401301026)\n2. Siti Maida (2401301074)\n3. Rehad Edya Mecca (2401301115)\n4. Muhammad Raihan (2401301021)\n5. Khatim Hidayatullah (2401301083)\n\nEmail Anggota:\n1. aldevianuri.handayani@mhs.politala.ac.id\n2. khatim.hidayatullah@mhs.politala.ac.id\n3. muhammad.raihan1@mhs.politala.ac.id\n4. siti.maida@mhs.politala.ac.id</string>
 
     <!-- Profile Strings -->
-    <string name="profile_name">Sofiani</string>
-    <string name="profile_email">sofiani@gmail.com</string>
+    <string name="profile_name"></string>
+    <string name="profile_email"></string>
     <string name="edit_profil">Edit Profil</string>
     <string name="no_hp">No. Hp</string>
     <string name="role">Role</string>

@@ -161,6 +161,7 @@
                         android:background="@color/divider_color" />
 
                     <RelativeLayout
+                        android:id="@+id/layoutDevice1"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:paddingVertical="8dp">
@@ -180,48 +181,15 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Lampu Teras Mushola"
+                                android:text="Lampu 1"
                                 android:textColor="@color/text_head"
                                 android:textSize="14sp" />
                             <TextView
                                 android:id="@+id/tvStatusDevice1"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="● Terhubung"
-                                android:textColor="#4CAF50"
-                                android:textSize="12sp" />
-                        </LinearLayout>
-                    </RelativeLayout>
-
-                    <RelativeLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:paddingVertical="8dp">
-                        <ImageView
-                            android:id="@+id/ivDevice2"
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:src="@drawable/ic_lamp_on"
-                            app:tint="@color/accent_yellow" />
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerVertical="true"
-                            android:layout_marginStart="12dp"
-                            android:layout_toEndOf="@id/ivDevice2"
-                            android:orientation="vertical">
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Lampu Dalam Mushola"
-                                android:textColor="@color/text_head"
-                                android:textSize="14sp" />
-                            <TextView
-                                android:id="@+id/tvStatusDevice2"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="● Terhubung"
-                                android:textColor="#4CAF50"
+                                android:text="○ Terputus"
+                                android:textColor="#F44336"
                                 android:textSize="12sp" />
                         </LinearLayout>
                     </RelativeLayout>
@@ -564,14 +532,6 @@
                             android:layout_centerVertical="true"
                             android:text="@string/tentang_aplikasi"
                             android:textColor="@color/text_head" />
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentEnd="true"
-                            android:layout_centerVertical="true"
-                            android:text="@string/app_version"
-                            android:textColor="@color/text_sub"
-                            android:textSize="13sp" />
                     </RelativeLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -625,6 +585,30 @@
                             android:layout_alignParentEnd="true"
                             android:src="@android:drawable/ic_lock_power_off"
                             app:tint="#E53935" />
+                    </RelativeLayout>
+
+                    <View android:layout_width="match_parent" android:layout_height="0.5dp" android:background="@color/divider_color" />
+
+                    <RelativeLayout
+                        android:id="@+id/layoutTestNotif"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingVertical="12dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?attr/selectableItemBackground">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Tes Notifikasi Bar Atas"
+                            android:textColor="@color/primary_blue"
+                            android:textSize="14sp" />
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_alignParentEnd="true"
+                            android:src="@drawable/ic_history"
+                            app:tint="@color/primary_blue" />
                     </RelativeLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>

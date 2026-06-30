@@ -39,12 +39,17 @@ public class SettingsActivity extends AppCompatActivity {
     private RadioGroup rgTheme;
     private RadioButton rbDark, rbLight;
     private MaterialButtonToggleGroup toggleThreshold;
+    private RelativeLayout layoutTestNotif;
     
-    private TextView tvStatusDevice1, tvStatusDevice2, tvProfileName, tvProfileEmail;
-    private ImageView ivDevice1, ivDevice2, ivProfileMain;
+    private TextView tvStatusDevice1, tvProfileName, tvProfileEmail;
+    private ImageView ivDevice1, ivProfileMain;
     private RelativeLayout layoutUserGuide, layoutContactSupport, layoutAbout, layoutLogout;
     private MaterialButton btnSetPassword;
     private DatabaseReference dbRef;
+    
+    private long lastTickTime = 0;
+    private boolean isConnected = false;
+    private final android.os.Handler offlineCheckHandler = new android.os.Handler();
 
     private final ActivityResultLauncher<Intent> editProfileLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -75,7 +80,7 @@ public class SettingsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
-        dbRef = FirebaseDatabase.getInstance("https://smartpress-ea81d-default-rtdb.asia-southeast1.firebasedatabase.app/").getReference();
+        dbRef = FirebaseDatabase.getInstance("https://smartpress-ea81d-default-rtdb.asia-southeast1.firebasedatabase.app/").getReference("monitoring/perangkat_utama");
         initFirebaseListeners();
 
         switchNotifLamp = findViewById(R.id.switchNotifLamp);
@@ -87,9 +92,7 @@ public class SettingsActivity extends AppCompatActivity {
         toggleThreshold = findViewById(R.id.toggleThreshold);
         
         tvStatusDevice1 = findViewById(R.id.tvStatusDevice1);
-        tvStatusDevice2 = findViewById(R.id.tvStatusDevice2);
         ivDevice1 = findViewById(R.id.ivDevice1);
-        ivDevice2 = findViewById(R.id.ivDevice2);
         tvProfileName = findViewById(R.id.tvProfileName);
         tvProfileEmail = findViewById(R.id.tvProfileEmail);
         ivProfileMain = findViewById(R.id.ivProfileMain);
@@ -97,10 +100,12 @@ public class SettingsActivity extends AppCompatActivity {
         layoutContactSupport = findViewById(R.id.layoutContactSupport);
         layoutAbout = findViewById(R.id.layoutAbout);
         layoutLogout = findViewById(R.id.layoutLogout);
+        layoutTestNotif = findViewById(R.id.layoutTestNotif);
         btnSetPassword = findViewById(R.id.btnSetPassword);
 
         loadSettings();
-        updateDeviceConnectionUi();
+
+        layoutTestNotif.setOnClickListener(v -> showTestNotification());
 
         layoutUserGuide.setOnClickListener(v -> {
             startActivity(new Intent(SettingsActivity.this, UserGuideActivity.class));
@@ -129,9 +134,9 @@ public class SettingsActivity extends AppCompatActivity {
 
         toggleThreshold.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
             if (isChecked) {
-                int threshold = 2500; // Default Mid
-                if (checkedId == R.id.btnLow) threshold = 1500;
-                else if (checkedId == R.id.btnHigh) threshold = 3500;
+                int threshold = 2500; // Level 2 (Standar)
+                if (checkedId == R.id.btnLow) threshold = 1000; // Level 1 (Paling Sensitif)
+                else if (checkedId == R.id.btnHigh) threshold = 4000; // Level 3 (Kurang Sensitif)
                 
                 getSharedPreferences("SmartLampPrefs", MODE_PRIVATE).edit()
                         .putInt("ldr_threshold", threshold).apply();
@@ -153,6 +158,7 @@ public class SettingsActivity extends AppCompatActivity {
         });
 
         setupBottomNav();
+        startOfflineCheckLoop();
     }
 
     @Override
@@ -187,9 +193,13 @@ public class SettingsActivity extends AppCompatActivity {
                 .setTitle("keluar akun")
                 .setMessage("yakin nih mau keluar dari smartpress?")
                 .setPositiveButton("ya, keluar", (dialog, which) -> {
-                    // hapus semua data session
-                    SharedPreferences.Editor editor = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE).edit();
+                    // hapus session tapi simpan tema
+                    SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
+                    boolean currentTheme = prefs.getBoolean("is_dark_theme", true);
+                    
+                    SharedPreferences.Editor editor = prefs.edit();
                     editor.clear();
+                    editor.putBoolean("is_dark_theme", currentTheme);
                     editor.apply();
 
                     Toast.makeText(this, "oke udah keluar", Toast.LENGTH_SHORT).show();
@@ -204,13 +214,39 @@ public class SettingsActivity extends AppCompatActivity {
                 .show();
     }
 
+    private void showTestNotification() {
+        String channelId = "SMART_LAMP_NOTIF";
+        
+        // Buat channel jika belum ada (Penting untuk Android 8+)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            android.app.NotificationChannel channel = new android.app.NotificationChannel(
+                    channelId, "Smart Lamp Notifications", android.app.NotificationManager.IMPORTANCE_HIGH);
+            android.app.NotificationManager manager = getSystemService(android.app.NotificationManager.class);
+            if (manager != null) manager.createNotificationChannel(channel);
+        }
+
+        androidx.core.app.NotificationCompat.Builder builder = new androidx.core.app.NotificationCompat.Builder(this, channelId)
+                .setSmallIcon(R.drawable.ic_logo_smartpress)
+                .setContentTitle("Tes Notifikasi SmartPress")
+                .setContentText("Ini adalah contoh notifikasi bar atas yang muncul saat status lampu berubah.")
+                .setPriority(androidx.core.app.NotificationCompat.PRIORITY_HIGH)
+                .setAutoCancel(true)
+                .setDefaults(androidx.core.app.NotificationCompat.DEFAULT_ALL);
+
+        android.app.NotificationManager manager = (android.app.NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        if (manager != null) {
+            manager.notify(4, builder.build()); // ID 4 untuk tes
+            Toast.makeText(this, "Notifikasi terkirim! Cek bagian atas HP Anda.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     private void showContactSupportDialog() {
         new AlertDialog.Builder(this)
                 .setTitle("Hubungi Dukungan")
                 .setMessage("Jika Anda mengalami kendala, silakan hubungi kami melalui:\n\n" +
-                        "📧 Email: support@smartpress.id\n" +
-                        "📞 No. Telp: 0812-3456-7890\n" +
-                        "💬 WhatsApp: +62 812 3456 7890\n\n" +
+                        "📧 Email: muhammad.raihan1@mhs.politala.ac.id\n" +
+                        "📞 No. Telp: 081520427689\n" +
+                        "💬 WhatsApp: +62 815 2042 7689\n\n" +
                         "Tim kami akan membantu Anda secepat mungkin.")
                 .setPositiveButton("Tutup", null)
                 .show();
@@ -220,33 +256,48 @@ public class SettingsActivity extends AppCompatActivity {
         new AlertDialog.Builder(this)
                 .setTitle(getString(R.string.tentang_aplikasi))
                 .setMessage(getString(R.string.about_desc) + "\n\n" +
-                        getString(R.string.developer_info) + "\n" +
-                        "Versi Aplikasi: " + getString(R.string.app_version))
+                        getString(R.string.developer_info))
                 .setPositiveButton("Oke", null)
                 .show();
     }
 
     private void initFirebaseListeners() {
-        // Pantau status koneksi Lampu Teras
-        dbRef.child("is_connected").addValueEventListener(new ValueEventListener() {
+        // Pantau status koneksi Lampu 1 melalui heartbeat tick
+        dbRef.child("is_connected_tick").addValueEventListener(new ValueEventListener() {
+            private Object lastValue = null;
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                boolean isConnected = false;
                 if (snapshot.exists()) {
-                    isConnected = snapshot.getValue(Boolean.class);
+                    Object newValue = snapshot.getValue();
+                    if (lastValue != null && !newValue.equals(lastValue)) {
+                        isConnected = true;
+                        lastTickTime = System.currentTimeMillis();
+                        updateDeviceStatusUi();
+                    }
+                    lastValue = newValue;
                 }
-                updateTerasStatusUi(isConnected);
-                
-                // Simpan ke SharedPreferences agar MainActivity juga tahu
-                getSharedPreferences("SmartLampPrefs", MODE_PRIVATE).edit()
-                        .putBoolean("is_connected", isConnected).apply();
             }
 
             @Override public void onCancelled(@NonNull DatabaseError error) {}
         });
     }
 
-    private void updateTerasStatusUi(boolean isConnected) {
+    private void startOfflineCheckLoop() {
+        offlineCheckHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                if (System.currentTimeMillis() - lastTickTime > 20000) {
+                    if (isConnected) {
+                        isConnected = false;
+                        updateDeviceStatusUi();
+                    }
+                }
+                offlineCheckHandler.postDelayed(this, 5000);
+            }
+        });
+    }
+
+    private void updateDeviceStatusUi() {
         if (isConnected) {
             tvStatusDevice1.setText("● Terhubung");
             tvStatusDevice1.setTextColor(Color.parseColor("#4CAF50")); // Hijau
@@ -258,15 +309,6 @@ public class SettingsActivity extends AppCompatActivity {
             ivDevice1.setAlpha(0.5f);
             ivDevice1.setColorFilter(Color.GRAY, android.graphics.PorterDuff.Mode.SRC_IN);
         }
-        
-        // Lampu Dalam (Lampu 2) sementara kita buat Terputus dulu sesuai permintaan
-        tvStatusDevice2.setText("○ Belum Terpasang");
-        tvStatusDevice2.setTextColor(ContextCompat.getColor(this, R.color.text_sub));
-        ivDevice2.setAlpha(0.3f);
-    }
-
-    private void updateDeviceConnectionUi() {
-        // Fungsi ini sekarang digantikan oleh initFirebaseListeners untuk real-time
     }
 
     // ambil settingan dr sharedprefs
@@ -280,13 +322,13 @@ public class SettingsActivity extends AppCompatActivity {
         if (isDark) rbDark.setChecked(true);
         else rbLight.setChecked(true);
 
-        int threshold = prefs.getInt("ldr_threshold", 2500);
+        // Default awal: Level 1 (1000) - Paling Sensitif
+        int threshold = prefs.getInt("ldr_threshold", 1000);
         if (threshold <= 1500) toggleThreshold.check(R.id.btnLow);
         else if (threshold >= 3500) toggleThreshold.check(R.id.btnHigh);
         else toggleThreshold.check(R.id.btnMid);
     }
 
-    // simpen settingan ke sharedprefs
     private void saveSetting(String key, boolean value) {
         getSharedPreferences("SmartLampPrefs", MODE_PRIVATE).edit().putBoolean(key, value).apply();
     }
@@ -322,5 +364,11 @@ public class SettingsActivity extends AppCompatActivity {
             }
             return id == R.id.nav_settings;
         });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        offlineCheckHandler.removeCallbacksAndMessages(null);
     }
 }

@@ -18,11 +18,11 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.google.android.material.appbar.MaterialToolbar;
 
+import java.security.SecureRandom;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Locale;
-import java.util.Random;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -35,19 +35,21 @@ public class DetailActivity extends AppCompatActivity {
 
     private LineChart lineChart;
     private TextView tvPrediction, tvEfficiency;
-    private TextView tvVoltDetail, tvAmpereDetail, tvDurasiNyala;
+    private TextView tvVoltDetail, tvAmpereDetail, tvDurasiNyala, tvTarifPerKwh;
     private TextView tvKwhToday, tvEstimasiBiaya;
     private com.google.android.material.card.MaterialCardView cardProtectionAlert;
     private TextView tvProtectionTitle, tvProtectionDesc;
+    private View btnEditTarif;
     
     private DatabaseReference dbRef;
     private boolean isLampOn, isConnected;
     private long lastTickTime = 0;
     private double currentVoltage, currentCurrent, currentPower, totalKwhFromFirebase;
+    private double electricityTariff = 1500.0;
     private int xValue = 0;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final Handler offlineCheckHandler = new Handler(Looper.getMainLooper());
-    private final Random random = new Random();
+    private final SecureRandom random = new SecureRandom();
     private final DecimalFormat df = new DecimalFormat("#.##");
     private final NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("id", "ID"));
     
@@ -86,6 +88,10 @@ public class DetailActivity extends AppCompatActivity {
         tvProtectionTitle = findViewById(R.id.tvProtectionTitle);
         tvProtectionDesc = findViewById(R.id.tvProtectionDesc);
         lineChart = findViewById(R.id.lineChart); 
+        tvTarifPerKwh = findViewById(R.id.tvTarifPerKwh);
+        btnEditTarif = findViewById(R.id.btnEditTarif);
+
+        btnEditTarif.setOnClickListener(v -> showEditTarifDialog());
 
         dbRef = FirebaseDatabase.getInstance("https://smartpress-ea81d-default-rtdb.asia-southeast1.firebasedatabase.app/").getReference();
         initFirebaseListeners();
@@ -101,13 +107,36 @@ public class DetailActivity extends AppCompatActivity {
             }
         });
 
-        loadCurrentKwh();
+        loadSettings();
         setupChart(); 
         startDataSimulation();
     }
 
+    private void showEditTarifDialog() {
+        android.widget.EditText etTarif = new android.widget.EditText(this);
+        etTarif.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+        etTarif.setText(String.valueOf((int) electricityTariff));
+        etTarif.setSelection(etTarif.getText().length());
+
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("Atur Tarif Listrik")
+                .setMessage("Masukkan tarif per kWh (Rp):")
+                .setView(etTarif)
+                .setPositiveButton("Simpan", (dialog, which) -> {
+                    String val = etTarif.getText().toString();
+                    if (!val.isEmpty()) {
+                        electricityTariff = Double.parseDouble(val);
+                        getSharedPreferences("SmartLampPrefs", MODE_PRIVATE).edit()
+                                .putFloat("electricity_tariff", (float) electricityTariff).apply();
+                        updateDeepMonitoring();
+                    }
+                })
+                .setNegativeButton("Batal", null)
+                .show();
+    }
+
     // ambil data kwh yg ada
-    private void loadCurrentKwh() {
+    private void loadSettings() {
         SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
         String kwhStr = prefs.getString("total_kwh", "0.0").replace(",", ".");
         try {
@@ -115,6 +144,7 @@ public class DetailActivity extends AppCompatActivity {
         } catch (Exception e) {
             totalKwh = 0.0;
         }
+        electricityTariff = prefs.getFloat("electricity_tariff", 1500.0f);
     }
 
     // simpen kwh terbaru
@@ -168,7 +198,10 @@ public class DetailActivity extends AppCompatActivity {
     }
 
     private void initFirebaseListeners() {
-        dbRef.child("lamp_status").addValueEventListener(new ValueEventListener() {
+        String targetPath = "monitoring/perangkat_utama";
+        DatabaseReference mainRef = dbRef.child(targetPath);
+
+        mainRef.child("lamp_status").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) isLampOn = snapshot.getValue(Boolean.class);
@@ -177,24 +210,24 @@ public class DetailActivity extends AppCompatActivity {
         });
 
         // PZEM Data Listeners
-        dbRef.child("sensor_voltage").addValueEventListener(new ValueEventListener() {
+        mainRef.child("sensor_voltage").addValueEventListener(new ValueEventListener() {
             @Override public void onDataChange(@NonNull DataSnapshot s) { if(s.exists()) currentVoltage = s.getValue(Double.class); }
             @Override public void onCancelled(@NonNull DatabaseError e) {}
         });
-        dbRef.child("sensor_current").addValueEventListener(new ValueEventListener() {
+        mainRef.child("sensor_current").addValueEventListener(new ValueEventListener() {
             @Override public void onDataChange(@NonNull DataSnapshot s) { if(s.exists()) currentCurrent = s.getValue(Double.class); }
             @Override public void onCancelled(@NonNull DatabaseError e) {}
         });
-        dbRef.child("sensor_power").addValueEventListener(new ValueEventListener() {
+        mainRef.child("sensor_power").addValueEventListener(new ValueEventListener() {
             @Override public void onDataChange(@NonNull DataSnapshot s) { if(s.exists()) currentPower = s.getValue(Double.class); }
             @Override public void onCancelled(@NonNull DatabaseError e) {}
         });
-        dbRef.child("sensor_energy").addValueEventListener(new ValueEventListener() {
+        mainRef.child("sensor_energy").addValueEventListener(new ValueEventListener() {
             @Override public void onDataChange(@NonNull DataSnapshot s) { if(s.exists()) totalKwhFromFirebase = s.getValue(Double.class); }
             @Override public void onCancelled(@NonNull DatabaseError e) {}
         });
 
-        dbRef.child("is_connected_tick").addValueEventListener(new ValueEventListener() {
+        mainRef.child("is_connected_tick").addValueEventListener(new ValueEventListener() {
             private Object lastValue = null;
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -210,15 +243,27 @@ public class DetailActivity extends AppCompatActivity {
             @Override public void onCancelled(@NonNull DatabaseError error) {}
         });
 
-        dbRef.child("lamp_duration_sec").addValueEventListener(new ValueEventListener() {
+        mainRef.child("lamp_duration_sec").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
                     long secondsTotal = snapshot.getValue(Long.class);
+                    
+                    // Cek apakah data sudah usang (device offline lama)
+                    // Jika offline, kita tampilkan 0 jika ini hari baru dibanding last update
+                    // Tapi karena ga ada timestamp, kita asumsikan jika offline = 00:00:00 
+                    // atau biarkan saja tapi user minta kalau ga konek seminggu ya 0.
+                    if (!isConnected) {
+                        tvDurasiNyala.setText("00:00:00");
+                        return;
+                    }
+
                     long hours = secondsTotal / 3600;
                     long minutes = (secondsTotal % 3600) / 60;
                     long seconds = secondsTotal % 60;
                     tvDurasiNyala.setText(String.format(Locale.getDefault(), "%02d:%02d:%02d", hours, minutes, seconds));
+                } else if (!isConnected) {
+                    tvDurasiNyala.setText("00:00:00");
                 }
             }
             @Override public void onCancelled(@NonNull DatabaseError error) {}
@@ -240,7 +285,7 @@ public class DetailActivity extends AppCompatActivity {
                 watt = currentPower;
                 energy = totalKwhFromFirebase;
                 tvEfficiency.setText("Status: Real-time PZEM Monitoring");
-                tvEfficiency.setTextColor(Color.parseColor("#4CAF50"));
+                tvEfficiency.setTextColor(Color.WHITE); // Putih lebih tajam di background biru
             } else {
                 // Fallback ke simulasi jika sensor belum kirim data
                 volt = 220.0 + (random.nextDouble() * 4 - 2);
@@ -252,21 +297,27 @@ public class DetailActivity extends AppCompatActivity {
                 }
                 energy = totalKwh;
                 tvEfficiency.setText("Status: Simulasi Lampu (Sensor Pending)");
-                tvEfficiency.setTextColor(Color.parseColor("#FFA000"));
+                tvEfficiency.setTextColor(Color.parseColor("#FFD54F")); // Kuning terang
             }
         } else {
             tvEfficiency.setText("Status: PERANGKAT OFFLINE");
-            tvEfficiency.setTextColor(Color.parseColor("#F44336"));
+            tvEfficiency.setTextColor(Color.parseColor("#FF5252")); // Red A200 lebih terang/tajam
+            tvDurasiNyala.setText("00:00:00");
+            volt = 0.0;
+            ampere = 0.0;
+            watt = 0.0;
+            energy = 0.0;
         }
 
         // UPDATE UI
         tvVoltDetail.setText(String.format(Locale.getDefault(), "%.1f V", volt));
         tvAmpereDetail.setText(String.format(Locale.getDefault(), "%.3f A", ampere));
         tvKwhToday.setText(String.format(Locale.getDefault(), "%.4f kWh", energy));
-        tvEstimasiBiaya.setText(currencyFormat.format(energy * 1444.70));
+        tvTarifPerKwh.setText(String.format(Locale.getDefault(), "Rp %,.0f", electricityTariff));
+        tvEstimasiBiaya.setText(currencyFormat.format(energy * electricityTariff));
         
         // Prediksi bulanan
-        double monthlyPrediction = energy * 30 * 1444.70;
+        double monthlyPrediction = energy * 30 * electricityTariff;
         tvPrediction.setText(currencyFormat.format(monthlyPrediction));
         
         addEntry((float) watt);

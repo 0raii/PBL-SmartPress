@@ -48,6 +48,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        // Force private mode to avoid "World Readable" warnings
+        context.getDatabasePath(DATABASE_NAME).setReadable(false, false);
     }
 
     @Override
@@ -105,9 +107,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // Fungsi Update Statistik Harian
     public void updateDailyStats(int userId, String date, double kwh, int incrementAutoCount) {
         SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.rawQuery("SELECT " + COL_AUTO_COUNT + " FROM " + TABLE_DAILY_STATS + 
-                " WHERE " + COL_STATS_USER_ID + " = ? AND " + COL_DATE + " = ?", 
-                new String[]{String.valueOf(userId), date});
+        Cursor cursor = db.query(TABLE_DAILY_STATS, new String[]{COL_AUTO_COUNT},
+                COL_STATS_USER_ID + " = ? AND " + COL_DATE + " = ?",
+                new String[]{String.valueOf(userId), date}, null, null, null);
         
         ContentValues values = new ContentValues();
         values.put(COL_KWH, kwh);
@@ -129,25 +131,27 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // Ambil Semua Log Otomatis (untuk PDF)
     public Cursor getAllAutoLogs(int userId) {
         SQLiteDatabase db = this.getReadableDatabase();
-        return db.rawQuery("SELECT * FROM " + TABLE_AUTO_LOGS + 
-                " WHERE " + COL_LOG_USER_ID + " = ?" +
-                " ORDER BY " + COL_TIMESTAMP + " DESC", new String[]{String.valueOf(userId)});
+        return db.query(TABLE_AUTO_LOGS, null, COL_LOG_USER_ID + " = ?",
+                new String[]{String.valueOf(userId)}, null, null, COL_TIMESTAMP + " DESC");
     }
 
     // Ambil Log Otomatis berdasarkan rentang waktu (untuk PDF Filtered)
     public Cursor getFilteredAutoLogs(int userId, long startTime, long endTime) {
         SQLiteDatabase db = this.getReadableDatabase();
-        return db.rawQuery("SELECT * FROM " + TABLE_AUTO_LOGS + 
-                " WHERE " + COL_LOG_USER_ID + " = ? AND " + COL_TIMESTAMP + " BETWEEN ? AND ? ORDER BY " + COL_TIMESTAMP + " DESC", 
-                new String[]{String.valueOf(userId), String.valueOf(startTime), String.valueOf(endTime)});
+        return db.query(TABLE_AUTO_LOGS, null, 
+                COL_LOG_USER_ID + " = ? AND " + COL_TIMESTAMP + " BETWEEN ? AND ?",
+                new String[]{String.valueOf(userId), String.valueOf(startTime), String.valueOf(endTime)},
+                null, null, COL_TIMESTAMP + " DESC");
     }
 
     // Hitung jumlah log otomatis hari ini
     public int getAutoLogSummary(int userId, long startTime, long endTime) {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM " + TABLE_AUTO_LOGS + 
-                " WHERE " + COL_LOG_USER_ID + " = ? AND " + COL_TIMESTAMP + " BETWEEN ? AND ?", 
-                new String[]{String.valueOf(userId), String.valueOf(startTime), String.valueOf(endTime)});
+        Cursor cursor = db.query(TABLE_AUTO_LOGS, new String[]{"COUNT(*)"},
+                COL_LOG_USER_ID + " = ? AND " + COL_TIMESTAMP + " BETWEEN ? AND ?",
+                new String[]{String.valueOf(userId), String.valueOf(startTime), String.valueOf(endTime)},
+                null, null, null);
+        
         int count = 0;
         if (cursor.moveToFirst()) {
             count = cursor.getInt(0);
@@ -159,26 +163,27 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // Ambil Log Otomatis dengan Pagination (Limit & Offset)
     public Cursor getPagedAutoLogs(int userId, long startTime, long endTime, int limit, int offset) {
         SQLiteDatabase db = this.getReadableDatabase();
-        return db.rawQuery("SELECT * FROM " + TABLE_AUTO_LOGS + 
-                " WHERE " + COL_LOG_USER_ID + " = ? AND " + COL_TIMESTAMP + " BETWEEN ? AND ? " +
-                " ORDER BY " + COL_TIMESTAMP + " DESC " +
-                " LIMIT ? OFFSET ?", 
-                new String[]{String.valueOf(userId), String.valueOf(startTime), String.valueOf(endTime), String.valueOf(limit), String.valueOf(offset)});
+        String limitStr = offset + "," + limit;
+        return db.query(TABLE_AUTO_LOGS, null,
+                COL_LOG_USER_ID + " = ? AND " + COL_TIMESTAMP + " BETWEEN ? AND ?",
+                new String[]{String.valueOf(userId), String.valueOf(startTime), String.valueOf(endTime)},
+                null, null, COL_TIMESTAMP + " DESC", limitStr);
     }
 
     // Ambil Semua User
     public Cursor getAllUsers() {
         SQLiteDatabase db = this.getReadableDatabase();
-        return db.rawQuery("SELECT * FROM " + TABLE_USERS, null);
+        return db.query(TABLE_USERS, null, null, null, null, null, null);
     }
 
     // Registrasi User (dari halaman Register) - Sekarang Sinkron ke Firebase
     public boolean registerUser(String name, String email, String password) {
+        String hashedPassword = SecurityUtils.hashPassword(password);
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COL_NAME, name);
         values.put(COL_EMAIL, email);
-        values.put(COL_PASSWORD, password);
+        values.put(COL_PASSWORD, hashedPassword);
         values.put(COL_PHONE, "");
         values.put(COL_ROLE, "User");
         values.put(COL_PHOTO, "");
@@ -186,7 +191,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         
         if (result != -1) {
             // SINKRON KE FIREBASE (Untuk Admin)
-            syncUserToFirebase((int)result, name, email, password, "", "User", "");
+            syncUserToFirebase((int)result, name, email, hashedPassword, "", "User", "");
             return true;
         }
         return false;
@@ -313,17 +318,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     // Tambah User oleh Admin - Sinkron ke Firebase
     public boolean addUserByAdmin(String name, String email, String password, String phone, String role) {
+        String hashedPassword = SecurityUtils.hashPassword(password);
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COL_NAME, name);
         values.put(COL_EMAIL, email);
-        values.put(COL_PASSWORD, password);
+        values.put(COL_PASSWORD, hashedPassword);
         values.put(COL_PHONE, phone);
         values.put(COL_ROLE, role);
         values.put(COL_PHOTO, "");
         long result = db.insert(TABLE_USERS, null, values);
         if (result != -1) {
-            syncUserToFirebase((int)result, name, email, password, phone, role, "");
+            syncUserToFirebase((int)result, name, email, hashedPassword, phone, role, "");
             return true;
         }
         return false;
@@ -391,11 +397,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     // Fungsi Cek Login
     public boolean checkUser(String email, String password) {
+        String hashedPassword = SecurityUtils.hashPassword(password);
         SQLiteDatabase db = this.getReadableDatabase();
-        String[] columns = {COL_ID};
         String selection = COL_EMAIL + " = ?" + " AND " + COL_PASSWORD + " = ?";
-        String[] selectionArgs = {email, password};
-        Cursor cursor = db.query(TABLE_USERS, columns, selection, selectionArgs, null, null, null);
+        String[] selectionArgs = {email, hashedPassword};
+        Cursor cursor = db.query(TABLE_USERS, new String[]{COL_ID}, selection, selectionArgs, null, null, null);
         int count = cursor.getCount();
         cursor.close();
         return count > 0;
@@ -404,6 +410,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // Ambil data user lengkap berdasarkan email
     public Cursor getUserData(String email) {
         SQLiteDatabase db = this.getReadableDatabase();
-        return db.rawQuery("SELECT * FROM " + TABLE_USERS + " WHERE " + COL_EMAIL + " = ?", new String[]{email});
+        return db.query(TABLE_USERS, null, COL_EMAIL + " = ?", new String[]{email}, null, null, null);
     }
 }

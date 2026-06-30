@@ -66,10 +66,21 @@ public class ReportActivity extends AppCompatActivity {
     private DatabaseHelper dbHelper;
     private double currentKwh = 0;
     private long currentDurationSec = 0;
+    private boolean isLampOn, isAutoMode, isTimerEnabled;
+    private int currentLumen = 0;
+    private double currentWatt = 0;
     private NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("id", "ID"));
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
+        boolean isDark = prefs.getBoolean("is_dark_theme", true);
+        if (isDark) {
+            androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES);
+        } else {
+            androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO);
+        }
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_report);
 
@@ -114,6 +125,9 @@ public class ReportActivity extends AppCompatActivity {
         initFirebaseListeners();
         setupBottomNav();
         
+        // Set default filter ke Hari
+        toggleGroupFilter.check(R.id.btnDay);
+        
         toggleGroupFilter.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
             if (isChecked) {
                 updateReportUi();
@@ -132,6 +146,8 @@ public class ReportActivity extends AppCompatActivity {
         String period = "Harian";
         long startTime = 0;
         long endTime = System.currentTimeMillis();
+
+        double tariff = prefs.getFloat("electricity_tariff", 1500.0f);
 
         java.util.Calendar cal = java.util.Calendar.getInstance();
         if (checkedId == R.id.btnDay) {
@@ -166,7 +182,7 @@ public class ReportActivity extends AppCompatActivity {
         canvas.drawText("Dicetak pada: " + new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(new Date()), 50, 80, paint);
         canvas.drawText("Ringkasan Penggunaan:", 50, 110, titlePaint);
         canvas.drawText("- Total Penggunaan Energi: " + String.format("%.2f", currentKwh) + " kWh", 70, 130, paint);
-        canvas.drawText("- Estimasi Biaya: " + currencyFormat.format(currentKwh * 1444.70), 70, 150, paint);
+        canvas.drawText("- Estimasi Biaya: " + currencyFormat.format(currentKwh * tariff), 70, 150, paint);
         
         int totalLogs = dbHelper.getAutoLogSummary(userId, startTime, endTime);
         canvas.drawText("- Total Aksi Otomatis: " + totalLogs + " kali", 70, 170, paint);
@@ -304,6 +320,67 @@ public class ReportActivity extends AppCompatActivity {
     }
 
     private void initFirebaseListeners() {
+        // Listener Status Lampu untuk Logging Realtime
+        dbRef.child("lamp_status").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@androidx.annotation.NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    boolean status = snapshot.getValue(Boolean.class);
+                    if (isLampOn != status) {
+                        isLampOn = status;
+                        
+                        // Log ke SQLite jika dalam mode otomatis/jadwal
+                        if (isAutoMode || isTimerEnabled) {
+                            SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
+                            int userId = prefs.getInt("profile_id", -1);
+                            if (userId != -1) {
+                                dbHelper.addAutoLog(userId, isLampOn ? "HIDUP" : "MATI", currentLumen, currentWatt);
+                                dbHelper.updateDailyStats(userId, new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date()), currentKwh, 1);
+                            }
+                        }
+                        updateReportUi();
+                    }
+                }
+            }
+            @Override public void onCancelled(@androidx.annotation.NonNull DatabaseError error) {}
+        });
+
+        dbRef.child("auto_mode").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@androidx.annotation.NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) isAutoMode = snapshot.getValue(Boolean.class);
+            }
+            @Override public void onCancelled(@androidx.annotation.NonNull DatabaseError error) {}
+        });
+
+        dbRef.child("timer_enabled").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@androidx.annotation.NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) isTimerEnabled = snapshot.getValue(Boolean.class);
+            }
+            @Override public void onCancelled(@androidx.annotation.NonNull DatabaseError error) {}
+        });
+
+        dbRef.child("sensor_lux").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@androidx.annotation.NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    int ldrValue = snapshot.getValue(Integer.class);
+                    // Konversi ADC ke persen (sama dengan MainActivity)
+                    currentLumen = (int) (((4095.0 - ldrValue) / 4095.0) * 100);
+                }
+            }
+            @Override public void onCancelled(@androidx.annotation.NonNull DatabaseError error) {}
+        });
+
+        dbRef.child("sensor_power").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@androidx.annotation.NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) currentWatt = snapshot.getValue(Double.class);
+            }
+            @Override public void onCancelled(@androidx.annotation.NonNull DatabaseError error) {}
+        });
+
         dbRef.child("sensor_energy").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@androidx.annotation.NonNull DataSnapshot snapshot) {
@@ -335,7 +412,9 @@ public class ReportActivity extends AppCompatActivity {
         int checkedId = toggleGroupFilter.getCheckedButtonId();
         currentPage = 0; // Reset ke halaman 1 setiap ganti filter
         tvTotalKwhReport.setText(String.format(Locale.US, "%.2f", currentKwh));
-        tvTotalCostReport.setText(currencyFormat.format(currentKwh * 1444.70));
+        
+        double tariff = prefs.getFloat("electricity_tariff", 1500.0f);
+        tvTotalCostReport.setText(currencyFormat.format(currentKwh * tariff));
         
         long hours = currentDurationSec / 3600;
         long minutes = (currentDurationSec % 3600) / 60;

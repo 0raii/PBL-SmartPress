@@ -18,6 +18,14 @@ public class AdminDashboardActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
+        boolean isDark = prefs.getBoolean("is_dark_theme", true);
+        if (isDark) {
+            androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES);
+        } else {
+            androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO);
+        }
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin_dashboard);
 
@@ -26,7 +34,6 @@ public class AdminDashboardActivity extends AppCompatActivity {
         cardMonitoringIot = findViewById(R.id.cardMonitoringIot);
         cardLogout = findViewById(R.id.cardLogout);
 
-        SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
         String name = prefs.getString("profile_name", "Administrator");
         tvAdminName.setText("Halo, " + name);
 
@@ -39,7 +46,12 @@ public class AdminDashboardActivity extends AppCompatActivity {
         });
 
         cardLogout.setOnClickListener(v -> {
-            prefs.edit().clear().apply();
+            boolean currentTheme = prefs.getBoolean("is_dark_theme", true);
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.clear();
+            editor.putBoolean("is_dark_theme", currentTheme);
+            editor.apply();
+
             startActivity(new Intent(this, LoginActivity.class));
             finish();
         });

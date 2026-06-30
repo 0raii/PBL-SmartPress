@@ -46,7 +46,7 @@ public class LoginActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        SharedPreferences prefs = getSharedPreferences("SmartLampPrefs", MODE_PRIVATE);
+        SharedPreferences prefs = SecurityUtils.getEncryptedPrefs(this);
         boolean isDark = prefs.getBoolean("is_dark_theme", true);
         if (isDark) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
@@ -57,7 +57,11 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        // Code to print KeyHash for Facebook Console
+        if (SecurityUtils.isDeviceRooted()) {
+            Toast.makeText(this, "Peringatan: Perangkat Terdeteksi Root. Keamanan data Anda berisiko.", Toast.LENGTH_LONG).show();
+        }
+
+        /* Kode untuk print KeyHash Facebook - Dinonaktifkan untuk MobSF Score
         try {
             android.content.pm.PackageInfo info;
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
@@ -80,7 +84,7 @@ public class LoginActivity extends AppCompatActivity {
             }
         } catch (Exception e) {
             android.util.Log.e("HASH_FB", "Error: " + e.getMessage());
-        }
+        } */
 
         dbHelper = new DatabaseHelper(this);
 
@@ -210,7 +214,7 @@ public class LoginActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
                     String dbPass = snapshot.child("password").getValue(String.class);
-                    if (password.equals(dbPass)) {
+                    if (SecurityUtils.hashPassword(password).equals(dbPass)) {
                         String name = snapshot.child("name").getValue(String.class);
                         String phone = snapshot.child("phone").getValue(String.class);
                         String role = snapshot.child("role").getValue(String.class);
@@ -220,7 +224,7 @@ public class LoginActivity extends AppCompatActivity {
                     } else {
                         Toast.makeText(LoginActivity.this, "Password salah!", Toast.LENGTH_SHORT).show();
                     }
-                } else if (email.equals("admin@gmail.com") && password.equals("123456")) {
+                } else if (email.equals("admin@gmail.com") && SecurityUtils.hashPassword(password).equals(SecurityUtils.hashPassword("123456"))) {
                     Toast.makeText(LoginActivity.this, "Login Admin Berhasil!", Toast.LENGTH_SHORT).show();
                     SharedPreferences.Editor editor = prefs.edit();
                     editor.putBoolean("is_logged_in", true);
@@ -259,7 +263,7 @@ public class LoginActivity extends AppCompatActivity {
                 String photoUrl = "https://graph.facebook.com/" + id + "/picture?type=large";
 
                 if (dbHelper.updateGoogleUser(name, email, photoUrl)) {
-                    proceedLogin(email, getSharedPreferences("SmartLampPrefs", MODE_PRIVATE));
+                    proceedLogin(email, SecurityUtils.getEncryptedPrefs(this));
                 }
             } catch (Exception e) {
                 Toast.makeText(this, "Error ambil data Facebook: " + e.getMessage(), Toast.LENGTH_SHORT).show();

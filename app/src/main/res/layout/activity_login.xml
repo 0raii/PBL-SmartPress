@@ -146,6 +146,7 @@
                 android:layout_height="56dp"
                 android:layout_marginTop="32dp"
                 android:backgroundTint="@color/primary_blue"
+                android:filterTouchesWhenObscured="true"
                 android:text="@string/masuk"
                 android:textAllCaps="false"
                 android:textSize="18sp"

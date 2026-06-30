@@ -13,7 +13,7 @@ android {
 
     defaultConfig {
         applicationId = "com.smartpress"
-        minSdk = 24
+        minSdk = 29
         targetSdk = 36
         versionCode = 2
         versionName = "1.1.0"
@@ -22,8 +22,17 @@ android {
     }
 
     buildTypes {
+        debug {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -49,6 +58,10 @@ dependencies {
     // Firebase
     implementation("com.google.firebase:firebase-database:21.0.0")
     implementation("com.google.firebase:firebase-auth:23.1.0")
+
+    // Security & Preferences
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
+    implementation("androidx.preference:preference:1.2.1")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
